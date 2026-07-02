@@ -1,0 +1,24 @@
+---
+description: Implementation detail — ForgeKit MCP searchLessons + getAntiPatterns (also see forgekit-lessons-gate.mdc)
+globs: src/**
+alwaysApply: false
+---
+
+# ForgeKit lessons + anti-patterns (MCP)
+
+**Workflow:** `forgekit-lessons-gate.mdc` defines when to run tools before larger tasks. This file adds density when you are already editing app code: still run `getAntiPatterns` + `searchLessons` if the gate applies and you have not run them in this task block.
+
+**Adjust `globs`** in the frontmatter above to match this repo's actual layout as it's scaffolded (e.g. `src/lib/**`, `src/content/**`, `scripts/**`).
+
+For content loading/parsing, build pipeline, feed/sitemap generation, scaffolding tooling, or site config handling:
+
+1. `searchLessons` (ForgeKit MCP — typically configured as the `forgekit` server in `.cursor/mcp.json`)
+   - Pass a short `query` string (keywords, not sentences), e.g. `frontmatter YAML parsing`, `static site prerender`, `git dependency versioning`, `CLI scaffold overwrite`.
+   - Optional `limit` (default 10).
+
+2. `getAntiPatterns` (same server, no arguments)
+   - Skim for failure modes that apply (vague specs, schema drift, untested refactors, jargon in empty states).
+
+**When to skip:** trivial one-line edits, pure type renames with no UX impact, or when the user explicitly asks not to broaden scope — consistent with the lessons gate.
+
+**Product-facing users:** Do not mention MCP, tool names, or this rule in user-visible text unless they ask how the workflow is wired up.

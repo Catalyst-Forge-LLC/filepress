@@ -1,0 +1,163 @@
+{
+  "project": {
+    "name": "Downpress",
+    "created": "2026-07-02",
+    "description": "Git-native Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited directly in a GitHub repo (e.g. via the GitHub mobile app), compiled to a static prerendered site with auto-deploy on push. Structured as a reusable core engine plus independently deployable, scaffoldable sites."
+  },
+  "currentPhase": "1-architecture",
+  "phases": {
+    "1-architecture": {
+      "status": "in_progress",
+      "startedAt": "2026-07-02",
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "Tech choices confirmed",
+        "Folder structure confirmed",
+        "Data model shape confirmed",
+        "First feature batch defined",
+        "Claude's understanding verified by user",
+        "PHASE_1_BRIEF.md created, complete, and locked (docs/)",
+        "Major decisions recorded in workflow_tracking.json decisions[]"
+      ],
+      "notes": [
+        "Project already has a full GENESIS.md build spec (git-native SvelteKit blog, core/site split architecture) written before agent bootstrap. Used as the primary Phase 1 planning artifact via ingestPlanArtifact instead of starting intake from scratch.",
+        "GENESIS.md Section 9 lists 11 open questions (drafts handling, deploy target, content dir location, date format policy, future-dated posts, styling ambition, comments scope, custom domain, theme sharing across sites, core versioning scheme, scaffold command distribution) that still need explicit user answers before the brief can be locked."
+      ]
+    },
+    "2-scaffolding": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "App runs with pnpm dev",
+        "Real data visible on screen",
+        "Core CRUD works",
+        "Hero flow functions end to end",
+        "CONTEXT_PROMPT.md created and populated by merging PHASE_1_BRIEF.md (then template lessons as needed)",
+        "README.md created (from ForgeKit template)",
+        "TODO.md created (from ForgeKit template, seeded from PHASE_1_BRIEF §11)",
+        "IDEAS.md created (from ForgeKit template)",
+        "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
+      ],
+      "notes": []
+    },
+    "3-stabilization": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "Environment variables resolve correctly",
+        "APIs return real data",
+        "Core workflow completes without infrastructure errors",
+        "Error messages are human-readable (not just status codes)"
+      ],
+      "notes": []
+    },
+    "4-feature-iteration": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": ["Core value proposition delivered", "Hero flow works with real data including edge cases", "Features tested beyond happy path"],
+      "notes": [],
+      "iterations": []
+    },
+    "5-refactoring": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "No file exceeds ~500 lines without justification",
+        "Shared utilities extracted",
+        "No duplicated patterns",
+        "Build passes after each refactor"
+      ],
+      "notes": []
+    },
+    "6-strategic-review": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "BRAND_AND_PRODUCT.md created (from ForgeKit template)",
+        "TODO reorganized by brand value pillars",
+        "Features mapped to brand pillars",
+        "Gap between brand promise and product identified",
+        "IDEAS.md processed into TODO",
+        "Build order decided"
+      ],
+      "notes": []
+    },
+    "7-hardening": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "CODE_QUALITY.md produced (from ForgeKit template) and critical findings fixed",
+        "BLACK_HAT_REPORT.md produced (via ForgeKit security audit) and critical/high findings fixed",
+        "All findings triaged into TODO.md with P0/P1/P2 priority",
+        "All LLM outputs checked against field size limits",
+        "No silent failures in core workflows (grep for empty catch blocks)",
+        "All API routes return errors in consistent format",
+        "All user input validated (centralized Zod schemas recommended)",
+        "No unvalidated as-any casts on critical paths",
+        "DEPLOYMENT.md created (from ForgeKit template)",
+        "BUSINESS_PLAN.md created if pursuing paid users (from ForgeKit template)",
+        "TEST_PLAN.md complete or extended (from ForgeKit template)",
+        "TECHNICAL_REFERENCE.md complete and current",
+        "Auth flow works end to end (if applicable)",
+        "Payment flow works end to end (if applicable)",
+        "Docs alignment audit passed (via ForgeKit docs-alignment audit)",
+        "All documentation consolidated and cross-referenced"
+      ],
+      "notes": []
+    }
+  },
+  "decisions": [
+    {
+      "id": "D1",
+      "timestamp": "2026-07-02",
+      "phase": "1-architecture",
+      "decision": "Use gray-matter + remark/rehype (data-driven) instead of mdsvex-as-routes for content parsing/rendering.",
+      "rationale": "Posts are pure content, not interactive Svelte templates; avoids mdsvex's known limitation where a +layout.svelte can't directly read a child .md file's frontmatter; keeps frontmatter access uniform everywhere (listings, post pages, RSS, sitemap) via one loader function.",
+      "alternatives_considered": ["mdsvex-as-routes", "MDX-flavored starters (e.g. sveltekit-blog-mdx)"]
+    },
+    {
+      "id": "D2",
+      "timestamp": "2026-07-02",
+      "phase": "1-architecture",
+      "decision": "Static prerendering via adapter-static, not SSR.",
+      "rationale": "No runtime backend needed; output is a plain static folder deployable anywhere. Tag/pagination routes must stay crawlable or be listed explicitly in config.kit.prerender.entries.",
+      "alternatives_considered": ["Default SvelteKit SSR"]
+    },
+    {
+      "id": "D3",
+      "timestamp": "2026-07-02",
+      "phase": "1-architecture",
+      "decision": "Core/site split (Downpress core engine + independent Site repos) is a first-class requirement from the start, not a later refactor.",
+      "rationale": "SvelteKit's routing/build system is inherently per-project (hard framework constraint) — every Site must be its own SvelteKit project. Core centralizes content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and scaffolding.",
+      "alternatives_considered": ["Single monolithic project serving multiple blogs via config (not possible under SvelteKit)", "Copy-paste the engine per site"]
+    },
+    {
+      "id": "D4",
+      "timestamp": "2026-07-02",
+      "phase": "1-architecture",
+      "decision": "Sites depend on Downpress core via a pinned git URL dependency (tag/commit), not a main-floating or npm-published dependency.",
+      "rationale": "Avoids needing to publish/maintain a public npm package while still allowing normal package-manager installs; pinning means a core change never silently changes a site's next build without a deliberate version bump.",
+      "alternatives_considered": ["Publish core to npm under a scoped name (deferred, not needed for v1)", "Floating dependency on main"]
+    }
+  ],
+  "gotchas": [],
+  "sessions": [
+    {
+      "date": "2026-07-02",
+      "summary": "Ran ForgeKit greenfield kickoff for Downpress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
+    }
+  ]
+}

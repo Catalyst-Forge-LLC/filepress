@@ -1,0 +1,10 @@
+---
+description: No unrequested attribution trailers in git commit messages
+alwaysApply: true
+---
+
+# No unrequested commit trailers
+
+Do not add attribution trailers (e.g. "Co-Authored-By", tool/agent signatures, generated-by notices) to git commit messages unless the user explicitly asks for them.
+
+Use plain `git commit -m "..."` or `git commit -F <file>` with a message describing the change and its rationale. This applies regardless of which agent/tool is making the commit (Cursor, Claude Code, etc.) — users may switch tools mid-project.

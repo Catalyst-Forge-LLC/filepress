@@ -1,0 +1,71 @@
+# Downpress
+
+A git-native Markdown blog engine. Every post is a plain `.md` file with YAML frontmatter, committed to a Git repo and editable from anywhere — the GitHub mobile app, the GitHub web editor, or any text editor. There is **no admin UI, no database, and no server runtime**: a SvelteKit `adapter-static` build compiles the Markdown into a fast, fully prerendered site that deploys on every push.
+
+## Why
+
+Blogging platforms bring accounts, databases, and plugin ecosystems to something that should be a folder of text files. Downpress keeps the whole thing as files in Git, and moves all the strictness into the build so authoring from a phone text box stays trivial.
+
+## Requirements
+
+- Node.js 20+ (developed on 24)
+- pnpm
+
+## Getting started
+
+```bash
+pnpm install
+pnpm dev        # local dev server
+pnpm build      # produce the static site in build/
+pnpm preview    # serve the production build locally
+pnpm check      # type-check
+```
+
+## Writing a post
+
+Create a Markdown file in the top-level [`posts/`](posts/) directory:
+
+```markdown
+---
+title: "My Post"
+date: 2026-07-04
+description: A short summary used in listings and SEO.
+tags: [notes, sveltekit]
+draft: false
+updated: 2026-07-05
+---
+
+Body content in **Markdown**.
+```
+
+### Frontmatter fields
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `title` | yes | Build fails (naming the file) if missing. |
+| `date` | yes | Strict `YYYY-MM-DD`. Future-dated posts stay hidden until their date arrives. |
+| `slug` | no | Derived from the filename if omitted. |
+| `description` / `excerpt` | no | Used for listing previews and meta tags. |
+| `tags` | no | A YAML list; normalized to lowercase and de-duplicated. |
+| `draft` | no | `true` hides the post from listings, tags, RSS, and the sitemap — but the page still builds at its URL (unlinked, `noindex`) so you can preview it. |
+| `updated` | no | Strict `YYYY-MM-DD`; shown when different from `date`. |
+
+### Conventions & behavior
+
+- **Dates are strict `YYYY-MM-DD`.** Anything else fails the build with the file named.
+- **Future-dated posts are hidden** until a build runs on or after their date.
+- **Duplicate slugs fail the build**, naming both files.
+- **Raw HTML in a post body is passed through** — the content is yours (trust boundary is repo push access). Don't paste untrusted HTML.
+- **Images:** place assets under `static/images/posts/<slug>/` and reference them by absolute path, e.g. `/images/posts/<slug>/photo.jpg`, so you never have to compute relative paths on a phone.
+
+## How it works
+
+`posts/*.md` are read at build time (`import.meta.glob`), parsed with `gray-matter`, validated, and compiled to HTML with a `unified` remark/rehype pipeline (GFM, heading anchors, build-time syntax highlighting). Every route is prerendered by `adapter-static`. See [`CONTEXT_PROMPT.md`](CONTEXT_PROMPT.md) for architecture and [`docs/PHASE_1_BRIEF.md`](docs/PHASE_1_BRIEF.md) for the full plan.
+
+## Deploy
+
+Target host is **Cloudflare Pages** on a custom domain (build command `pnpm build`, output directory `build`). CI wiring is on the roadmap ([`TODO.md`](TODO.md)) and not yet committed.
+
+## Status
+
+Early build. The content engine, listings, post/tag pages, and feeds work end to end; deployment automation and the reusable core/site split are upcoming milestones.

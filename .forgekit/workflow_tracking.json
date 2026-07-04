@@ -4,12 +4,12 @@
     "created": "2026-07-02",
     "description": "Git-native Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited directly in a GitHub repo (e.g. via the GitHub mobile app), compiled to a static prerendered site with auto-deploy on push. Structured as a reusable core engine plus independently deployable, scaffoldable sites."
   },
-  "currentPhase": "1-architecture",
+  "currentPhase": "2-scaffolding",
   "phases": {
     "1-architecture": {
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2026-07-02",
-      "completedAt": null,
+      "completedAt": "2026-07-04",
       "exitCriteriaMet": [
         "Tech choices confirmed",
         "Folder structure confirmed",
@@ -27,11 +27,10 @@
       ]
     },
     "2-scaffolding": {
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-07-04",
       "completedAt": null,
-      "exitCriteriaMet": [],
-      "exitCriteriaRemaining": [
+      "exitCriteriaMet": [
         "App runs with pnpm dev",
         "Real data visible on screen",
         "Core CRUD works",
@@ -42,7 +41,14 @@
         "IDEAS.md created (from ForgeKit template)",
         "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
       ],
-      "notes": []
+      "exitCriteriaRemaining": [],
+      "notes": [
+        "2026-07-04: Scaffolded full runnable spine in one pass. SvelteKit 2.69 / Svelte 5.56 / Vite 8.1 (config in vite.config.ts; this Kit version has no svelte.config.js). Created into a temp dir then moved to repo root to avoid the sv create non-empty-dir hang. adapter-static, fully prerendered.",
+        "Built the content engine (src/lib/content/): gray-matter + unified remark/rehype pipeline; loader handles all GENESIS edge cases (malformed/missing frontmatter, strict YYYY-MM-DD, real-calendar-date check, duplicate-slug detection naming both files, unicode slugs, tag normalization, drafts, future-date hiding). ContentError fails the build loud and file-named.",
+        "Routes: index (published, empty state), posts/[slug] (SEO meta + draft banner; entries() builds published + drafts), tags index + tags/[tag], rss.xml, sitemap.xml, robots.txt. Classic theme in app.css (sparse/editorial, light+dark).",
+        "Verified in build output + preview: draft builds but is unlisted/absent from feeds (200 at URL); future-dated post excluded entirely (404); missing-title and duplicate-slug both fail the build loudly naming files; pnpm check 0 errors, 0 lint errors.",
+        "Phase 2 exit criteria all met. Deferred to later milestones: M3 CI/Cloudflare deploy, M4 core/site split + scaffold script, M5 polish. Awaiting user confirmation before advancing currentPhase to 3-stabilization."
+      ]
     },
     "3-stabilization": {
       "status": "not_started",
@@ -211,6 +217,10 @@
     {
       "date": "2026-07-04",
       "summary": "User resolved all 11 open questions. Locked docs/PHASE_1_BRIEF.md and added decisions D5-D10 (Cloudflare Pages + custom domain; top-level /posts/; hidden-URL draft preview; strict YYYY-MM-DD + hide future-dated; sparse/classic styling with selectable per-site themes; informal versioning + local scaffold script; comments a permanent non-goal). Phase 1 exit criteria all met. Held at currentPhase 1-architecture pending explicit user go-ahead to start Phase 2 scaffolding."
+    },
+    {
+      "date": "2026-07-04",
+      "summary": "Phase 2 scaffolding: ran lessons gate (getAntiPatterns + searchLessons), advanced to 2-scaffolding, and built the full runnable spine in one pass. SvelteKit adapter-static app (TS/pnpm) with a complete content engine (gray-matter + remark/rehype, all edge cases, loud file-named ContentError), index/post/tag routes, RSS/sitemap/robots, and the Classic theme. Verified build + preview: drafts previewable-but-unlisted, future-dated hidden (404), dedupe + missing-field failures loud; pnpm check clean. Wrote Phase 2 docs (CONTEXT_PROMPT merged from brief, README, TODO, .forgekit/IDEAS). All Phase 2 exit criteria met; awaiting confirmation to advance to Phase 3."
     }
   ]
 }

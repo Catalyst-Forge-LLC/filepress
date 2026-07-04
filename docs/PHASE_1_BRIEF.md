@@ -4,8 +4,8 @@
 
 _Structured capture of planning and architecture before code scaffolding. Goal: Phase 2 (or a new agent/session) can start from this file + `.forgekit/workflow_tracking.json` without re-reading the whole Phase 1 chat._
 
-**Status:** `draft` — derived from `GENESIS.md` (a pre-written build spec); locking is blocked on user answers to the open questions in §9.
-**Last updated:** 2026-07-02
+**Status:** `locked` — derived from `GENESIS.md` (a pre-written build spec); all §9 open questions resolved by user on 2026-07-04.
+**Last updated:** 2026-07-04
 **Phase 1 exit:** Do not mark Phase 1 complete in `.forgekit/workflow_tracking.json` until this brief is locked and major commitments are in `decisions[]`.
 
 ---
@@ -32,7 +32,7 @@ Structurally, this is not one blog but a reusable engine (**Downpress core**) pl
 
 ## 3. Constraints
 
-- **Technical:** No database, no server runtime, no authentication system — content trust boundary is "whoever can push to the GitHub repo." Build/dev must run on standard Node.js tooling (edits originate from a phone; build runs in CI on a Linux runner). Each Site's build must be fully isolated — building Site A must never read, write, or affect Site B, even as sibling directories.
+- **Technical:** No database, no server runtime, no authentication system — content trust boundary is "whoever can push to the GitHub repo." Build/dev must run on standard Node.js tooling (edits originate from a phone; build runs in CI on a Linux runner). Each Site's build must be fully isolated — building Site A must never read, write, or affect Site B, even as sibling directories. Every Site is served from a custom domain, so `adapter-static` runs at site root (no base-path/subpath handling needed).
 - **Business/timeline:** None specified yet.
 - **Explicit non-goals for v1:** No custom web editor UI, no database/accounts/auth, no comments system, no image-optimization pipeline beyond a static-folder convention, no multi-author support, no CMS-style admin dashboard, no search, no hosted "create a site for me" service (scaffolding is local/CLI), no cross-site features (each site is independent at runtime; only the build-time engine is shared). Full list in `GENESIS.md` §10.
 
@@ -46,12 +46,12 @@ _Proposed by GENESIS.md; not yet explicitly confirmed by user sign-off (see §9 
 | --- | --- | --- | --- |
 | Framework | SvelteKit | proposed | Required per project brief; static output via `adapter-static`. |
 | Content pipeline | gray-matter + remark/rehype (data-driven), **not** mdsvex-as-routes | proposed | Posts are pure data, not templates; avoids mdsvex's known layout/frontmatter-context limitation; keeps frontmatter access uniform across listings, post pages, RSS, sitemap. |
-| Language | Not yet specified (TS recommended for consistency with rest of tooling) | open | Confirm TypeScript vs JavaScript. |
+| Language | TypeScript, ES modules only | confirmed | Per user's global project convention (pnpm + TS + ESM). |
 | DB / backend | None (static site, no runtime server) | confirmed | Explicit non-goal. |
 | Auth / storage | None (GitHub's own access control is the trust boundary) | confirmed | |
-| Styling | Not yet decided | open | See §9 open question 6. |
-| Deploy / CI | GitHub Actions (or a host with native git integration); target host (GitHub Pages / Cloudflare Pages / Netlify / Vercel) undecided | open | See §9 open question 2 — determines exact CI workflow and adapter base-path config. |
-| Package manager | pnpm (per user's global convention) | proposed | |
+| Styling | Sparse, sharp/classic, high-end — not busy or cluttered | confirmed | Restrained editorial typography; minimal chrome; generous whitespace. Per-site themes are variations on this shared core aesthetic (see D9). |
+| Deploy / CI | Cloudflare Pages, on a custom domain | confirmed | CF Pages native git integration builds `adapter-static` output on push to `main`; custom domain means no base-path config. |
+| Package manager | pnpm | confirmed | Per user's global convention. |
 | Site dependency mechanism | Git URL dependency on Downpress core (`github:user/downpress-core#tag-or-commit`), pinned by default, not floating on `main` | proposed | Avoids needing to publish to npm; an explicit version bump is required to pull in core updates. |
 
 ---
@@ -107,23 +107,23 @@ Alternatives considered: publish core to npm under a scoped name (deferred — n
 
 ---
 
-## 9. Open questions (must resolve before locking this brief)
+## 9. Open questions — resolved
 
-_Carried over verbatim from `GENESIS.md` §9 — these are the concrete things to reply with._
+_All resolved by user on 2026-07-04. Answers folded into the sections above and into `decisions[]` (D5–D10)._
 
-| # | Question | Notes |
-| - | -------- | ----- |
-| 1 | **Drafts:** fully excluded from build output, or built at a hidden/unlinked URL for phone preview? | Affects build pipeline and edge case 6.2 handling. |
-| 2 | **Deploy target:** GitHub Pages, Cloudflare Pages, Netlify, or Vercel? | Determines exact CI workflow and `adapter-static` config (GitHub Pages needs a base path unless using a custom domain). |
-| 3 | **Content directory location:** `src/content/posts/` vs. a top-level `/posts/` outside `src/`? | Top-level may be easier to find/edit via the GitHub mobile app's file browser. |
-| 4 | **Date format policy:** strictly ISO `YYYY-MM-DD` only, or also accept full ISO datetime strings? | Recommend picking one and rejecting the other. |
-| 5 | **Future-dated posts:** include immediately on build, or hide until the date arrives? | Requires a build-time "is this in the past" check tied to the CI run's date if hidden. |
-| 6 | **Styling ambition:** bare-minimum readable typography, or a specific visual direction (font pairing, dark mode, reference site)? | |
-| 7 | **Comments/interactivity:** confirmed out of scope for v1? | If wanted later: Giscus via GitHub Discussions, not v1. |
-| 8 | **Custom domain:** from day one, or default host subdomain? | Affects `adapter-static` base-path config, mainly for GitHub Pages. |
-| 9 | **Theme sharing across sites:** one shared default theme, or multiple selectable themes/layouts per site from the start? | Affects how much lives in core vs. per-site. |
-| 10 | **Core versioning scheme:** informal (pin to commit SHAs as needed), or real semver-tagged releases from the start? | |
-| 11 | **Scaffold command location:** a local script run from the core repo (`node scripts/create-site.js`), or a published CLI (`npx downpress create ...`)? | The latter needs a separate npm-publish decision. |
+| # | Question | Answer |
+| - | -------- | ------ |
+| 1 | **Drafts:** excluded vs. hidden-URL preview? | **Hidden-URL preview.** `draft: true` posts are excluded from index, tag pages, RSS, and sitemap, but still built at their normal `/posts/<slug>` URL (unlinked) so formatting can be previewed on a phone before flipping to published. (D7) |
+| 2 | **Deploy target?** | **Cloudflare Pages.** (D5) |
+| 3 | **Content directory location?** | **Top-level `/posts/`** (outside `src/`), for easy browsing/editing in the GitHub mobile app. (D6) |
+| 4 | **Date format policy?** | **Strict `YYYY-MM-DD` only.** Anything else fails the build with a file-named error. (D8) |
+| 5 | **Future-dated posts?** | **Hidden until their date arrives** — build-time "date ≤ today" check tied to the CI run's date. (D8) |
+| 6 | **Styling ambition?** | **Sparse, sharp/classic, high-end — not busy or cluttered.** Restrained editorial typography, minimal chrome, generous whitespace. (D9) |
+| 7 | **Comments/interactivity?** | **None, ever** — no visitor comments at all, not even a later third-party embed. Hard non-goal. |
+| 8 | **Custom domain?** | **Always** a custom domain from day one → `adapter-static` at site root, no base-path config. (D5) |
+| 9 | **Theme sharing across sites?** | **Selectable per-site themes**, but all variations of the shared classic/clear core aesthetic (not radically different designs). (D9) |
+| 10 | **Core versioning scheme?** | **Informal** — pin sites to core commit SHAs as needed; no semver release process in v1. (D10) |
+| 11 | **Scaffold command location?** | **Local script** run from the core repo (e.g. `node scripts/create-site.js`); no published CLI in v1. (D10) |
 
 ---
 
@@ -131,7 +131,7 @@ _Carried over verbatim from `GENESIS.md` §9 — these are the concrete things t
 
 - No custom web-based editor UI — editing happens via the GitHub mobile app / GitHub.com / any text editor.
 - No database, no user accounts, no authentication.
-- No comments system (v1).
+- No comments system — ever (no visitor comments at all, not even a later third-party embed like Giscus).
 - No image optimization pipeline beyond a static-folder convention.
 - No multi-author support.
 - No CMS-style admin dashboard.
@@ -155,8 +155,8 @@ Milestones from `GENESIS.md` §7 (full detail there):
 
 ## 12. Handoff checklist (before leaving Phase 1)
 
-- [ ] User has confirmed stack, folder shape, data sketch, hero flow, and v1 boundaries
-- [ ] All 11 open questions in §9 are answered (or explicitly deferred with a documented default)
-- [ ] This brief is marked **locked** (status line above updated from `draft`)
-- [ ] `.forgekit/workflow_tracking.json` updated: `decisions[]` for each D#; `phases["1-architecture"]` notes summarize sign-off
+- [x] User has confirmed stack, folder shape, data sketch, hero flow, and v1 boundaries
+- [x] All 11 open questions in §9 are answered (or explicitly deferred with a documented default)
+- [x] This brief is marked **locked** (status line above updated from `draft`)
+- [x] `.forgekit/workflow_tracking.json` updated: `decisions[]` for each D#; `phases["1-architecture"]` notes summarize sign-off
 - [ ] Phase 2 opener will read this file + `.forgekit/workflow_tracking.json` first

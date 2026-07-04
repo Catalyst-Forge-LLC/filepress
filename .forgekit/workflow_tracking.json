@@ -10,8 +10,7 @@
       "status": "in_progress",
       "startedAt": "2026-07-02",
       "completedAt": null,
-      "exitCriteriaMet": [],
-      "exitCriteriaRemaining": [
+      "exitCriteriaMet": [
         "Tech choices confirmed",
         "Folder structure confirmed",
         "Data model shape confirmed",
@@ -20,9 +19,11 @@
         "PHASE_1_BRIEF.md created, complete, and locked (docs/)",
         "Major decisions recorded in workflow_tracking.json decisions[]"
       ],
+      "exitCriteriaRemaining": [],
       "notes": [
         "Project already has a full GENESIS.md build spec (git-native SvelteKit blog, core/site split architecture) written before agent bootstrap. Used as the primary Phase 1 planning artifact via ingestPlanArtifact instead of starting intake from scratch.",
-        "GENESIS.md Section 9 lists 11 open questions (drafts handling, deploy target, content dir location, date format policy, future-dated posts, styling ambition, comments scope, custom domain, theme sharing across sites, core versioning scheme, scaffold command distribution) that still need explicit user answers before the brief can be locked."
+        "2026-07-04: User answered all 11 GENESIS.md Section 9 open questions. Resolutions folded into docs/PHASE_1_BRIEF.md and decisions D5-D10. Brief marked locked. Key answers: Cloudflare Pages + always custom domain (D5); top-level /posts/ dir (D6); drafts hidden-URL preview (D7); strict YYYY-MM-DD dates + hide future-dated posts (D8); sparse/classic high-end styling with selectable per-site themes on a shared aesthetic (D9); informal core versioning + local scaffold script (D10); comments are a permanent hard non-goal (no visitor comments ever).",
+        "Exit criteria all met; awaiting explicit user confirmation to advance currentPhase to 2-scaffolding before any app code is written."
       ]
     },
     "2-scaffolding": {
@@ -151,6 +152,54 @@
       "decision": "Sites depend on Downpress core via a pinned git URL dependency (tag/commit), not a main-floating or npm-published dependency.",
       "rationale": "Avoids needing to publish/maintain a public npm package while still allowing normal package-manager installs; pinning means a core change never silently changes a site's next build without a deliberate version bump.",
       "alternatives_considered": ["Publish core to npm under a scoped name (deferred, not needed for v1)", "Floating dependency on main"]
+    },
+    {
+      "id": "D5",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Deploy to Cloudflare Pages, always on a custom domain from day one.",
+      "rationale": "CF Pages has native git integration to build adapter-static output on push to main. A custom domain means the site is served at root, so adapter-static needs no base-path/subpath configuration.",
+      "alternatives_considered": ["GitHub Pages (would need base-path config unless on a custom domain)", "Netlify", "Vercel"]
+    },
+    {
+      "id": "D6",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Post content lives in a top-level /posts/ directory, outside src/.",
+      "rationale": "Easier to find and edit via the GitHub mobile app's file browser since it is not nested inside app source.",
+      "alternatives_considered": ["src/content/posts/"]
+    },
+    {
+      "id": "D7",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Drafts (draft: true) are excluded from index, tag pages, RSS, and sitemap, but still built at their normal /posts/<slug> URL (unlinked) for private preview.",
+      "rationale": "Lets the owner preview formatting on a phone before flipping draft: false, without exposing the post in any discoverable listing or feed.",
+      "alternatives_considered": ["Fully exclude drafts from build output entirely"]
+    },
+    {
+      "id": "D8",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Dates are strict YYYY-MM-DD only; future-dated posts are hidden until their date arrives.",
+      "rationale": "One accepted date format keeps sorting unambiguous and lets malformed dates fail loudly (naming the file). Future-dating uses a build-time 'date <= today' check tied to the CI run's date so scheduled posts stay hidden until the next build on/after that date.",
+      "alternatives_considered": ["Accept full ISO datetime strings", "Include future-dated posts immediately"]
+    },
+    {
+      "id": "D9",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Visual direction is sparse, sharp/classic, high-end and uncluttered; core supports selectable per-site themes that are all variations on this shared aesthetic.",
+      "rationale": "Restrained editorial typography and minimal chrome fit a text-first blog and keep client JS minimal (Lighthouse 95+ goal). Selectable themes give per-site variety without each site diverging into a wholly different design, so most theme code stays in core.",
+      "alternatives_considered": ["Bare-minimum default typography only", "One fixed shared theme with no per-site selection", "Fully independent per-site designs"]
+    },
+    {
+      "id": "D10",
+      "timestamp": "2026-07-04",
+      "phase": "1-architecture",
+      "decision": "Core versioning is informal (pin sites to core commit SHAs as needed); the scaffold command is a local script run from the core repo, not a published CLI.",
+      "rationale": "Fastest path for v1 with a single maintainer and no public distribution; a semver release process and an npx CLI can be added later if multiple sites make change-tracking painful.",
+      "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx downpress create CLI"]
     }
   ],
   "gotchas": [],
@@ -158,6 +207,10 @@
     {
       "date": "2026-07-02",
       "summary": "Ran ForgeKit greenfield kickoff for Downpress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
+    },
+    {
+      "date": "2026-07-04",
+      "summary": "User resolved all 11 open questions. Locked docs/PHASE_1_BRIEF.md and added decisions D5-D10 (Cloudflare Pages + custom domain; top-level /posts/; hidden-URL draft preview; strict YYYY-MM-DD + hide future-dated; sparse/classic styling with selectable per-site themes; informal versioning + local scaffold script; comments a permanent non-goal). Phase 1 exit criteria all met. Held at currentPhase 1-architecture pending explicit user go-ahead to start Phase 2 scaffolding."
     }
   ]
 }

@@ -208,7 +208,23 @@
       "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx downpress create CLI"]
     }
   ],
-  "gotchas": [],
+  "gotchas": [
+    {
+      "date": "2026-07-04",
+      "gotcha": "This Svelte tooling version (Kit 2.69 / Vite 8 / vite-plugin-svelte 7) has NO svelte.config.js — adapter and kit options (adapter, prerender, compilerOptions) are passed directly to the sveltekit() plugin inside vite.config.ts.",
+      "resolution": "Configure adapter-static and prerender.entries in vite.config.ts, not a separate svelte.config.js."
+    },
+    {
+      "date": "2026-07-04",
+      "gotcha": "Reading content via Node fs makes the loader server-only. If imported from a universal +page.ts it would be bundled for the client and break.",
+      "resolution": "posts.ts uses $env/dynamic/private + node:fs (server-only by construction); content routes are +page.server.ts. Pure logic is isolated in parse.ts for safe importing/testing. Requires @types/node for svelte-check."
+    },
+    {
+      "date": "2026-07-04",
+      "gotcha": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.).",
+      "resolution": "Scaffold into a fresh temp dir with fully non-interactive flags, then move files to the repo root."
+    }
+  ],
   "sessions": [
     {
       "date": "2026-07-02",
@@ -221,6 +237,10 @@
     {
       "date": "2026-07-04",
       "summary": "Phase 2 scaffolding: ran lessons gate (getAntiPatterns + searchLessons), advanced to 2-scaffolding, and built the full runnable spine in one pass. SvelteKit adapter-static app (TS/pnpm) with a complete content engine (gray-matter + remark/rehype, all edge cases, loud file-named ContentError), index/post/tag routes, RSS/sitemap/robots, and the Classic theme. Verified build + preview: drafts previewable-but-unlisted, future-dated hidden (404), dedupe + missing-field failures loud; pnpm check clean. Wrote Phase 2 docs (CONTEXT_PROMPT merged from brief, README, TODO, .forgekit/IDEAS). All Phase 2 exit criteria met; awaiting confirmation to advance to Phase 3."
+    },
+    {
+      "date": "2026-07-04",
+      "summary": "Early hardening + first real site. Extracted pure parse/validate logic into src/lib/content/parse.ts; added Vitest (20 unit tests: slugify, tag normalization, strict/impossible dates, missing fields, dedupe) + @types/node. Reworked content loading to read the filesystem from DOWNPRESS_CONTENT_DIR (default posts/) instead of import.meta.glob, and made site identity env-driven (PUBLIC_SITE_*); content routes moved to +page.server.ts (loader is now server-only) — this is the seam the M4 core/site split will use. Validated end to end by building and running the engine locally as example-site.example against ../example-site/artifacts (added frontmatter to that article in place); article, tags, RSS, sitemap all correct. pnpm check + test clean. The .env and site content are gitignored/external — only engine hardening was committed. currentPhase left at 2-scaffolding pending confirmation to formally enter Phase 3."
     }
   ]
 }

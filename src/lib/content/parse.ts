@@ -1,0 +1,148 @@
+import matter from 'gray-matter';
+import type { PostSource, RawFrontmatter } from './types';
+
+/**
+ * A content error that names the offending file. The build must fail loudly and
+ * attributably (per PHASE_1_BRIEF §3 and GENESIS edge cases 1–3), never crash
+ * with a generic stack trace or silently drop a post.
+ *
+ * This module is deliberately free of `import.meta.glob` / Vite specifics so the
+ * parsing + validation logic can be unit-tested in isolation.
+ */
+export class ContentError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'ContentError';
+	}
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Validate a strict YYYY-MM-DD date string and confirm it's a real calendar date. */
+export function assertValidDate(value: string, field: string, file: string): string {
+	if (!DATE_RE.test(value)) {
+		throw new ContentError(
+			`${file}: invalid \`${field}\` "${value}" — dates must be strictly YYYY-MM-DD (e.g. 2026-07-04).`
+		);
+	}
+	const [y, m, d] = value.split('-').map(Number);
+	const dt = new Date(Date.UTC(y, m - 1, d));
+	if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) {
+		throw new ContentError(`${file}: \`${field}\` "${value}" is not a real calendar date.`);
+	}
+	return value;
+}
+
+/**
+ * Derive a URL-safe slug from a string. Lowercases, trims, turns whitespace and
+ * underscores into hyphens, and drops any character that isn't a Unicode letter,
+ * number, or hyphen (emoji and punctuation are stripped; accented letters kept).
+ */
+export function slugify(input: string): string {
+	return input
+		.normalize('NFKC')
+		.toLowerCase()
+		.trim()
+		.replace(/[\s_]+/g, '-')
+		.replace(/[^\p{L}\p{N}-]+/gu, '')
+		.replace(/-{2,}/g, '-')
+		.replace(/^-+|-+$/g, '');
+}
+
+/** Normalize a tag: coerce to string, trim, lowercase (edge case 13). */
+export function normalizeTag(tag: unknown): string {
+	return String(tag).trim().toLowerCase();
+}
+
+/** Filename (no extension, no directory) from a "/posts/foo.md" style path. */
+export function filenameOf(path: string): string {
+	return path.slice(path.lastIndexOf('/') + 1).replace(/\.md$/, '');
+}
+
+function normalizeDateInput(value: unknown): string {
+	// YAML auto-parses unquoted dates into Date objects; a phone may also type a
+	// string. Normalize both to the YYYY-MM-DD text before strict validation.
+	return value instanceof Date ? value.toISOString().slice(0, 10) : String(value).trim();
+}
+
+/** Parse and validate one raw Markdown file into a PostSource. Throws ContentError. */
+export function parsePost(path: string, raw: string): PostSource {
+	let parsed: matter.GrayMatterFile<string>;
+	try {
+		// gray-matter tolerates trailing whitespace after the closing `---` (edge case 8).
+		parsed = matter(raw);
+	} catch (e: unknown) {
+		const detail = e instanceof Error ? e.message : String(e);
+		throw new ContentError(`${path}: could not parse YAML frontmatter — ${detail}`);
+	}
+
+	const fm = parsed.data as RawFrontmatter;
+
+	if (fm.title === undefined || fm.title === null || String(fm.title).trim() === '') {
+		throw new ContentError(`${path}: missing required frontmatter field \`title\`.`);
+	}
+	if (fm.date === undefined || fm.date === null || String(fm.date).trim() === '') {
+		throw new ContentError(`${path}: missing required frontmatter field \`date\`.`);
+	}
+
+	const title = String(fm.title).trim();
+	const date = assertValidDate(normalizeDateInput(fm.date), 'date', path);
+
+	let updated: string | null = null;
+	if (fm.updated !== undefined && fm.updated !== null && String(fm.updated).trim() !== '') {
+		updated = assertValidDate(normalizeDateInput(fm.updated), 'updated', path);
+	}
+
+	const explicitSlug = fm.slug !== undefined && fm.slug !== null && String(fm.slug).trim() !== '';
+	const slug = slugify(explicitSlug ? String(fm.slug) : filenameOf(path));
+	if (slug === '') {
+		throw new ContentError(
+			`${path}: could not derive a non-empty slug from ${explicitSlug ? 'the `slug` field' : 'the filename'}.`
+		);
+	}
+
+	const descriptionRaw = fm.description ?? fm.excerpt;
+	const description =
+		descriptionRaw !== undefined && descriptionRaw !== null && String(descriptionRaw).trim() !== ''
+			? String(descriptionRaw).trim()
+			: null;
+
+	let tags: string[] = [];
+	if (fm.tags !== undefined && fm.tags !== null) {
+		if (!Array.isArray(fm.tags)) {
+			throw new ContentError(
+				`${path}: \`tags\` must be a YAML list (e.g. tags: [notes, sveltekit]), got ${typeof fm.tags}.`
+			);
+		}
+		tags = [...new Set(fm.tags.map(normalizeTag).filter((t) => t !== ''))];
+	}
+
+	const draft = fm.draft === true;
+
+	return {
+		slug,
+		title,
+		date,
+		updated,
+		description,
+		tags,
+		draft,
+		sourcePath: path,
+		body: parsed.content
+	};
+}
+
+/** Throw if any two sources resolve to the same slug, naming both files (edge case 3). */
+export function assertUniqueSlugs(sources: PostSource[]): void {
+	const bySlug = new Map<string, string>();
+	for (const post of sources) {
+		const existing = bySlug.get(post.slug);
+		if (existing) {
+			throw new ContentError(
+				`Duplicate slug "${post.slug}" produced by two files: ${existing} and ${post.sourcePath}. ` +
+					`Set a distinct \`slug\` in one file's frontmatter or rename it.`
+			);
+		}
+		bySlug.set(post.slug, post.sourcePath);
+	}
+}

@@ -1,4 +1,4 @@
-import type { EntryGenerator, PageLoad } from './$types';
+import type { EntryGenerator, PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { getBuildableSlugs, getRenderedPost, loadPostSources } from '$lib/content/posts';
 
@@ -8,7 +8,7 @@ export const entries: EntryGenerator = () => {
 	return getBuildableSlugs().map((slug) => ({ slug }));
 };
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params }) => {
 	const post = await getRenderedPost(params.slug);
 	if (!post) {
 		error(404, `No post found for "${params.slug}".`);

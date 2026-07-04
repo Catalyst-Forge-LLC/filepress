@@ -35,8 +35,9 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ## M4 — Core/site split & scaffolding
 
-- [ ] Extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme into a `downpress-core` package/repo
+- [ ] Extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme into a `downpress-core` package/repo _(content-dir + identity env seam already in place)_
 - [ ] Rebuild this site as "Site A" depending on core via a pinned git dependency
+- [ ] Promote **example-site.example** to a real Site repo (its own `/posts/`, `downpress.config`, CI) once the core split lands — currently run locally via `DOWNPRESS_CONTENT_DIR` + a gitignored `.env`
 - [ ] `defineDownpressConfig()` helper consumed by a site's config
 - [ ] Local scaffold script (`node scripts/create-site.js <name>`): new SvelteKit site wired to core, empty `/posts/`, starter `downpress.config`, CI workflow; refuse to overwrite a non-empty dir (edge case 18)
 - [ ] Prove isolation: build Site A and Site B independently in either order, no cross-contamination
@@ -54,7 +55,9 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ### Robustness & Code Quality
 
-- [ ] Add a tiny unit test for the loader's validation + slugify + tag normalization (pure functions, easy to test)
+- [x] Extract pure parse/validate logic to `parse.ts`; add Vitest unit tests for slugify, tag normalization, date validation, missing fields, and duplicate detection _(20 tests, `pnpm test`)_
+- [x] Make content directory (`DOWNPRESS_CONTENT_DIR`) and site identity (`PUBLIC_SITE_*`) env-configurable — the seam for the M4 core/site split; verified by running as example-site.example
+- [ ] Add a couple of integration tests over the fs loader (fixtures dir → published/draft/future filtering, dedupe error)
 
 ### Documentation
 

@@ -47,7 +47,7 @@ downpress/
         feeds.ts                 # buildRssXml / buildSitemapXml / buildRobotsTxt
       components/                # PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter (prop-driven)
   sites/<name>/                  # a SvelteKit app (example-site, demo, …)
-    downpress.config.ts is at src/lib/downpress.config.ts (defineDownpressConfig)
+    downpress.config.ts          # site identity (defineDownpressConfig)
     src/lib/content.server.ts    # createContent({ contentDir: env||'posts' })
     src/routes/…                 # THIN: import config + content, render core components
     posts/                       # this site's own Markdown
@@ -68,7 +68,7 @@ A **Post** is one `.md` file. Validated frontmatter (`PostMeta` in `packages/cor
 | `draft` | boolean | no (default false) | Excluded from listings/feed/sitemap; page still built for preview (D7). |
 | `updated` | `YYYY-MM-DD` | no | Shown if present and different from `date`. |
 
-Plus `author` (optional byline; falls back to site author in views). **Tags** are derived (unique normalized tags across published posts). **Site config** is one object per site in `sites/<name>/src/lib/downpress.config.ts` via `defineDownpressConfig` (title, url, author, tagline, postsPerPage, topics, newsletter).
+Plus `author` (optional byline; falls back to site author in views). **Tags** are derived (unique normalized tags across published posts). **Site config** is one object per site in `sites/<name>/downpress.config.ts` via `defineDownpressConfig` (title, url, author, tagline, postsPerPage, topics, newsletter).
 
 ## Key Architectural Decisions
 
@@ -79,7 +79,7 @@ _(WHY preserved; full rationale + alternatives in `.forgekit/workflow_tracking.j
 - **D3 — Core/site split is a first-class goal (M4), not a later bolt-on.** SvelteKit is per-project; core will centralize loader, pipeline, feeds, layout/themes, scaffolding.
 - **D4 — Sites depend on core via a pinned dependency**, not `main`-floating. _M4 impl: `workspace:*` inside this pnpm monorepo (source-linked, no build step). Splitting core into its own repo + git-URL+SHA pins is deferred until a second repo is actually needed._
 - **D5 — Cloudflare Pages + always a custom domain** → static output at root, no base path.
-- **D6 — Content in each site's top-level `posts/`** (outside `src/`) for easy GitHub-mobile browsing. Read from disk via Node `fs` through `createContent({ contentDir })`; `DOWNPRESS_CONTENT_DIR` overrides for local experiments. Site identity is a `defineDownpressConfig` object in `src/lib/downpress.config.ts` (not env).
+- **D6 — Content in each site's top-level `posts/`** (outside `src/`) for easy GitHub-mobile browsing. Read from disk via Node `fs` through `createContent({ contentDir })`; `DOWNPRESS_CONTENT_DIR` overrides for local experiments. Site identity is `downpress.config.ts` at the site root (not env).
 - **D7 — Drafts:** excluded from index/tags/RSS/sitemap, but built at their URL (unlinked, `noindex`) for phone preview.
 - **D8 — Strict `YYYY-MM-DD`; future-dated posts hidden** until their date (build-time `date <= today` in UTC).
 - **D9 — Styling is sparse/classic/high-end; per-site themes are variations on the shared core aesthetic.**

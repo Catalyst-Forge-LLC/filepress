@@ -58,7 +58,7 @@ const SKIP = new Set(
 		'build',
 		'README.md',
 		'package.json',
-		join('src', 'lib', 'downpress.config.ts'),
+		'downpress.config.ts',
 		'posts'
 	].map((p) => join(templateSite, p))
 );
@@ -101,9 +101,9 @@ writeFileSync(
 	) + '\n'
 );
 
-// downpress.config.ts
+// downpress.config.ts (site root — alongside posts/)
 writeFileSync(
-	join(target, 'src', 'lib', 'downpress.config.ts'),
+	join(target, 'downpress.config.ts'),
 	`import { defineDownpressConfig } from '@downpress/core';
 
 export default defineDownpressConfig({
@@ -122,7 +122,7 @@ writeFileSync(
 	`# ${title}
 
 A Downpress site. Content is the Markdown in [\`posts/\`](posts/); identity lives
-in [\`src/lib/downpress.config.ts\`](src/lib/downpress.config.ts). Engine logic
+in [\`downpress.config.ts\`](downpress.config.ts). Engine logic
 comes from [\`@downpress/core\`](../../packages/core).
 
 \`\`\`bash

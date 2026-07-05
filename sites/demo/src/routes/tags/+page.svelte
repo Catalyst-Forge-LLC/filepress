@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import config from '$lib/downpress.config';
+	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
 </script>

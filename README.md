@@ -19,7 +19,7 @@ sites/demo             the engine's own showcase site
 scripts/create-site.mjs  scaffolds a new site from the shared boilerplate
 ```
 
-Each site is its own SvelteKit app (the router is per-project), but its route files are thin — they call the core content API and render core components. A site's whole identity lives in one file, `src/lib/downpress.config.ts`.
+Each site is its own SvelteKit app (the router is per-project), but its route files are thin — they call the core content API and render core components. A site's whole identity lives in one file at the site root, `downpress.config.ts` (alongside `posts/`).
 
 ## Requirements
 
@@ -91,7 +91,7 @@ Body content in **Markdown**.
 
 ## Site configuration
 
-Each site declares its identity via `defineDownpressConfig` in `src/lib/downpress.config.ts`:
+Each site declares its identity via `defineDownpressConfig` in `downpress.config.ts` at the site root:
 
 ```ts
 import { defineDownpressConfig } from '@downpress/core';

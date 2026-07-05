@@ -51,7 +51,7 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Extract content loader, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components into `@downpress/core` (`packages/core`, source-linked Svelte library)
 - [x] Rebuild sites as SvelteKit apps depending on core via `workspace:*` (thin per-site routes; routes stay per-project by SvelteKit constraint)
 - [x] Promote **example-site.example** to a real site (`sites/example-site`, own `posts/` + `downpress.config.ts`)
-- [x] `defineDownpressConfig()` helper consumed by each site's `src/lib/downpress.config.ts`
+- [x] `defineDownpressConfig()` helper consumed by each site's `downpress.config.ts` (site root)
 - [x] Local scaffold script (`node scripts/create-site.mjs <name>`): wires a new site to core, starter `downpress.config`, starter post; refuses a non-empty dir (edge case 18)
 - [x] Prove isolation: `example-site` and `demo` build independently to their own `build/` (verified)
 - [x] Site config validation: `defineDownpressConfig` fails loudly on missing `title`/`url` (edge case 19, unit-tested)

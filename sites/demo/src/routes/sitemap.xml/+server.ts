@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
 import { buildSitemapXml } from '@downpress/core/server';
 import { content } from '$lib/content.server';
-import config from '$lib/downpress.config';
+import config from '$site-config';
 
 export const prerender = true;
 

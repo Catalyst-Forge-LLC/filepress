@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '@downpress/core/theme';
 	import { SiteHeader, SiteFooter } from '@downpress/core';
-	import config from '$lib/downpress.config';
+	import config from '$site-config';
 
 	let { children } = $props();
 </script>

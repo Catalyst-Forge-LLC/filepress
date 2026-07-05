@@ -1,7 +1,7 @@
 # example-site.example
 
 A Downpress site. Content is the Markdown in [`posts/`](posts/); identity lives
-in [`src/lib/downpress.config.ts`](src/lib/downpress.config.ts). All the engine
+in [`downpress.config.ts`](downpress.config.ts). All the engine
 logic comes from [`@downpress/core`](../../packages/core).
 
 ## Develop

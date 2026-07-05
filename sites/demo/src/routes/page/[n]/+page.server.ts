@@ -1,7 +1,7 @@
 import type { EntryGenerator, PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { content } from '$lib/content.server';
-import config from '$lib/downpress.config';
+import config from '$site-config';
 
 // Page 1 lives at "/"; this route covers pages 2..N only.
 export const entries: EntryGenerator = () => {

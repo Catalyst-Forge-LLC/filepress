@@ -1,7 +1,7 @@
 /**
  * Downpress site configuration — the single per-site config surface.
  *
- * A site declares its identity in a `downpress.config.ts` via
+ * A site declares its identity in `downpress.config.ts` at the site root via
  * `defineDownpressConfig({...})`. Core never reads environment variables for
  * identity; the site owns that (and may read env in its own config file). This
  * keeps `@downpress/core` app-agnostic and importable from both client and

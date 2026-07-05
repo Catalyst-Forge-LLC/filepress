@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { content } from '$lib/content.server';
-import config from '$lib/downpress.config';
+import config from '$site-config';
 
 const PREVIEW = 6;
 

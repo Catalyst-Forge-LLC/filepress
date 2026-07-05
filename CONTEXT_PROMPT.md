@@ -20,7 +20,7 @@ Structurally it is designed to become a reusable **core engine** plus independen
 - **Content pipeline:** `gray-matter` (frontmatter) + `unified`/`remark`/`rehype` (Markdown → HTML). Plugins: `remark-gfm`, `remark-rehype` (+`rehype-raw` for raw-HTML passthrough), `rehype-slug`, `rehype-autolink-headings`, `rehype-highlight`, `rehype-stringify`.
 - **Content source:** read from disk with Node `fs` at build time; directory is `DOWNPRESS_CONTENT_DIR` (absolute or repo-relative), defaulting to `posts/`. This is server-only, so content routes use `+page.server.ts`.
 - **Tests:** Vitest (`pnpm test`) over the pure parsing/validation logic in `src/lib/content/parse.ts`.
-- **Styling:** Hand-written CSS in `src/app.css` (no Tailwind). One "Classic" theme: sparse, sharp, editorial — serif reading column, one accent, hairline rules, light/dark via `prefers-color-scheme`.
+- **Styling:** Hand-written CSS in `src/app.css` (no Tailwind). "Essay" theme (D11): quiet, text-first, editorial — self-hosted Newsreader (reading serif) + Inter (UI/meta) via `@fontsource-variable`, one accent at three intensities, warm neutrals, light/dark via `prefers-color-scheme`. Tokens are CSS custom properties so per-site themes (D9) stay cheap.
 - **Deploy:** Cloudflare Pages, always on a custom domain (site served at root, no base path). CI wiring is Roadmap M3 (not built yet).
 - **No** database, auth, LLM, analytics, or third-party client scripts.
 
@@ -31,7 +31,7 @@ downpress/
   posts/                         # default content dir (D6); override with DOWNPRESS_CONTENT_DIR
   .env.example                   # PUBLIC_SITE_* identity + DOWNPRESS_CONTENT_DIR
   src/
-    app.css                      # global "Classic" theme
+    app.css                      # global "Essay" theme (tokens as CSS custom properties)
     lib/
       config.ts                  # per-site config from PUBLIC_SITE_* env (with defaults) + absoluteUrl()
       format.ts                  # UTC-stable date formatting
@@ -114,18 +114,19 @@ _(WHY preserved; full rationale + alternatives in `.forgekit/workflow_tracking.j
 
 - Content loader with full edge-case handling (missing/malformed frontmatter, strict dates, duplicate slugs, unicode slugs, tag normalization, drafts, future-dating). Fails loud, names files.
 - Index listing (published, newest-first, empty state), post pages (SEO meta, updated date, draft-preview banner), tag index + per-tag archives.
-- RSS feed, sitemap, robots.txt (all prerendered).
-- "Classic" theme in `app.css`; light/dark.
-- Pure parse/validate logic extracted to `parse.ts` with 20 Vitest unit tests (`pnpm test`).
-- Content directory + site identity are env-configurable (`DOWNPRESS_CONTENT_DIR`, `PUBLIC_SITE_*`). Verified by building the engine as the **example-site.example** site (content in `../example-site/artifacts`, via a gitignored `.env`) end to end.
-- `pnpm build` produces a working static site; verified draft/future/dedupe behavior in output.
+- RSS feed, sitemap (covers `/topics` + paginated pages), robots.txt (all prerendered).
+- **"Essay" theme** in `app.css` (D11): self-hosted Newsreader + Inter (`@fontsource-variable`, imported in `+layout.svelte`), three-tier accent (`--accent` / `--rule` / `--accent-wash`), warm neutrals, light/dark. Design lives in CSS custom properties for cheap per-site variants.
+- **Feature batch (D12):** excerpt post cards (`$lib/components/PostCard.svelte`) + featured hero + index pagination (`/page/[n]`, guarded by `handleUnseenRoutes`); optional per-post `author` byline; prev/next links (`getAdjacentPosts`); config-driven Topics/Explore (`/topics`, `site.topics`); config-driven external newsletter CTA (`site.newsletter`, `Newsletter.svelte`); image-only paragraphs → `<figure>`+`<figcaption>` (`rehype-figure.ts`).
+- Pure parse/validate logic in `parse.ts` (+ `rehype-figure`) with 26 Vitest unit tests (`pnpm test`).
+- Content directory + site identity are env-configurable (`DOWNPRESS_CONTENT_DIR`, `PUBLIC_SITE_*` incl. `TAGLINE`, `POSTS_PER_PAGE`, `NEWSLETTER_*`). Verified by building the engine as the **example-site.example** site (content in `../example-site/artifacts`, via a gitignored `.env`) end to end.
+- `pnpm build` produces a working static site; verified draft/future/dedupe behavior + the new theme/pages in output.
 
 ### Not Started
 
 - **M3:** Cloudflare Pages CI deploy wiring; live-domain verification.
-- **M4:** core/site split + scaffold script + isolation proof.
-- **M5:** pagination, 404 polish, reading time, prev/next, per-site theme selection.
-- Image convention doc (edge case 10), OG image, more SEO polish.
+- **M4 (next):** core/site split + scaffold script + isolation proof; promote example-site.example to a real Site repo.
+- **M5:** 404 polish, reading-time, client-side search, per-site theme selection (tokens ready), core version-bump tooling.
+- Sample post with an image (edge case 10), OG image, more SEO polish.
 
 ## Recent Changes
 

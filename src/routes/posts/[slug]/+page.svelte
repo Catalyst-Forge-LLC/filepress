@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { site, absoluteUrl } from '$lib/config';
 	import { formatDate } from '$lib/format';
+	import Newsletter from '$lib/components/Newsletter.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -9,6 +10,7 @@
 	const pageTitle = $derived(`${post.title} — ${site.title}`);
 	const canonical = $derived(absoluteUrl(`/posts/${post.slug}`));
 	const showUpdated = $derived(post.updated && post.updated !== post.date);
+	const adjacent = $derived(data.adjacent);
 </script>
 
 <svelte:head>
@@ -36,6 +38,9 @@
 		<h1>{post.title}</h1>
 		<p class="meta">
 			<time datetime={post.date}>{formatDate(post.date)}</time>
+			{#if post.author}
+				&middot; <span class="byline">{post.author}</span>
+			{/if}
 			{#if showUpdated}
 				&middot; updated <time datetime={post.updated}>{formatDate(post.updated!)}</time>
 			{/if}
@@ -51,4 +56,27 @@
 
 	<!-- Body HTML is compiled at build time from the owner's own Markdown (trusted). -->
 	<div class="prose">{@html post.html}</div>
+
+	{#if adjacent.older || adjacent.newer}
+		<nav class="post-nav" aria-label="More posts">
+			{#if adjacent.older}
+				<a class="older" href="/posts/{adjacent.older.slug}">
+					<span class="post-nav-label">&larr; Older</span>
+					<span class="post-nav-title">{adjacent.older.title}</span>
+				</a>
+			{:else}
+				<span></span>
+			{/if}
+			{#if adjacent.newer}
+				<a class="newer" href="/posts/{adjacent.newer.slug}">
+					<span class="post-nav-label">Newer &rarr;</span>
+					<span class="post-nav-title">{adjacent.newer.title}</span>
+				</a>
+			{:else}
+				<span></span>
+			{/if}
+		</nav>
+	{/if}
 </article>
+
+<Newsletter />

@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { getPublishedPosts } from '$lib/content/posts';
+import { getIndexPage } from '$lib/content/posts';
+import { site } from '$lib/config';
 
 export const load: PageServerLoad = () => {
-	return { posts: getPublishedPosts() };
+	return getIndexPage(1, site.postsPerPage);
 };

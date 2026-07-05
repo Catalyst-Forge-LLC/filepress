@@ -140,6 +140,16 @@ describe('parsePost', () => {
 		);
 		expect(notDraft.draft).toBe(false);
 	});
+
+	it('reads an optional author, defaulting to null', () => {
+		const withAuthor = parsePost(
+			'/posts/a.md',
+			frontmatter('title: X\ndate: 2026-01-01\nauthor: Jane Roe')
+		);
+		expect(withAuthor.author).toBe('Jane Roe');
+		const withoutAuthor = parsePost('/posts/b.md', frontmatter('title: X\ndate: 2026-01-01'));
+		expect(withoutAuthor.author).toBeNull();
+	});
 });
 
 describe('assertUniqueSlugs', () => {
@@ -150,6 +160,7 @@ describe('assertUniqueSlugs', () => {
 		updated: null,
 		description: null,
 		tags: [],
+		author: null,
 		draft: false,
 		sourcePath,
 		body: ''

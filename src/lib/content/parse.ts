@@ -117,6 +117,11 @@ export function parsePost(path: string, raw: string): PostSource {
 		tags = [...new Set(fm.tags.map(normalizeTag).filter((t) => t !== ''))];
 	}
 
+	const author =
+		fm.author !== undefined && fm.author !== null && String(fm.author).trim() !== ''
+			? String(fm.author).trim()
+			: null;
+
 	const draft = fm.draft === true;
 
 	return {
@@ -126,6 +131,7 @@ export function parsePost(path: string, raw: string): PostSource {
 		updated,
 		description,
 		tags,
+		author,
 		draft,
 		sourcePath: path,
 		body: parsed.content

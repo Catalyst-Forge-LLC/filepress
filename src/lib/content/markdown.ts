@@ -7,6 +7,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeStringify from 'rehype-stringify';
+import { rehypeFigure } from './rehype-figure';
 
 /**
  * Markdown → HTML pipeline (build-time only).
@@ -20,6 +21,8 @@ import rehypeStringify from 'rehype-stringify';
  *   (`rehype-autolink-headings`) so deep links work.
  * - Code blocks are syntax-highlighted at build time (`rehype-highlight`,
  *   highlight.js). A theme stylesheet is imported globally in app.css.
+ * - Image-only paragraphs become `<figure>` with a `<figcaption>` from the
+ *   image title/alt (`rehype-figure`), for captioned editorial images.
  */
 const processor = unified()
 	.use(remarkParse)
@@ -31,6 +34,7 @@ const processor = unified()
 		behavior: 'wrap',
 		properties: { className: ['heading-anchor'] }
 	})
+	.use(rehypeFigure)
 	.use(rehypeHighlight, { detect: true, ignoreMissing: true })
 	.use(rehypeStringify, { allowDangerousHtml: true });
 

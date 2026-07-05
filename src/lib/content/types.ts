@@ -8,6 +8,7 @@ export interface RawFrontmatter {
 	tags?: unknown;
 	draft?: unknown;
 	updated?: unknown;
+	author?: unknown;
 }
 
 /** Validated, normalized metadata for a single post. */
@@ -23,6 +24,8 @@ export interface PostMeta {
 	description: string | null;
 	/** Normalized (lowercased, trimmed, de-duplicated) tags. */
 	tags: string[];
+	/** Optional per-post author byline; null falls back to the site author in views. */
+	author: string | null;
 	draft: boolean;
 	/** Source file path relative to the repo root, e.g. "/posts/foo.md". */
 	sourcePath: string;

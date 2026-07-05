@@ -74,6 +74,36 @@ function toMeta(post: PostSource): PostMeta {
 	return meta;
 }
 
+/**
+ * One page of the index. The newest published post is pulled out as `featured`
+ * and shown only on page 1; the remaining posts paginate `perPage` at a time.
+ * `page` is 1-based and clamped to the valid range.
+ */
+export function getIndexPage(
+	page: number,
+	perPage: number
+): { featured: PostMeta | null; posts: PostMeta[]; page: number; totalPages: number } {
+	const published = getPublishedPosts();
+	const featured = published[0] ?? null;
+	const rest = published.slice(1);
+	const size = Math.max(1, Math.floor(perPage));
+	const totalPages = Math.max(1, Math.ceil(rest.length / size));
+	const current = Math.min(Math.max(1, Math.floor(page)), totalPages);
+	const start = (current - 1) * size;
+	return {
+		featured: current === 1 ? featured : null,
+		posts: rest.slice(start, start + size),
+		page: current,
+		totalPages
+	};
+}
+
+/** Number of index pages (used by the /page/[n] entry generator). */
+export function getIndexPageCount(perPage: number): number {
+	const rest = Math.max(0, getPublishedPosts().length - 1);
+	return Math.max(1, Math.ceil(rest / Math.max(1, Math.floor(perPage))));
+}
+
 /** Published posts (non-draft, not future-dated), newest first. For index/tags/feed/sitemap. */
 export function getPublishedPosts(): PostMeta[] {
 	const now = today();
@@ -126,4 +156,22 @@ export function getAllTags(): { tag: string; count: number }[] {
 export function getPostsByTag(tag: string): PostMeta[] {
 	const normalized = normalizeTag(tag);
 	return getPublishedPosts().filter((p) => p.tags.includes(normalized));
+}
+
+/**
+ * Neighbouring published posts for prev/next navigation. `older`/`newer` are
+ * relative to publish order (the published list is newest-first). Drafts and
+ * future-dated posts never appear here, and a draft's own page gets no neighbours.
+ */
+export function getAdjacentPosts(slug: string): {
+	older: PostMeta | null;
+	newer: PostMeta | null;
+} {
+	const published = getPublishedPosts();
+	const i = published.findIndex((p) => p.slug === slug);
+	if (i === -1) return { older: null, newer: null };
+	return {
+		newer: i > 0 ? published[i - 1] : null,
+		older: i < published.length - 1 ? published[i + 1] : null
+	};
 }

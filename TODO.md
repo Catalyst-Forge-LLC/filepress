@@ -24,6 +24,19 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [ ] Document the image convention in a visible place (README done; consider a sample post with an image)
 - [ ] Decide/verify smart-quote handling on a real phone-authored title (edge case: apostrophes)
 
+## Feature batch + Essay restyle ✅ (2026-07-05, D11/D12)
+
+- [x] "Essay" theme: self-hosted Newsreader + Inter (`@fontsource-variable`), three-tier accent, warm neutrals, light+dark
+- [x] Optional per-post `author` byline (frontmatter + `parse.ts` + tests)
+- [x] Excerpt post cards + "Read more →" (shared `PostCard` component)
+- [x] Featured latest post on the index
+- [x] Index pagination via `/page/[n]` (+ `handleUnseenRoutes` guard for small sites)
+- [x] Prev/next post links on articles
+- [x] Config-driven Topics/Explore view (`site.topics`, falls back to all tags)
+- [x] Config-driven external newsletter CTA (`site.newsletter`)
+- [x] Image-only paragraphs → `<figure>` + `<figcaption>` (`rehype-figure` + tests)
+- [x] `SiteConfig` extended (tagline, postsPerPage, topics, newsletter) + `.env.example`; sitemap covers `/topics` + paginated pages
+
 ## M3 — Deployed and automated
 
 - [ ] Cloudflare Pages project wired to the repo (build `pnpm build`, output `build/`)
@@ -45,10 +58,12 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ## M5 — Polish (optional)
 
-- [ ] Pagination for the index once post count grows
+- [x] Pagination for the index once post count grows _(`/page/[n]`)_
+- [x] Prev/next post links _(done in the feature batch)_
 - [ ] Custom 404 page styling
-- [ ] Per-site theme selection (variations on the Classic aesthetic, D9)
-- [ ] Reading-time estimate / prev-next post links (only if wanted)
+- [ ] Per-site theme selection (variations on the Essay aesthetic, D9) — tokens are in place; needs a theme-switch seam
+- [ ] Reading-time estimate (deferred; not in this batch)
+- [ ] Client-side search (deferred; needs JS + build-time index)
 - [ ] Tooling to bump a Site's pinned core version deliberately
 
 ## Foundation

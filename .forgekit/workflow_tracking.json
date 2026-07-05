@@ -206,6 +206,22 @@
       "decision": "Core versioning is informal (pin sites to core commit SHAs as needed); the scaffold command is a local script run from the core repo, not a published CLI.",
       "rationale": "Fastest path for v1 with a single maintainer and no public distribution; a semver release process and an npx CLI can be added later if multiple sites make change-tracking painful.",
       "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx downpress create CLI"]
+    },
+    {
+      "id": "D11",
+      "timestamp": "2026-07-05",
+      "phase": "4-feature-iteration",
+      "decision": "Default theme is 'Essay' — a quiet, text-first editorial look (Ben Evans / Stratechery family) with self-hosted Newsreader (reading serif) + Inter (UI/meta), a single accent used at three intensities (strong / rule / wash), and warm parchment neutrals with a dark variant.",
+      "rationale": "example-site.example is an essay site; the quiet single-column serif look serves reading and keeps client JS ~zero (Lighthouse 95+ goal, D9). Fonts are bundled via @fontsource-variable so there are no third-party font requests. Design is expressed as CSS custom properties so per-site theme variants (D9) stay cheap.",
+      "alternatives_considered": ["Warmer editorial/journal (Traveling Mitch)", "Magazine card grid (Copyblogger)", "System-font stack only (no font files)"]
+    },
+    {
+      "id": "D12",
+      "timestamp": "2026-07-05",
+      "phase": "4-feature-iteration",
+      "decision": "First feature batch: excerpt post cards, featured latest post + index pagination (/page/[n]), optional per-post author byline, prev/next post links, a config-driven Topics/Explore view, a config-driven external newsletter CTA, and image-only paragraphs becoming <figure>+<figcaption>. Deferred: client-side search, reading-time, manual dark toggle.",
+      "rationale": "Distilled from reference blogs the user shared; all are static-friendly (zero or trivial JS) and fit 'keep it simple'. Newsletter is just a link to an external service (Buttondown/Substack) — no backend, consistent with comments being a non-goal.",
+      "alternatives_considered": ["Include client-side search now (needs JS + build index)", "Reading-time + manual theme toggle now"]
     }
   ],
   "gotchas": [
@@ -223,6 +239,11 @@
       "date": "2026-07-04",
       "gotcha": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.).",
       "resolution": "Scaffold into a fresh temp dir with fully non-interactive flags, then move files to the repo root."
+    },
+    {
+      "date": "2026-07-05",
+      "gotcha": "A prerendered dynamic route with an entries() that returns [] (e.g. /page/[n] on a site small enough to fit on page 1) fails the adapter-static build with 'marked as prerenderable but not prerendered'.",
+      "resolution": "Set kit.prerender.handleUnseenRoutes in vite.config.ts to a function that ignores exactly '/page/[n]' and still throws for any other unseen route, so the build stays strict elsewhere."
     }
   ],
   "sessions": [
@@ -241,6 +262,10 @@
     {
       "date": "2026-07-04",
       "summary": "Early hardening + first real site. Extracted pure parse/validate logic into src/lib/content/parse.ts; added Vitest (20 unit tests: slugify, tag normalization, strict/impossible dates, missing fields, dedupe) + @types/node. Reworked content loading to read the filesystem from DOWNPRESS_CONTENT_DIR (default posts/) instead of import.meta.glob, and made site identity env-driven (PUBLIC_SITE_*); content routes moved to +page.server.ts (loader is now server-only) — this is the seam the M4 core/site split will use. Validated end to end by building and running the engine locally as example-site.example against ../example-site/artifacts (added frontmatter to that article in place); article, tags, RSS, sitemap all correct. pnpm check + test clean. The .env and site content are gitignored/external — only engine hardening was committed. currentPhase left at 2-scaffolding pending confirmation to formally enter Phase 3."
+    },
+    {
+      "date": "2026-07-05",
+      "summary": "Stage 1 of the 'A' track: feature batch + Essay restyle before the M4 core/site split (chose to add features to a stable engine first, then extract). Distilled UX from user-provided blogs (Ben Evans, Stratechery, Traveling Mitch, Copyblogger). Added (D11/D12): quiet Essay theme with self-hosted Newsreader+Inter via @fontsource-variable, three-tier accent + warm neutrals; optional author byline (parse.ts + tests, now 26 tests); excerpt post cards + featured hero; index pagination via /page/[n] (+ handleUnseenRoutes gotcha fix); prev/next post links; config-driven Topics/Explore view; config-driven external newsletter CTA; rehype-figure (image-only paragraphs -> figure+figcaption, with its own tests). Extended SiteConfig (tagline, postsPerPage, topics, newsletter) + .env.example; sitemap now lists /topics and paginated pages; README documents author + captions. pnpm check clean, 26 tests pass, adapter-static build succeeds; verified visually by previewing the example-site.example build. Next: Stage 2 = the M4 core/site split + scaffold script, then promote example-site.example to a real Site repo. currentPhase still 2-scaffolding — this is Phase-4-shaped work; awaiting user OK to flip currentPhase to 4-feature-iteration."
     }
   ]
 }

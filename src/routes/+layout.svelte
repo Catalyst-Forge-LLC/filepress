@@ -1,9 +1,14 @@
 <script lang="ts">
+	// Self-hosted fonts (bundled at build time — no third-party requests).
+	import '@fontsource-variable/newsreader/index.css';
+	import '@fontsource-variable/newsreader/standard-italic.css';
+	import '@fontsource-variable/inter/index.css';
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { site } from '$lib/config';
 
 	let { children } = $props();
+	const year = new Date().getFullYear();
 </script>
 
 <svelte:head>
@@ -28,6 +33,10 @@
 
 <footer class="site-footer">
 	<div class="wrap">
-		{site.title} &middot; built with Downpress
+		<span>&copy; {year} {site.author}</span>
+		<span class="footer-links">
+			<a href="/rss.xml">RSS</a>
+			<a href="/topics">Topics</a>
+		</span>
 	</div>
 </footer>

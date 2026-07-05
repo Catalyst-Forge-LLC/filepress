@@ -31,6 +31,7 @@ title: "My Post"
 date: 2026-07-04
 description: A short summary used in listings and SEO.
 tags: [notes, sveltekit]
+author: Jane Roe
 draft: false
 updated: 2026-07-05
 ---
@@ -47,6 +48,7 @@ Body content in **Markdown**.
 | `slug` | no | Derived from the filename if omitted. |
 | `description` / `excerpt` | no | Used for listing previews and meta tags. |
 | `tags` | no | A YAML list; normalized to lowercase and de-duplicated. |
+| `author` | no | Byline shown on the post and in listings. Omit on single-author sites. |
 | `draft` | no | `true` hides the post from listings, tags, RSS, and the sitemap — but the page still builds at its URL (unlinked, `noindex`) so you can preview it. |
 | `updated` | no | Strict `YYYY-MM-DD`; shown when different from `date`. |
 
@@ -57,6 +59,7 @@ Body content in **Markdown**.
 - **Duplicate slugs fail the build**, naming both files.
 - **Raw HTML in a post body is passed through** — the content is yours (trust boundary is repo push access). Don't paste untrusted HTML.
 - **Images:** place assets under `static/images/posts/<slug>/` and reference them by absolute path, e.g. `/images/posts/<slug>/photo.jpg`, so you never have to compute relative paths on a phone.
+- **Captions:** an image on its own line becomes a `<figure>`; its title text becomes the caption, e.g. `![alt text](/images/…/photo.jpg "Caption shown under the image")`.
 
 ## How it works
 

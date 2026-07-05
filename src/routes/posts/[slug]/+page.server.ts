@@ -1,6 +1,11 @@
 import type { EntryGenerator, PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getBuildableSlugs, getRenderedPost, loadPostSources } from '$lib/content/posts';
+import {
+	getAdjacentPosts,
+	getBuildableSlugs,
+	getRenderedPost,
+	loadPostSources
+} from '$lib/content/posts';
 
 // Build a page for every published post plus every draft (drafts are unlinked
 // but reachable by direct URL for preview, D7). Future-dated posts are excluded.
@@ -14,5 +19,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, `No post found for "${params.slug}".`);
 	}
 	const isDraft = loadPostSources().some((p) => p.slug === params.slug && p.draft);
-	return { post, isDraft };
+	// Drafts get no prev/next (they aren't part of the published sequence).
+	const adjacent = getAdjacentPosts(params.slug);
+	return { post, isDraft, adjacent };
 };

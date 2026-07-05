@@ -22,7 +22,19 @@ export default defineConfig({
 				// the /rss.xml, /sitemap.xml, and /robots.txt endpoints. Dynamic routes
 				// (posts/[slug], tags/[tag]) supply their own `entries` generators, so
 				// drafts still build even though nothing links to them (D7).
-				entries: ['*']
+				entries: ['*'],
+
+				// The paginated /page/[n] route legitimately has zero pages on a small
+				// site (everything fits on page 1), so it may never be crawled. Ignore
+				// that one case, but keep the build strict for any other unseen route.
+				handleUnseenRoutes: ({ routes }) => {
+					const unexpected = routes.filter((r) => r !== '/page/[n]');
+					if (unexpected.length > 0) {
+						throw new Error(
+							`Routes marked prerenderable but not prerendered: ${unexpected.join(', ')}`
+						);
+					}
+				}
 			}
 		})
 	]

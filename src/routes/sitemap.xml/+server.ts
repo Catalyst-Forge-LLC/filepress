@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
-import { getAllTags, getPublishedPosts } from '$lib/content/posts';
-import { absoluteUrl } from '$lib/config';
+import { getAllTags, getIndexPageCount, getPublishedPosts } from '$lib/content/posts';
+import { absoluteUrl, site } from '$lib/config';
 
 export const prerender = true;
 
@@ -11,10 +11,15 @@ function escapeXml(value: string): string {
 export const GET: RequestHandler = () => {
 	const posts = getPublishedPosts();
 	const tags = getAllTags();
+	const pageCount = getIndexPageCount(site.postsPerPage);
+	const extraPages: { loc: string }[] = [];
+	for (let n = 2; n <= pageCount; n++) extraPages.push({ loc: absoluteUrl(`/page/${n}`) });
 
 	const urls: { loc: string; lastmod?: string }[] = [
 		{ loc: absoluteUrl('/') },
+		{ loc: absoluteUrl('/topics') },
 		{ loc: absoluteUrl('/tags') },
+		...extraPages,
 		...posts.map((p) => ({
 			loc: absoluteUrl(`/posts/${p.slug}`),
 			lastmod: p.updated ?? p.date

@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  packages/core:
     dependencies:
       '@fontsource-variable/inter':
         specifier: ^5.2.8
@@ -45,6 +47,22 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5
     devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+      svelte:
+        specifier: ^5.56.1
+        version: 5.56.4
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.1.0)(vite@8.1.3(@types/node@26.1.0))
+
+  sites/demo:
+    dependencies:
+      '@downpress/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.10
         version: 3.0.10(@sveltejs/kit@2.69.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4)(vite@8.1.3(@types/node@26.1.0)))(svelte@5.56.4)(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0)))
@@ -69,9 +87,37 @@ importers:
       vite:
         specifier: ^8.0.16
         version: 8.1.3(@types/node@26.1.0)
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.1.0)(vite@8.1.3(@types/node@26.1.0))
+
+  sites/example-site:
+    dependencies:
+      '@downpress/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      '@sveltejs/adapter-static':
+        specifier: ^3.0.10
+        version: 3.0.10(@sveltejs/kit@2.69.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4)(vite@8.1.3(@types/node@26.1.0)))(svelte@5.56.4)(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0)))
+      '@sveltejs/kit':
+        specifier: ^2.63.0
+        version: 2.69.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4)(vite@8.1.3(@types/node@26.1.0)))(svelte@5.56.4)(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0))
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^7.1.2
+        version: 7.1.2(svelte@5.56.4)(vite@8.1.3(@types/node@26.1.0))
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+      svelte:
+        specifier: ^5.56.1
+        version: 5.56.4
+      svelte-check:
+        specifier: ^4.6.0
+        version: 4.7.1(picomatch@4.0.5)(svelte@5.56.4)(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.16
+        version: 8.1.3(@types/node@26.1.0)
 
 packages:
 

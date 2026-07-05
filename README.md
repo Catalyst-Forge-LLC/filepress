@@ -6,6 +6,21 @@ A git-native Markdown blog engine. Every post is a plain `.md` file with YAML fr
 
 Blogging platforms bring accounts, databases, and plugin ecosystems to something that should be a folder of text files. Downpress keeps the whole thing as files in Git, and moves all the strictness into the build so authoring from a phone text box stays trivial.
 
+## Monorepo layout
+
+Downpress is a pnpm workspace: one reusable engine and any number of independently buildable sites.
+
+```
+packages/core          @downpress/core — the engine (content loader, Markdown
+                       pipeline, feed/sitemap builders, config helper, Essay
+                       theme, shared Svelte components)
+sites/example-site  a real site (example-site.example) that depends on core
+sites/demo             the engine's own showcase site
+scripts/create-site.mjs  scaffolds a new site from the shared boilerplate
+```
+
+Each site is its own SvelteKit app (the router is per-project), but its route files are thin — they call the core content API and render core components. A site's whole identity lives in one file, `src/lib/downpress.config.ts`.
+
 ## Requirements
 
 - Node.js 20+ (developed on 24)
@@ -14,16 +29,29 @@ Blogging platforms bring accounts, databases, and plugin ecosystems to something
 ## Getting started
 
 ```bash
-pnpm install
-pnpm dev        # local dev server
-pnpm build      # produce the static site in build/
-pnpm preview    # serve the production build locally
-pnpm check      # type-check
+pnpm install                       # link the workspace
+
+pnpm --filter example-site dev  # run a site locally
+pnpm --filter example-site build
+pnpm --filter <site> check
+
+pnpm test                          # engine unit tests (@downpress/core)
+pnpm -r --if-present check         # type-check every site
 ```
+
+### Create a new site
+
+```bash
+node scripts/create-site.mjs my-site --title "My Site" --url https://my.site
+pnpm install
+pnpm --filter my-site dev
+```
+
+The scaffold copies the shared routes/build config, generates a `downpress.config.ts`, and drops in a starter post. It refuses to write into a non-empty directory.
 
 ## Writing a post
 
-Create a Markdown file in the top-level [`posts/`](posts/) directory:
+Create a Markdown file in the site's `posts/` directory:
 
 ```markdown
 ---
@@ -58,17 +86,37 @@ Body content in **Markdown**.
 - **Future-dated posts are hidden** until a build runs on or after their date.
 - **Duplicate slugs fail the build**, naming both files.
 - **Raw HTML in a post body is passed through** — the content is yours (trust boundary is repo push access). Don't paste untrusted HTML.
-- **Images:** place assets under `static/images/posts/<slug>/` and reference them by absolute path, e.g. `/images/posts/<slug>/photo.jpg`, so you never have to compute relative paths on a phone.
+- **Images:** place assets under a site's `static/images/posts/<slug>/` and reference them by absolute path, e.g. `/images/posts/<slug>/photo.jpg`, so you never have to compute relative paths on a phone.
 - **Captions:** an image on its own line becomes a `<figure>`; its title text becomes the caption, e.g. `![alt text](/images/…/photo.jpg "Caption shown under the image")`.
+
+## Site configuration
+
+Each site declares its identity via `defineDownpressConfig` in `src/lib/downpress.config.ts`:
+
+```ts
+import { defineDownpressConfig } from '@downpress/core';
+
+export default defineDownpressConfig({
+  title: 'My Site',
+  description: '…',
+  url: 'https://my.site',        // required; canonical origin, no base path
+  author: 'Me',
+  postsPerPage: 10,
+  topics: [{ label: 'Essays', tag: 'essays' }],
+  newsletter: { url: 'https://buttondown.email/me', blurb: '…', cta: 'Subscribe' }
+});
+```
+
+Missing `title`/`url` fails the build loudly. Content lives in the site's own `posts/`; set `DOWNPRESS_CONTENT_DIR` only for local experiments against an external folder.
 
 ## How it works
 
-`posts/*.md` are read at build time (`import.meta.glob`), parsed with `gray-matter`, validated, and compiled to HTML with a `unified` remark/rehype pipeline (GFM, heading anchors, build-time syntax highlighting). Every route is prerendered by `adapter-static`. See [`CONTEXT_PROMPT.md`](CONTEXT_PROMPT.md) for architecture and [`docs/PHASE_1_BRIEF.md`](docs/PHASE_1_BRIEF.md) for the full plan.
+Core reads a site's `posts/*.md` at build time with Node `fs` (server-only), parses with `gray-matter`, validates, and compiles to HTML with a `unified` remark/rehype pipeline (GFM, heading anchors, build-time syntax highlighting, image captions). Every route is prerendered by `adapter-static`. See [`CONTEXT_PROMPT.md`](CONTEXT_PROMPT.md) for architecture and [`docs/PHASE_1_BRIEF.md`](docs/PHASE_1_BRIEF.md) for the full plan.
 
 ## Deploy
 
-Target host is **Cloudflare Pages** on a custom domain (build command `pnpm build`, output directory `build`). CI wiring is on the roadmap ([`TODO.md`](TODO.md)) and not yet committed.
+Target host is **Cloudflare Pages** on a custom domain, per site. Build command `pnpm --filter <site> build`, output directory `sites/<site>/build`. CI wiring is on the roadmap ([`TODO.md`](TODO.md)) and not yet committed.
 
 ## Status
 
-Early build. The content engine, listings, post/tag pages, and feeds work end to end; deployment automation and the reusable core/site split are upcoming milestones.
+The engine, the Essay theme, the feature set (cards, featured, pagination, prev/next, topics, newsletter, captions), and the core/site split all work end to end; two sites build independently. Deployment automation is the next milestone.

@@ -46,15 +46,16 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [ ] Responsive styling pass on real mobile + desktop
 - [ ] Lighthouse: confirm 95+ performance on a typical post page
 
-## M4 — Core/site split & scaffolding
+## M4 — Core/site split & scaffolding ✅ (2026-07-05, pnpm workspace monorepo)
 
-- [ ] Extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme into a `downpress-core` package/repo _(content-dir + identity env seam already in place)_
-- [ ] Rebuild this site as "Site A" depending on core via a pinned git dependency
-- [ ] Promote **example-site.example** to a real Site repo (its own `/posts/`, `downpress.config`, CI) once the core split lands — currently run locally via `DOWNPRESS_CONTENT_DIR` + a gitignored `.env`
-- [ ] `defineDownpressConfig()` helper consumed by a site's config
-- [ ] Local scaffold script (`node scripts/create-site.js <name>`): new SvelteKit site wired to core, empty `/posts/`, starter `downpress.config`, CI workflow; refuse to overwrite a non-empty dir (edge case 18)
-- [ ] Prove isolation: build Site A and Site B independently in either order, no cross-contamination
-- [ ] Site config validation: fail (or documented fallback) if required config field missing (edge case 19)
+- [x] Extract content loader, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components into `@downpress/core` (`packages/core`, source-linked Svelte library)
+- [x] Rebuild sites as SvelteKit apps depending on core via `workspace:*` (thin per-site routes; routes stay per-project by SvelteKit constraint)
+- [x] Promote **example-site.example** to a real site (`sites/example-site`, own `posts/` + `downpress.config.ts`)
+- [x] `defineDownpressConfig()` helper consumed by each site's `src/lib/downpress.config.ts`
+- [x] Local scaffold script (`node scripts/create-site.mjs <name>`): wires a new site to core, starter `downpress.config`, starter post; refuses a non-empty dir (edge case 18)
+- [x] Prove isolation: `example-site` and `demo` build independently to their own `build/` (verified)
+- [x] Site config validation: `defineDownpressConfig` fails loudly on missing `title`/`url` (edge case 19, unit-tested)
+- [ ] _(deferred to when a second repo is actually needed)_ Split core into its own repo + pin sites via git URL+SHA (D4); add a CI workflow template to the scaffold
 
 ## M5 — Polish (optional)
 

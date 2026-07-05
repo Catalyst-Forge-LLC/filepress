@@ -1,0 +1,50 @@
+{
+	"name": "@downpress/core",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Reusable engine for Downpress sites: content loader, Markdown pipeline, feed/sitemap builders, config helper, Essay theme, and shared Svelte components.",
+	"svelte": "./src/lib/index.ts",
+	"types": "./src/lib/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/lib/index.ts",
+			"svelte": "./src/lib/index.ts",
+			"default": "./src/lib/index.ts"
+		},
+		"./server": {
+			"types": "./src/lib/server.ts",
+			"default": "./src/lib/server.ts"
+		},
+		"./theme": {
+			"default": "./src/lib/theme.ts"
+		},
+		"./assets/*": "./src/lib/assets/*"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"@fontsource-variable/inter": "^5.2.8",
+		"@fontsource-variable/newsreader": "^5.2.10",
+		"gray-matter": "^4.0.3",
+		"rehype-autolink-headings": "^7.1.0",
+		"rehype-highlight": "^7.0.2",
+		"rehype-raw": "^7.0.0",
+		"rehype-slug": "^6.0.0",
+		"rehype-stringify": "^10.0.1",
+		"remark-gfm": "^4.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.1.2",
+		"unified": "^11.0.5"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^26.1.0",
+		"svelte": "^5.56.1",
+		"vitest": "^4.1.9"
+	}
+}

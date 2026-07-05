@@ -4,7 +4,7 @@
     "created": "2026-07-02",
     "description": "Git-native Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited directly in a GitHub repo (e.g. via the GitHub mobile app), compiled to a static prerendered site with auto-deploy on push. Structured as a reusable core engine plus independently deployable, scaffoldable sites."
   },
-  "currentPhase": "2-scaffolding",
+  "currentPhase": "4-feature-iteration",
   "phases": {
     "1-architecture": {
       "status": "completed",
@@ -64,12 +64,16 @@
       "notes": []
     },
     "4-feature-iteration": {
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-07-05",
       "completedAt": null,
       "exitCriteriaMet": [],
       "exitCriteriaRemaining": ["Core value proposition delivered", "Hero flow works with real data including edge cases", "Features tested beyond happy path"],
-      "notes": [],
+      "notes": [
+        "2026-07-05: User confirmed advancing from 2-scaffolding straight to 4-feature-iteration (Phase 3 stabilization was effectively covered during early hardening: env resolution, server-only loaders, real-data render). Phase 2 spine + feature batch (D11/D12) are done and committed.",
+        "Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@downpress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
+        "2026-07-05: M4 core/site split DONE. @downpress/core extracted with client/server barrels + DI (createContent, defineDownpressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring."
+      ],
       "iterations": []
     },
     "5-refactoring": {
@@ -266,6 +270,10 @@
     {
       "date": "2026-07-05",
       "summary": "Stage 1 of the 'A' track: feature batch + Essay restyle before the M4 core/site split (chose to add features to a stable engine first, then extract). Distilled UX from user-provided blogs (Ben Evans, Stratechery, Traveling Mitch, Copyblogger). Added (D11/D12): quiet Essay theme with self-hosted Newsreader+Inter via @fontsource-variable, three-tier accent + warm neutrals; optional author byline (parse.ts + tests, now 26 tests); excerpt post cards + featured hero; index pagination via /page/[n] (+ handleUnseenRoutes gotcha fix); prev/next post links; config-driven Topics/Explore view; config-driven external newsletter CTA; rehype-figure (image-only paragraphs -> figure+figcaption, with its own tests). Extended SiteConfig (tagline, postsPerPage, topics, newsletter) + .env.example; sitemap now lists /topics and paginated pages; README documents author + captions. pnpm check clean, 26 tests pass, adapter-static build succeeds; verified visually by previewing the example-site.example build. Next: Stage 2 = the M4 core/site split + scaffold script, then promote example-site.example to a real Site repo. currentPhase still 2-scaffolding — this is Phase-4-shaped work; awaiting user OK to flip currentPhase to 4-feature-iteration."
+    },
+    {
+      "date": "2026-07-05",
+      "summary": "Stage 2 (M4 core/site split) DONE, as a pnpm workspace monorepo (user chose monorepo + confirmed flipping currentPhase to 4-feature-iteration). Extracted the whole engine into @downpress/core (packages/core, source-linked Svelte lib): content loader, remark/rehype pipeline (incl. rehype-figure), feed/sitemap/robots builders, format, Essay theme (styles/theme.css + font imports via @downpress/core/theme), and prop-driven components (PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter). Redesigned for DI to remove SvelteKit-only deps ($env/$lib): createContent({contentDir}) factory (server-only), defineDownpressConfig() that validates title/url + fills defaults, and a strict client-barrel (index.ts) vs server-barrel (server.ts) split. Rebuilt the app as sites/example-site (real site; example-post.md; own downpress.config.ts + content.server.ts + thin routes). Wrote scripts/create-site.mjs (templates from example-site, refuses non-empty dir, edge case 18) and used it to generate sites/demo, then restored the original demo posts (drafts + future-dated) into it. Deleted the old root SvelteKit app; root package.json is now a workspace manifest with pnpm -r scripts. Verification: @downpress/core tests = 31 pass (added config.test.ts covering defineDownpressConfig validation, edge case 19); pnpm -r check = 0 errors; example-site and demo each build cleanly and independently to their own build/ (isolation proven). Deferred (until a second repo is actually needed, D4): splitting core into its own git repo with URL+SHA pins + a CI workflow template in the scaffold. Next milestone: M3 (Cloudflare Pages deploy wiring, per site)."
     }
   ]
 }

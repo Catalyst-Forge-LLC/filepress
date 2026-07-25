@@ -1,7 +1,8 @@
 # Downpress — Site packaging options
 
-**Status:** Option **C implemented** (2026-07-25); Option **D** next (needs distribution decisions).  
-**Context:** After M4, sites still duplicated SvelteKit routes. Goal: **link Downpress, configure the bare minimum, deploy static build output.**
+**Status:** Options **C** and **D** implemented (2026-07-25).  
+Local sibling sites: `link:../downpress`. CI/CF: git pin under Catalyst-Forge-LLC (repo push still pending).  
+**Context:** Goal: **link Downpress, configure the bare minimum, deploy static build output.**
 
 Related: `GENESIS.md` §2.6 (core vs site), D3/D4/D5/D10 in `.forgekit/workflow_tracking.json`, current layout in `CONTEXT_PROMPT.md`.
 

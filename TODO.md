@@ -40,7 +40,8 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 ## Architecture — site packaging
 
 - [x] **Option C** ([`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md)): `packages/app` owns all routes; `sites/*` are content-only; `scripts/downpress.mjs --site` builds to `sites/<name>/build/`
-- [ ] **Option D:** installable `downpress` CLI for external content-only repos (distribution + pin strategy — needs user input; see packaging doc §8)
+- [x] **Option D:** installable `downpress` bin; sibling sites use `link:../downpress`; scaffold `--external`; docs for git pin `github:Catalyst-Forge-LLC/downpress#…` ([`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md))
+- [ ] Push engine to `Catalyst-Forge-LLC/downpress` and tag when ready for CF git-dep installs
 
 ## M3 — Deployed and automated
 

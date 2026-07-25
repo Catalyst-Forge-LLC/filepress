@@ -1,16 +1,20 @@
 #!/usr/bin/env node
-// Scaffold a content-only Downpress site into sites/<name>.
+// Scaffold a content-only Downpress site.
 //
-// Usage:
-//   node scripts/create-site.mjs <name> [--title "My Site"] [--url https://my.site]
+// Monorepo (default):
+//   node scripts/create-site.mjs my-site --title "My Site" --url https://my.site
+//   → sites/my-site/
 //
-// Sites are NOT SvelteKit apps — they only contain downpress.config.ts, posts/,
-// optional static/, and a README. The shared app in packages/app is run via
-// `pnpm downpress <dev|build> --site <name>`. Refuses a non-empty directory
-// (edge case 18).
+// External sibling repo:
+//   node scripts/create-site.mjs example-site --external ../example-site \
+//     --title "…" --url https://…
+//   → writes package.json with "downpress": "file:../downpress"
+//
+// Refuses a non-empty target (edge case 18), unless --force is passed (still
+// refuses to overwrite downpress.config.ts / package.json if present).
 
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -22,10 +26,11 @@ function fail(msg) {
 }
 
 function parseArgs(argv) {
-	const args = { _: [] };
+	const args = { _: [], force: false };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
-		if (a === '--title' || a === '--url') args[a.slice(2)] = argv[++i];
+		if (a === '--title' || a === '--url' || a === '--external') args[a.slice(2)] = argv[++i];
+		else if (a === '--force') args.force = true;
 		else args._.push(a);
 	}
 	return args;
@@ -34,14 +39,30 @@ function parseArgs(argv) {
 const args = parseArgs(process.argv.slice(2));
 const name = args._[0];
 
-if (!name) fail('missing site name. Usage: node scripts/create-site.mjs <name> [--title ..] [--url ..]');
+if (!name) {
+	fail(
+		'missing site name.\n' +
+			'  Usage: node scripts/create-site.mjs <name> [--title ..] [--url ..] [--external <path>]'
+	);
+}
 if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
 	fail(`invalid site name "${name}". Use lowercase letters, numbers, and hyphens.`);
 }
 
-const target = join(repoRoot, 'sites', name);
-if (existsSync(target) && readdirSync(target).length > 0) {
-	fail(`refusing to overwrite non-empty directory: sites/${name}`);
+const external = Boolean(args.external);
+const target = external ? resolve(repoRoot, args.external) : join(repoRoot, 'sites', name);
+
+if (existsSync(target)) {
+	const entries = readdirSync(target).filter((e) => e !== '.git' && e !== 'artifacts');
+	if (entries.length > 0 && !args.force) {
+		fail(`refusing to overwrite non-empty directory: ${target} (pass --force to merge carefully)`);
+	}
+	if (existsSync(join(target, 'downpress.config.ts'))) {
+		fail(`downpress.config.ts already exists in ${target}`);
+	}
+	if (external && existsSync(join(target, 'package.json'))) {
+		fail(`package.json already exists in ${target}`);
+	}
 }
 
 const title = args.title || name;
@@ -50,9 +71,13 @@ const url = args.url || `https://${name}.example.com`;
 mkdirSync(join(target, 'posts'), { recursive: true });
 mkdirSync(join(target, 'static'), { recursive: true });
 
+const configImport = external
+	? `import { defineDownpressConfig } from 'downpress';`
+	: `import { defineDownpressConfig } from 'downpress';`;
+
 writeFileSync(
 	join(target, 'downpress.config.ts'),
-	`import { defineDownpressConfig } from '../../packages/core/src/lib/index.ts';
+	`${configImport}
 
 export default defineDownpressConfig({
 	title: ${JSON.stringify(title)},
@@ -65,42 +90,11 @@ export default defineDownpressConfig({
 );
 
 writeFileSync(
-	join(target, 'README.md'),
-	`# ${title}
-
-Content-only Downpress site. Edit identity in [\`downpress.config.ts\`](downpress.config.ts)
-and posts in [\`posts/\`](posts/). The shared engine + routes live in
-[\`packages/app\`](../../packages/app) and [\`packages/core\`](../../packages/core).
-
-\`\`\`bash
-pnpm downpress dev --site ${name}
-pnpm downpress build --site ${name}   # → build/
-\`\`\`
-`
-);
-
-writeFileSync(
 	join(target, '.gitignore'),
 	`/build
+/node_modules
 .DS_Store
 Thumbs.db
-`
-);
-
-writeFileSync(
-	join(target, 'tsconfig.json'),
-	`{
-	"compilerOptions": {
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"target": "esnext",
-		"strict": true,
-		"skipLibCheck": true,
-		"noEmit": true,
-		"allowImportingTsExtensions": true
-	},
-	"include": ["downpress.config.ts"]
-}
 `
 );
 
@@ -118,6 +112,119 @@ This is your first post. Edit or replace \`posts/hello-world.md\`, then push.
 `
 );
 
-console.log(`Created sites/${name} (content-only)`);
-console.log(`Next:`);
-console.log(`  pnpm downpress dev --site ${name}`);
+if (external) {
+	const relToEngine = relative(target, repoRoot).replace(/\\/g, '/') || '..';
+	writeFileSync(
+		join(target, 'package.json'),
+		JSON.stringify(
+			{
+				name,
+				private: true,
+				version: '0.0.1',
+				type: 'module',
+				scripts: {
+					dev: 'downpress dev',
+					build: 'downpress build',
+					preview: 'downpress preview',
+					check: 'downpress check'
+				},
+				devDependencies: {
+					// link: uses the live engine tree (with its workspace node_modules).
+					// For Cloudflare/CI after the engine is on GitHub, switch to:
+					// "downpress": "github:Catalyst-Forge-LLC/downpress#<tag-or-sha>"
+					downpress: `link:${relToEngine}`
+				}
+			},
+			null,
+			'\t'
+		) + '\n'
+	);
+
+	writeFileSync(
+		join(target, 'tsconfig.json'),
+		`{
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "esnext",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["downpress.config.ts"]
+}
+`
+	);
+
+	writeFileSync(
+		join(target, 'README.md'),
+		`# ${title}
+
+Content-only Downpress site. Local engine via \`link:${relToEngine}\`.
+
+\`\`\`bash
+# once in the engine repo
+cd ${relToEngine} && pnpm install
+
+# in this site
+pnpm install
+pnpm dev
+pnpm build    # → build/
+\`\`\`
+
+## Deploy (Cloudflare Pages)
+
+\`link:\` only works on your machine. After the engine is on GitHub under
+Catalyst-Forge-LLC, switch the dependency to a **git pin**:
+
+\`\`\`json
+"downpress": "github:Catalyst-Forge-LLC/downpress#v0.1.0"
+\`\`\`
+
+| Setting | Value |
+| --- | --- |
+| Build command | \`pnpm install && pnpm build\` |
+| Output directory | \`build\` |
+`
+	);
+
+	console.log(`Created external site at ${target}`);
+	console.log(`Next:`);
+	console.log(`  cd ${relToEngine} && pnpm install   # if not already`);
+	console.log(`  cd ${target} && pnpm install && pnpm dev`);
+} else {
+	writeFileSync(
+		join(target, 'tsconfig.json'),
+		`{
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "esnext",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["downpress.config.ts"]
+}
+`
+	);
+
+	writeFileSync(
+		join(target, 'README.md'),
+		`# ${title}
+
+Content-only Downpress site (monorepo). Edit [\`downpress.config.ts\`](downpress.config.ts)
+and [\`posts/\`](posts/).
+
+\`\`\`bash
+pnpm downpress dev --site ${name}
+pnpm downpress build --site ${name}   # → build/
+\`\`\`
+`
+	);
+
+	console.log(`Created sites/${name} (content-only)`);
+	console.log(`Next: pnpm downpress dev --site ${name}`);
+}

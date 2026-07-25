@@ -1,9 +1,34 @@
 {
-	"name": "downpress-workspace",
+	"name": "downpress",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
-	"description": "Downpress monorepo: @downpress/core engine, @downpress/app (routes), and content-only sites under sites/.",
+	"description": "Git-native Markdown blog engine. Link this package from a content-only site (config + posts), then run `downpress build`.",
+	"bin": {
+		"downpress": "./scripts/downpress.mjs"
+	},
+	"exports": {
+		".": {
+			"types": "./packages/core/src/lib/index.ts",
+			"svelte": "./packages/core/src/lib/index.ts",
+			"default": "./packages/core/src/lib/index.ts"
+		},
+		"./server": {
+			"types": "./packages/core/src/lib/server.ts",
+			"default": "./packages/core/src/lib/server.ts"
+		},
+		"./theme": {
+			"default": "./packages/core/src/lib/theme.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"scripts/downpress.mjs",
+		"packages/core",
+		"packages/app",
+		"pnpm-workspace.yaml",
+		"README.md"
+	],
 	"scripts": {
 		"downpress": "node scripts/downpress.mjs",
 		"test": "pnpm --filter @downpress/core test",
@@ -14,5 +39,13 @@
 		"dev:nth": "pnpm downpress dev --site example-site",
 		"dev:demo": "pnpm downpress dev --site demo",
 		"create-site": "node scripts/create-site.mjs"
-	}
+	},
+	"dependencies": {
+		"@downpress/app": "workspace:*",
+		"@downpress/core": "workspace:*"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.30.1"
 }

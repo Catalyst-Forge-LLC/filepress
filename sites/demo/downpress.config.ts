@@ -1,4 +1,4 @@
-import { defineDownpressConfig } from '../../packages/core/src/lib/index.ts';
+import { defineDownpressConfig } from 'downpress';
 
 export default defineDownpressConfig({
 	title: 'Downpress',

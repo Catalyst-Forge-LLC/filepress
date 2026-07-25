@@ -6,47 +6,51 @@ A git-native Markdown blog engine. Every post is a plain `.md` file with YAML fr
 
 Blogging platforms bring accounts, databases, and plugin ecosystems to something that should be a folder of text files. Downpress keeps the whole thing as files in Git, and moves all the strictness into the build so authoring from a phone text box stays trivial.
 
-## Monorepo layout
+## Layout
 
-Downpress is a pnpm workspace: one engine, one SvelteKit app, and content-only sites.
+This package is both the **engine repo** and an installable CLI named `downpress`
+(bin). Sites are content-only folders that link it.
 
 ```
-packages/core            @downpress/core — content loader, Markdown pipeline,
-                         feeds, config helper, Essay theme, shared components
-packages/app             @downpress/app — the only SvelteKit project (all routes)
-sites/<name>/            content-only: downpress.config.ts + posts/ + static/
-scripts/downpress.mjs    run the app against a site (`dev` / `build` / …)
-scripts/create-site.mjs  scaffolds a new content-only site
+packages/core            engine library
+packages/app             the only SvelteKit project (all routes)
+sites/<name>/            optional in-repo content sites (demo, etc.)
+scripts/downpress.mjs    CLI entry (also exposed as the `downpress` bin)
 ```
 
-A site is **not** a SvelteKit app. Identity lives in `downpress.config.ts` next to `posts/`. Routes live once in `packages/app` and are selected with `--site`.
+A site is **not** a SvelteKit app — only `downpress.config.ts` + `posts/` + `static/`.
 
 ## Requirements
 
 - Node.js 20+ (developed on 24)
 - pnpm
 
-## Getting started
+## Getting started (monorepo)
 
 ```bash
 pnpm install
 
 pnpm downpress dev --site example-site
 pnpm downpress build --site example-site   # → sites/example-site/build/
-pnpm downpress check --site demo
-
-pnpm test                 # @downpress/core unit tests
-pnpm build                # build example-site + demo
+pnpm test
 ```
 
-### Create a new site
+### Sibling site (recommended for real properties)
 
 ```bash
-pnpm create-site my-site --title "My Site" --url https://my.site
-pnpm downpress dev --site my-site
+# from this repo
+pnpm create-site mystite --external ../my-site --title "My Site" --url https://my.site
+
+cd ../my-site
+pnpm install
+pnpm dev
+pnpm build    # → ./build/
 ```
 
-The scaffold writes config, a starter post, and `static/`. It refuses a non-empty directory.
+Local dependency: `"downpress": "link:../downpress"`.  
+CI/Cloudflare: switch to `github:Catalyst-Forge-LLC/downpress#<tag-or-sha>`.
+
+See [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 
 ## Writing a post
 
@@ -114,16 +118,18 @@ Core reads a site's `posts/*.md` at build time with Node `fs` (server-only), par
 
 ## Deploy
 
-Target host is **Cloudflare Pages** on a custom domain, per site. Example for example-site:
+Prefer a **sibling site repo** (Option D). After this engine is on GitHub:
 
 | Setting | Value |
 | --- | --- |
-| Root directory | `/` (repo root) |
-| Build command | `pnpm install && pnpm downpress build --site example-site` |
-| Output directory | `sites/example-site/build` |
+| Site dependency | `github:Catalyst-Forge-LLC/downpress#<tag-or-sha>` |
+| Build command | `pnpm install && pnpm build` |
+| Output directory | `build` |
 
-CI wiring is still on the roadmap ([`TODO.md`](TODO.md)). Packaging for external content-only repos (Option D) is sketched in [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md).
+In-monorepo deploy still works: `pnpm downpress build --site <name>` → `sites/<name>/build`.
 
 ## Status
 
-Engine + Essay theme + feature batch + **content-only sites with a single shared app (Option C)** work end to end. Two sites build to their own `build/` folders. Next: Option D CLI packaging, then M3 Cloudflare deploy automation.
+Options **C** and **D** are in place: one shared app, content-only sites, installable
+`downpress` CLI via `link:../downpress` (proven with `example-site`). Next: push
+engine to Catalyst-Forge-LLC, then M3 Cloudflare wiring on the site repo.

@@ -28,10 +28,18 @@ if (!existsSync(siteConfig)) {
 	throw new Error(`No downpress.config.ts at site root: ${siteConfig}`);
 }
 
+const coreEntry = join(appRoot, '../core/src/lib/index.ts');
+const coreServer = join(appRoot, '../core/src/lib/server.ts');
+const coreTheme = join(appRoot, '../core/src/lib/theme.ts');
+
 export default defineConfig({
 	plugins: [
 		sveltekit({
 			alias: {
+				// Site configs (monorepo or linked) import from `downpress`.
+				downpress: coreEntry,
+				'downpress/server': coreServer,
+				'downpress/theme': coreTheme,
 				'$site-config': siteConfig
 			},
 

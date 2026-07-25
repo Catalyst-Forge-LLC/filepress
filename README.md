@@ -48,7 +48,8 @@ pnpm build    # → ./build/
 ```
 
 Local dependency: `"downpress": "link:../downpress"`.  
-CI/Cloudflare: switch to `github:Catalyst-Forge-LLC/downpress#<tag-or-sha>`.
+CI/Cloudflare: switch to `github:Catalyst-Forge-LLC/downpress#<tag-or-sha>`  
+(engine on the Catalyst Forge org; site repos can stay on personal GitHub).
 
 See [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 

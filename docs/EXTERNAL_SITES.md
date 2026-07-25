@@ -3,7 +3,9 @@
 Option D: a site is a separate folder/repo that **links** the engine and only
 keeps config + content. Deploy still serves the static `build/` folder.
 
-Org target: [Catalyst-Forge-LLC](https://github.com/Catalyst-Forge-LLC).
+**Engine** lives under [Catalyst-Forge-LLC](https://github.com/Catalyst-Forge-LLC)
+(`Catalyst-Forge-LLC/downpress`). **Sites** can live on a personal GitHub account
+(or any other org) — they only need a dependency pin on the engine.
 
 ## Local development (`link:`)
 
@@ -81,11 +83,14 @@ No Downpress env vars required if `downpress.config.ts` + `posts/` are in the si
 
 ### First-time GitHub checklist
 
-1. Create `Catalyst-Forge-LLC/downpress` and push this repo.
+1. Push this engine to `Catalyst-Forge-LLC/downpress` (repo already created).
 2. Tag a release when the CLI is stable (`v0.1.0`).
-3. Create the site repo (e.g. `Catalyst-Forge-LLC/example-site`) from the content-only tree.
-4. Switch the site’s dependency from `link:../downpress` to the git pin.
+3. Create each site repo on **personal GitHub** (or elsewhere) from the content-only tree — e.g. `you/example-site`.
+4. Switch the site’s dependency from `link:../downpress` to the git pin on the engine.
 5. Wire CF Pages to the **site** repo with the table above.
+
+If the engine repo is **private**, the site’s CF/GitHub Actions install needs permission
+to read `Catalyst-Forge-LLC/downpress` (deploy key, machine user, or make the engine public).
 
 ## Monorepo sites (still supported)
 

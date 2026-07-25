@@ -3,13 +3,16 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-	"description": "Downpress monorepo: the @downpress/core engine plus independently buildable sites.",
+	"description": "Downpress monorepo: @downpress/core engine, @downpress/app (routes), and content-only sites under sites/.",
 	"scripts": {
+		"downpress": "node scripts/downpress.mjs",
 		"test": "pnpm --filter @downpress/core test",
-		"check": "pnpm -r --if-present check",
-		"build": "pnpm -r --if-present build",
-		"build:nth": "pnpm --filter example-site build",
-		"dev:nth": "pnpm --filter example-site dev",
+		"check": "pnpm downpress check --site demo",
+		"build": "pnpm downpress build --site example-site && pnpm downpress build --site demo",
+		"build:nth": "pnpm downpress build --site example-site",
+		"build:demo": "pnpm downpress build --site demo",
+		"dev:nth": "pnpm downpress dev --site example-site",
+		"dev:demo": "pnpm downpress dev --site demo",
 		"create-site": "node scripts/create-site.mjs"
 	}
 }

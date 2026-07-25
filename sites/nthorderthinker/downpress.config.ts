@@ -1,4 +1,4 @@
-import { defineDownpressConfig } from '@downpress/core';
+import { defineDownpressConfig } from '../../packages/core/src/lib/index.ts';
 
 export default defineDownpressConfig({
 	title: 'The Nth Order Thinker',

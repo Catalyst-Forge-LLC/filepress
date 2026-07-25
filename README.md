@@ -8,18 +8,18 @@ Blogging platforms bring accounts, databases, and plugin ecosystems to something
 
 ## Monorepo layout
 
-Downpress is a pnpm workspace: one reusable engine and any number of independently buildable sites.
+Downpress is a pnpm workspace: one engine, one SvelteKit app, and content-only sites.
 
 ```
-packages/core          @downpress/core — the engine (content loader, Markdown
-                       pipeline, feed/sitemap builders, config helper, Essay
-                       theme, shared Svelte components)
-sites/example-site  a real site (example-site.example) that depends on core
-sites/demo             the engine's own showcase site
-scripts/create-site.mjs  scaffolds a new site from the shared boilerplate
+packages/core            @downpress/core — content loader, Markdown pipeline,
+                         feeds, config helper, Essay theme, shared components
+packages/app             @downpress/app — the only SvelteKit project (all routes)
+sites/<name>/            content-only: downpress.config.ts + posts/ + static/
+scripts/downpress.mjs    run the app against a site (`dev` / `build` / …)
+scripts/create-site.mjs  scaffolds a new content-only site
 ```
 
-Each site is its own SvelteKit app (the router is per-project), but its route files are thin — they call the core content API and render core components. A site's whole identity lives in one file at the site root, `downpress.config.ts` (alongside `posts/`).
+A site is **not** a SvelteKit app. Identity lives in `downpress.config.ts` next to `posts/`. Routes live once in `packages/app` and are selected with `--site`.
 
 ## Requirements
 
@@ -29,25 +29,24 @@ Each site is its own SvelteKit app (the router is per-project), but its route fi
 ## Getting started
 
 ```bash
-pnpm install                       # link the workspace
+pnpm install
 
-pnpm --filter example-site dev  # run a site locally
-pnpm --filter example-site build
-pnpm --filter <site> check
+pnpm downpress dev --site example-site
+pnpm downpress build --site example-site   # → sites/example-site/build/
+pnpm downpress check --site demo
 
-pnpm test                          # engine unit tests (@downpress/core)
-pnpm -r --if-present check         # type-check every site
+pnpm test                 # @downpress/core unit tests
+pnpm build                # build example-site + demo
 ```
 
 ### Create a new site
 
 ```bash
-node scripts/create-site.mjs my-site --title "My Site" --url https://my.site
-pnpm install
-pnpm --filter my-site dev
+pnpm create-site my-site --title "My Site" --url https://my.site
+pnpm downpress dev --site my-site
 ```
 
-The scaffold copies the shared routes/build config, generates a `downpress.config.ts`, and drops in a starter post. It refuses to write into a non-empty directory.
+The scaffold writes config, a starter post, and `static/`. It refuses a non-empty directory.
 
 ## Writing a post
 
@@ -115,8 +114,16 @@ Core reads a site's `posts/*.md` at build time with Node `fs` (server-only), par
 
 ## Deploy
 
-Target host is **Cloudflare Pages** on a custom domain, per site. Build command `pnpm --filter <site> build`, output directory `sites/<site>/build`. CI wiring is on the roadmap ([`TODO.md`](TODO.md)) and not yet committed.
+Target host is **Cloudflare Pages** on a custom domain, per site. Example for example-site:
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `/` (repo root) |
+| Build command | `pnpm install && pnpm downpress build --site example-site` |
+| Output directory | `sites/example-site/build` |
+
+CI wiring is still on the roadmap ([`TODO.md`](TODO.md)). Packaging for external content-only repos (Option D) is sketched in [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md).
 
 ## Status
 
-The engine, the Essay theme, the feature set (cards, featured, pagination, prev/next, topics, newsletter, captions), and the core/site split all work end to end; two sites build independently. Deployment automation is the next milestone.
+Engine + Essay theme + feature batch + **content-only sites with a single shared app (Option C)** work end to end. Two sites build to their own `build/` folders. Next: Option D CLI packaging, then M3 Cloudflare deploy automation.

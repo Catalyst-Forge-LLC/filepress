@@ -37,10 +37,10 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Image-only paragraphs → `<figure>` + `<figcaption>` (`rehype-figure` + tests)
 - [x] `SiteConfig` extended (tagline, postsPerPage, topics, newsletter) + `.env.example`; sitemap covers `/topics` + paginated pages
 
-## Architecture — site packaging (decision pending)
+## Architecture — site packaging
 
-- [ ] Decide packaging approach in [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md) (recommend **C** content sites + one `packages/app`, then **D** CLI for external repos)
-- [ ] If C/D: migrate routes into `packages/app`; shrink `sites/*` to config + posts + static; update scaffold + deploy docs
+- [x] **Option C** ([`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md)): `packages/app` owns all routes; `sites/*` are content-only; `scripts/downpress.mjs --site` builds to `sites/<name>/build/`
+- [ ] **Option D:** installable `downpress` CLI for external content-only repos (distribution + pin strategy — needs user input; see packaging doc §8)
 
 ## M3 — Deployed and automated
 

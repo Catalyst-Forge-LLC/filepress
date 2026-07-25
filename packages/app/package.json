@@ -1,8 +1,9 @@
 {
-	"name": "example-site",
+	"name": "@downpress/app",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
+	"description": "The single SvelteKit app for Downpress. Sites under sites/* supply config + posts + static; this package owns all routes.",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",

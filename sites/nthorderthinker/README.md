@@ -1,23 +1,16 @@
 # example-site.example
 
-A Downpress site. Content is the Markdown in [`posts/`](posts/); identity lives
-in [`downpress.config.ts`](downpress.config.ts). All the engine
-logic comes from [`@downpress/core`](../../packages/core).
-
-## Develop
+Content-only Downpress site. Identity: [`downpress.config.ts`](downpress.config.ts).
+Posts: [`posts/`](posts/). Shared routes/engine: [`packages/app`](../../packages/app)
++ [`packages/core`](../../packages/core).
 
 ```bash
-pnpm --filter example-site dev
-pnpm --filter example-site build     # -> build/ (static, adapter-static)
-pnpm --filter example-site check
+pnpm downpress dev --site example-site
+pnpm downpress build --site example-site   # → build/
 ```
 
-## Writing
+## Deploy (Cloudflare Pages)
 
-Add a Markdown file with frontmatter to `posts/`. See the root
-[README](../../README.md) for the frontmatter fields and conventions.
-
-## Deploy
-
-Cloudflare Pages, custom domain at root. Build command `pnpm --filter
-example-site build`, output directory `sites/example-site/build`.
+- Build command: `pnpm install && pnpm downpress build --site example-site`
+- Output directory: `sites/example-site/build`
+- Root directory: repo root (monorepo)

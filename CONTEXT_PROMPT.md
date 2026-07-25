@@ -8,7 +8,7 @@ _Paste into a new chat to resume. Single most important document for session con
 
 Downpress is a git-native Markdown blog engine. Every post is a plain `.md` file with YAML frontmatter, committed to a GitHub repo and edited from anywhere (GitHub mobile app, web editor, any text editor) — **no admin UI, no database, no server runtime**. A SvelteKit `adapter-static` build compiles the Markdown into a fast, fully prerendered site that auto-deploys on push.
 
-Structurally it is a **pnpm workspace monorepo**: a reusable engine (`@downpress/core`) plus independently buildable **sites** under `sites/*`. Each site is its own SvelteKit app with thin routes that call the core content API and render core components; a site's identity is one `downpress.config.ts` (M4 done, D3/D4).
+Structurally it is a **pnpm workspace monorepo**: `@downpress/core` (engine library), `@downpress/app` (the only SvelteKit app — all routes), and **content-only sites** under `sites/*` (`downpress.config.ts` + `posts/` + `static/`). Run via `pnpm downpress <dev|build> --site <name>` (Option C in `docs/SITE_PACKAGING_OPTIONS.md`). Option D (external CLI package) is next.
 
 **Hero flow:** author/edit a `.md` file under a site's `posts/` → push to `main` → CI builds and deploys → live site reflects the change with no manual step.
 
@@ -28,30 +28,21 @@ Structurally it is a **pnpm workspace monorepo**: a reusable engine (`@downpress
 
 ```
 downpress/
-  pnpm-workspace.yaml            # packages/* + sites/*
-  package.json                   # workspace scripts (test / check / build / create-site)
-  scripts/create-site.mjs        # scaffold a new site (refuses non-empty dir; edge case 18)
-  packages/core/                 # @downpress/core — source-linked Svelte library
-    package.json                 # "svelte" export -> src/lib/index.ts; exports ./server, ./theme
-    src/lib/
-      index.ts                   # CLIENT-SAFE barrel: components, defineDownpressConfig, formatDate, types
-      server.ts                  # SERVER-ONLY barrel: createContent, renderMarkdown, feed builders, parse
-      theme.ts                   # font imports + theme.css (import '@downpress/core/theme')
-      config.ts                  # SiteConfig types + defineDownpressConfig (validates title/url) + absoluteUrl
-      format.ts                  # UTC-stable date formatting
-      styles/theme.css           # the Essay theme
-      content/
-        types.ts, parse.ts (+test), rehype-figure.ts (+test)   # PURE, unit-tested
-        markdown.ts              # unified remark/rehype pipeline (+ rehype-figure)
-        content.ts               # createContent({contentDir}) factory — SERVER-ONLY (fs)
-        feeds.ts                 # buildRssXml / buildSitemapXml / buildRobotsTxt
-      components/                # PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter (prop-driven)
-  sites/<name>/                  # a SvelteKit app (example-site, demo, …)
-    downpress.config.ts          # site identity (defineDownpressConfig)
-    src/lib/content.server.ts    # createContent({ contentDir: env||'posts' })
-    src/routes/…                 # THIN: import config + content, render core components
-    posts/                       # this site's own Markdown
-    vite.config.ts               # adapter-static + prerender + handleUnseenRoutes(/page/[n])
+  pnpm-workspace.yaml            # packages/* only (sites are not packages)
+  package.json                   # downpress / test / build / create-site scripts
+  scripts/downpress.mjs          # CLI: sets DOWNPRESS_SITE_ROOT, runs @downpress/app
+  scripts/create-site.mjs        # scaffold content-only site (refuses non-empty dir)
+  packages/core/                 # @downpress/core — engine library (unchanged role)
+  packages/app/                  # @downpress/app — THE SvelteKit project (all routes)
+    vite.config.ts               # $site-config alias, assets + adapter outDir from site root
+    src/lib/site.server.ts       # getSiteRoot / getContentDir helpers
+    src/lib/content.server.ts    # createContent({ contentDir: getContentDir() })
+    src/routes/…                 # index, posts, tags, topics, feeds, pagination
+  sites/<name>/                  # CONTENT ONLY (example-site, demo, …)
+    downpress.config.ts          # identity (imports defineDownpressConfig from packages/core)
+    posts/                       # Markdown
+    static/                      # favicon, images
+    build/                       # gitignored output of `pnpm downpress build --site <name>`
 ```
 
 ## Data Model
@@ -117,13 +108,13 @@ _(WHY preserved; full rationale + alternatives in `.forgekit/workflow_tracking.j
 - RSS feed, sitemap (covers `/topics` + paginated pages), robots.txt (all prerendered).
 - **"Essay" theme** (D11) in `packages/core/src/lib/styles/theme.css`, loaded via `@downpress/core/theme` (fonts + CSS): self-hosted Newsreader + Inter, three-tier accent (`--accent` / `--rule` / `--accent-wash`), warm neutrals, light/dark. CSS custom properties for cheap per-site variants.
 - **Feature batch (D12):** excerpt post cards + featured hero + index pagination (`/page/[n]`, guarded by `handleUnseenRoutes`); optional per-post `author` byline; prev/next links; config-driven Topics/Explore (`site.topics`); config-driven external newsletter CTA (`site.newsletter`); image-only paragraphs → `<figure>`+`<figcaption>` (`rehype-figure`). Components are prop-driven in `packages/core/src/lib/components`.
-- **M4 core/site split (DONE):** pnpm workspace monorepo. `@downpress/core` (source-linked lib, client/`server` barrels) + `sites/*` SvelteKit apps depending on it via `workspace:*`. `defineDownpressConfig` validates each site's identity (unit-tested). `scripts/create-site.mjs` scaffolds a site (refuses non-empty dir). **example-site** (real, 1 post) and **demo** (showcase) build independently — isolation proven.
+- **M4 + Option C (DONE):** `@downpress/core` engine + `@downpress/app` (single SvelteKit app for all routes) + content-only `sites/*`. `pnpm downpress <cmd> --site <name>` injects config/posts/static and writes `sites/<name>/build/`. Scaffold emits content-only sites. **example-site** and **demo** build independently.
 - 31 Vitest unit tests over `parse.ts`, `rehype-figure.ts`, `config.ts` (`pnpm test`). Both sites pass `check` and `build`.
 
 ### Not Started
 
-- **Site packaging decision:** [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md) — current per-site SvelteKit apps duplicate identical routes; recommended path is content-only sites + one `packages/app` (then a `downpress` CLI). Awaiting user choice before migrating.
-- **M3:** Cloudflare Pages CI deploy wiring (per site); live-domain verification (output paths depend on packaging choice).
+- **Option D:** expose `downpress` as an installable CLI/package for external content-only site repos (see `docs/SITE_PACKAGING_OPTIONS.md`). Needs user decisions on distribution (git dep vs npm) and timing.
+- **M3:** Cloudflare Pages CI deploy wiring (per site); build `pnpm downpress build --site <name>`, output `sites/<name>/build`.
 - **M5:** 404 polish, reading-time, client-side search, per-site theme selection (tokens ready), core version-bump tooling.
 - Split core into its own repo + git-URL+SHA pins + CI workflow template (deferred; see D4).
 - A couple of integration tests over the fs loader; `TECHNICAL_REFERENCE.md` for the core API. Sample post with an image (edge case 10), OG image.
@@ -149,3 +140,7 @@ _(WHY preserved; full rationale + alternatives in `.forgekit/workflow_tracking.j
 - **Stage 2 (M4):** converted the repo to a **pnpm workspace monorepo**. Extracted everything into `@downpress/core` (`packages/core`), redesigned for DI (no `$env`/`$lib`): `createContent({contentDir})`, prop-driven components, client vs `/server` barrels, `defineDownpressConfig`. Rebuilt the app as `sites/example-site` (real site, `example-post.md`). Wrote `scripts/create-site.mjs` and used it to generate `sites/demo` (restored the old demo posts). Deleted the old root SvelteKit app.
 - **Verified:** `pnpm --filter @downpress/core test` = 31 pass; `pnpm -r check` = 0 errors; `example-site` and `demo` each `build` cleanly and independently to their own `build/`.
 - Phase advanced to **4-feature-iteration** (user-confirmed). Gotcha logged: `/page/[n]` must be allowed in `handleUnseenRoutes` (one page of posts = route never crawled).
+
+### Session 2026-07-25 (Option C: content-only sites)
+
+- Migrated to Option C from `docs/SITE_PACKAGING_OPTIONS.md`: created `packages/app` (sole SvelteKit app), demoted `sites/*` to config + posts + static, added `scripts/downpress.mjs` (`DOWNPRESS_SITE_ROOT` injection; build → `sites/<name>/build/`). Scaffold emits content-only sites. Verified check + both site builds + 31 core tests. Option D next (needs distribution decisions from user).

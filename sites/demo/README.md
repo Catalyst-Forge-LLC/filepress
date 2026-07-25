@@ -1,11 +1,9 @@
-# Downpress
+# Downpress demo site
 
-A Downpress site. Content is the Markdown in [`posts/`](posts/); identity lives
-in [`downpress.config.ts`](downpress.config.ts). Engine logic
-comes from [`@downpress/core`](../../packages/core).
+Content-only showcase site for the engine. Identity:
+[`downpress.config.ts`](downpress.config.ts). Posts: [`posts/`](posts/).
 
 ```bash
-pnpm --filter demo dev
-pnpm --filter demo build
-pnpm --filter demo check
+pnpm downpress dev --site demo
+pnpm downpress build --site demo   # → build/
 ```

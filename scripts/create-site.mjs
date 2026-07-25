@@ -1,22 +1,20 @@
 #!/usr/bin/env node
-// Scaffold a new Downpress site into sites/<name>.
+// Scaffold a content-only Downpress site into sites/<name>.
 //
 // Usage:
 //   node scripts/create-site.mjs <name> [--title "My Site"] [--url https://my.site]
 //
-// The shared boilerplate (routes, app shell, build config) is copied from the
-// reference site `sites/example-site` — routes are identical across sites,
-// so it is the single source of truth. Only per-site files (package.json,
-// downpress.config.ts, README, starter post) are generated. Refuses to write
-// into a non-empty directory (edge case 18).
+// Sites are NOT SvelteKit apps — they only contain downpress.config.ts, posts/,
+// optional static/, and a README. The shared app in packages/app is run via
+// `pnpm downpress <dev|build> --site <name>`. Refuses a non-empty directory
+// (edge case 18).
 
-import { cpSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
-const templateSite = join(repoRoot, 'sites', 'example-site');
 
 function fail(msg) {
 	console.error(`create-site: ${msg}`);
@@ -40,7 +38,6 @@ if (!name) fail('missing site name. Usage: node scripts/create-site.mjs <name> [
 if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
 	fail(`invalid site name "${name}". Use lowercase letters, numbers, and hyphens.`);
 }
-if (!existsSync(templateSite)) fail(`template site not found at ${templateSite}.`);
 
 const target = join(repoRoot, 'sites', name);
 if (existsSync(target) && readdirSync(target).length > 0) {
@@ -50,61 +47,12 @@ if (existsSync(target) && readdirSync(target).length > 0) {
 const title = args.title || name;
 const url = args.url || `https://${name}.example.com`;
 
-// Copy the shared boilerplate, skipping per-site and generated content.
-const SKIP = new Set(
-	[
-		'node_modules',
-		'.svelte-kit',
-		'build',
-		'README.md',
-		'package.json',
-		'downpress.config.ts',
-		'posts'
-	].map((p) => join(templateSite, p))
-);
+mkdirSync(join(target, 'posts'), { recursive: true });
+mkdirSync(join(target, 'static'), { recursive: true });
 
-cpSync(templateSite, target, {
-	recursive: true,
-	filter: (src) => !SKIP.has(src)
-});
-
-// package.json
-writeFileSync(
-	join(target, 'package.json'),
-	JSON.stringify(
-		{
-			name,
-			private: true,
-			version: '0.0.1',
-			type: 'module',
-			scripts: {
-				dev: 'vite dev',
-				build: 'vite build',
-				preview: 'vite preview',
-				prepare: "svelte-kit sync || echo ''",
-				check: 'svelte-kit sync && svelte-check --tsconfig ./tsconfig.json'
-			},
-			dependencies: { '@downpress/core': 'workspace:*' },
-			devDependencies: {
-				'@sveltejs/adapter-static': '^3.0.10',
-				'@sveltejs/kit': '^2.63.0',
-				'@sveltejs/vite-plugin-svelte': '^7.1.2',
-				'@types/node': '^26.1.0',
-				svelte: '^5.56.1',
-				'svelte-check': '^4.6.0',
-				typescript: '^6.0.3',
-				vite: '^8.0.16'
-			}
-		},
-		null,
-		'\t'
-	) + '\n'
-);
-
-// downpress.config.ts (site root — alongside posts/)
 writeFileSync(
 	join(target, 'downpress.config.ts'),
-	`import { defineDownpressConfig } from '@downpress/core';
+	`import { defineDownpressConfig } from '../../packages/core/src/lib/index.ts';
 
 export default defineDownpressConfig({
 	title: ${JSON.stringify(title)},
@@ -116,25 +64,46 @@ export default defineDownpressConfig({
 `
 );
 
-// README.md
 writeFileSync(
 	join(target, 'README.md'),
 	`# ${title}
 
-A Downpress site. Content is the Markdown in [\`posts/\`](posts/); identity lives
-in [\`downpress.config.ts\`](downpress.config.ts). Engine logic
-comes from [\`@downpress/core\`](../../packages/core).
+Content-only Downpress site. Edit identity in [\`downpress.config.ts\`](downpress.config.ts)
+and posts in [\`posts/\`](posts/). The shared engine + routes live in
+[\`packages/app\`](../../packages/app) and [\`packages/core\`](../../packages/core).
 
 \`\`\`bash
-pnpm --filter ${name} dev
-pnpm --filter ${name} build
-pnpm --filter ${name} check
+pnpm downpress dev --site ${name}
+pnpm downpress build --site ${name}   # → build/
 \`\`\`
 `
 );
 
-// Starter post so the site builds immediately.
-mkdirSync(join(target, 'posts'), { recursive: true });
+writeFileSync(
+	join(target, '.gitignore'),
+	`/build
+.DS_Store
+Thumbs.db
+`
+);
+
+writeFileSync(
+	join(target, 'tsconfig.json'),
+	`{
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "esnext",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["downpress.config.ts"]
+}
+`
+);
+
 const today = new Date().toISOString().slice(0, 10);
 writeFileSync(
 	join(target, 'posts', 'hello-world.md'),
@@ -149,7 +118,6 @@ This is your first post. Edit or replace \`posts/hello-world.md\`, then push.
 `
 );
 
-console.log(`Created sites/${name}`);
+console.log(`Created sites/${name} (content-only)`);
 console.log(`Next:`);
-console.log(`  pnpm install`);
-console.log(`  pnpm --filter ${name} dev`);
+console.log(`  pnpm downpress dev --site ${name}`);

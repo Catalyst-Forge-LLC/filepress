@@ -1,7 +1,7 @@
 # Downpress — Site packaging options
 
-**Status:** draft for decision (2026-07-25)  
-**Context:** After M4 (pnpm monorepo + `@downpress/core`), each site is still a full SvelteKit app. Route and shell files are duplicated verbatim across sites. This doc compares options against the goal: **link Downpress, configure the bare minimum, deploy static build output.**
+**Status:** Option **C implemented** (2026-07-25); Option **D** next (needs distribution decisions).  
+**Context:** After M4, sites still duplicated SvelteKit routes. Goal: **link Downpress, configure the bare minimum, deploy static build output.**
 
 Related: `GENESIS.md` §2.6 (core vs site), D3/D4/D5/D10 in `.forgekit/workflow_tracking.json`, current layout in `CONTEXT_PROMPT.md`.
 

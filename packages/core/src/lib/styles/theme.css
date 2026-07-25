@@ -1,11 +1,14 @@
 /*
- * Downpress core theme — "Essay".
+ * Downpress core theme — "Essay" (default).
  *
  * Quiet, text-first, editorial — in the spirit of Stratechery and Ben Evans.
  * One reading serif (Newsreader), one UI sans for meta/labels (Inter), a single
  * restrained accent used at three intensities (strong / rule / wash), hairline
- * rules, and generous whitespace. Per-site themes (D9) are variations on these
- * tokens, so keep design decisions expressed as custom properties.
+ * rules, and generous whitespace.
+ *
+ * Sites may override via theme.css / theme.scss at the site root (loaded after
+ * this file). Prefer CSS custom properties and the documented class names —
+ * see docs/THEME.md.
  */
 
 :root {

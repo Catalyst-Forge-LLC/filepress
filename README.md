@@ -61,6 +61,22 @@ export default defineDownpressConfig({
 
 `title` and `url` are required; missing values fail the build with a clear error.
 
+## Theming
+
+The engine ships a default Essay look. To restyle a site, add `theme.css` (or
+`theme.scss`) next to `downpress.config.ts`. It loads after the default theme, so
+you can override CSS variables and structural classes without forking the app.
+
+```css
+/* theme.css */
+:root {
+  --accent: #1e4d6b;
+  --accent-strong: #163a52;
+}
+```
+
+Token and class reference: [`docs/THEME.md`](docs/THEME.md).
+
 ## Writing a post
 
 Add a file under the site's `posts/` directory:

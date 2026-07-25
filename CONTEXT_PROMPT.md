@@ -39,7 +39,8 @@ downpress/
     src/lib/content.server.ts    # createContent({ contentDir: getContentDir() })
     src/routes/…                 # index, posts, tags, topics, feeds, pagination
   sites/<name>/                  # CONTENT ONLY (example-site, demo, …)
-    downpress.config.ts          # identity (imports defineDownpressConfig from packages/core)
+    downpress.config.ts          # identity (import from 'downpress')
+    theme.css | theme.scss       # optional Zen Garden override (see docs/THEME.md)
     posts/                       # Markdown
     static/                      # favicon, images
     build/                       # gitignored output of `pnpm downpress build --site <name>`

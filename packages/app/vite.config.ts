@@ -18,6 +18,7 @@ const siteConfig = join(siteRoot, 'downpress.config.ts');
 const siteStatic = join(siteRoot, 'static');
 const siteBuild = join(siteRoot, 'build');
 const fallbackStatic = join(appRoot, 'static');
+const emptyTheme = join(appRoot, 'src/lib/empty-theme.css');
 
 // SvelteKit requires an assets directory to exist. Prefer the site's static/;
 // fall back to packages/app/static for sites that haven't added one yet.
@@ -27,6 +28,17 @@ if (!existsSync(fallbackStatic)) mkdirSync(fallbackStatic, { recursive: true });
 if (!existsSync(siteConfig)) {
 	throw new Error(`No downpress.config.ts at site root: ${siteConfig}`);
 }
+
+/** Optional site override: theme.css, else theme.scss, else empty stub. */
+function resolveSiteTheme(): string {
+	const css = join(siteRoot, 'theme.css');
+	if (existsSync(css)) return css;
+	const scss = join(siteRoot, 'theme.scss');
+	if (existsSync(scss)) return scss;
+	return emptyTheme;
+}
+
+const siteTheme = resolveSiteTheme();
 
 const coreEntry = join(appRoot, '../core/src/lib/index.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
@@ -40,7 +52,9 @@ export default defineConfig({
 				downpress: coreEntry,
 				'downpress/server': coreServer,
 				'downpress/theme': coreTheme,
-				'$site-config': siteConfig
+				'$site-config': siteConfig,
+				// Loaded after the core Essay theme so site rules win the cascade.
+				'$site-theme': siteTheme
 			},
 
 			files: {

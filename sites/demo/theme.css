@@ -1,0 +1,18 @@
+/*
+ * Demo site override — proves the Zen Garden hook.
+ * Real sites: add theme.css (or theme.scss) next to downpress.config.ts.
+ * See docs/THEME.md for tokens and public class names.
+ */
+:root {
+	--accent: #1e4d6b;
+	--accent-strong: #163a52;
+	--accent-wash: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--accent: #8eb6d4;
+		--accent-strong: #b0cce3;
+		--accent-wash: color-mix(in srgb, var(--accent) 10%, transparent);
+	}
+}

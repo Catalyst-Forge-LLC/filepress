@@ -173,6 +173,9 @@ pnpm dev
 pnpm build    # → build/
 \`\`\`
 
+Optional: add \`theme.css\` (or \`theme.scss\`) next to \`downpress.config.ts\` to
+override the default Essay theme.
+
 ## Deploy (Cloudflare Pages)
 
 \`link:\` only works on your machine. After the engine is on GitHub under
@@ -216,7 +219,7 @@ Catalyst-Forge-LLC, switch the dependency to a **git pin**:
 		`# ${title}
 
 Content-only Downpress site (monorepo). Edit [\`downpress.config.ts\`](downpress.config.ts)
-and [\`posts/\`](posts/).
+and [\`posts/\`](posts/). Optional [\`theme.css\`](theme.css) overrides the Essay theme.
 
 \`\`\`bash
 pnpm downpress dev --site ${name}

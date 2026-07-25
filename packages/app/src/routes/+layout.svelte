@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '@downpress/core/theme';
+	// Optional site override (theme.css or theme.scss at the site root).
+	import '$site-theme';
 	import { SiteHeader, SiteFooter } from '@downpress/core';
 	import config from '$site-config';
 

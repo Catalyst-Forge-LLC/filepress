@@ -1,7 +1,8 @@
 # Running a site against this engine
 
 A site is a separate folder (or repo) that depends on Downpress and only keeps
-config + content. The build output is a static `build/` directory.
+config + content (+ optional `theme.css`). The build output is a static `build/`
+directory.
 
 The engine can live in one GitHub org/account and each site in another — the
 site only needs a dependency pin on this package.
@@ -51,6 +52,9 @@ export default defineDownpressConfig({
   url: 'https://my.site'
 });
 ```
+
+Optional: `theme.css` or `theme.scss` at the site root overrides the default
+Essay theme. See [`THEME.md`](THEME.md).
 
 ### Scaffold
 

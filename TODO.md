@@ -68,7 +68,8 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Pagination for the index once post count grows _(`/page/[n]`)_
 - [x] Prev/next post links _(done in the feature batch)_
 - [ ] Custom 404 page styling
-- [ ] Per-site theme selection (variations on the Essay aesthetic, D9) — tokens are in place; needs a theme-switch seam
+- [x] Per-site theme override — optional `theme.css` / `theme.scss` at site root (Zen Garden); tokens + class API in `docs/THEME.md`
+- [ ] Optional named theme presets in core (still possible; site file remains the escape hatch)
 - [ ] Reading-time estimate (deferred; not in this batch)
 - [ ] Client-side search (deferred; needs JS + build-time index)
 - [ ] Tooling to bump a Site's pinned core version deliberately

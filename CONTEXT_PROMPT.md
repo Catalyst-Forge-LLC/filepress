@@ -122,7 +122,8 @@ _(WHY preserved; full rationale + alternatives in `.forgekit/workflow_tracking.j
 
 ### Not Started
 
-- **M3 (next):** Cloudflare Pages CI deploy wiring (per site); live-domain verification.
+- **Site packaging decision:** [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md) — current per-site SvelteKit apps duplicate identical routes; recommended path is content-only sites + one `packages/app` (then a `downpress` CLI). Awaiting user choice before migrating.
+- **M3:** Cloudflare Pages CI deploy wiring (per site); live-domain verification (output paths depend on packaging choice).
 - **M5:** 404 polish, reading-time, client-side search, per-site theme selection (tokens ready), core version-bump tooling.
 - Split core into its own repo + git-URL+SHA pins + CI workflow template (deferred; see D4).
 - A couple of integration tests over the fs loader; `TECHNICAL_REFERENCE.md` for the core API. Sample post with an image (edge case 10), OG image.

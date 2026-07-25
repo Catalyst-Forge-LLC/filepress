@@ -72,7 +72,8 @@
       "notes": [
         "2026-07-05: User confirmed advancing from 2-scaffolding straight to 4-feature-iteration (Phase 3 stabilization was effectively covered during early hardening: env resolution, server-only loaders, real-data render). Phase 2 spine + feature batch (D11/D12) are done and committed.",
         "Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@downpress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
-        "2026-07-05: M4 core/site split DONE. @downpress/core extracted with client/server barrels + DI (createContent, defineDownpressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring."
+        "2026-07-05: M4 core/site split DONE. @downpress/core extracted with client/server barrels + DI (createContent, defineDownpressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring.",
+        "2026-07-25: User flagged per-site route/lib duplication vs ideal 'link Downpress + bare minimum config' + static deploy. Wrote docs/SITE_PACKAGING_OPTIONS.md comparing A (status quo), B (generated routes), C (one packages/app + content-only sites), D (CLI/package like Astro), E/F rejects. Recommendation: C now, D as distribution end-state. Awaiting decision before migrating."
       ],
       "iterations": []
     },

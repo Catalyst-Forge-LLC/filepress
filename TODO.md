@@ -37,9 +37,14 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Image-only paragraphs → `<figure>` + `<figcaption>` (`rehype-figure` + tests)
 - [x] `SiteConfig` extended (tagline, postsPerPage, topics, newsletter) + `.env.example`; sitemap covers `/topics` + paginated pages
 
+## Architecture — site packaging (decision pending)
+
+- [ ] Decide packaging approach in [`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md) (recommend **C** content sites + one `packages/app`, then **D** CLI for external repos)
+- [ ] If C/D: migrate routes into `packages/app`; shrink `sites/*` to config + posts + static; update scaffold + deploy docs
+
 ## M3 — Deployed and automated
 
-- [ ] Cloudflare Pages project wired to the repo (build `pnpm build`, output `build/`)
+- [ ] Cloudflare Pages project wired to the repo (build command + output path depend on packaging choice — see SITE_PACKAGING_OPTIONS §6)
 - [ ] Confirm push-to-`main` → live deploy with no manual step
 - [ ] Custom domain attached; verify site serves at root (no base path)
 - [ ] `robots.txt` + `sitemap.xml` verified live and cross-referenced

@@ -1,20 +1,19 @@
-# External (sibling) Downpress sites
+# Running a site against this engine
 
-Option D: a site is a separate folder/repo that **links** the engine and only
-keeps config + content. Deploy still serves the static `build/` folder.
+A site is a separate folder (or repo) that depends on Downpress and only keeps
+config + content. The build output is a static `build/` directory.
 
-**Engine** lives under [Catalyst-Forge-LLC](https://github.com/Catalyst-Forge-LLC)
-(`Catalyst-Forge-LLC/downpress`). **Sites** can live on a personal GitHub account
-(or any other org) — they only need a dependency pin on the engine.
+The engine can live in one GitHub org/account and each site in another — the
+site only needs a dependency pin on this package.
 
-## Local development (`link:`)
+## Local development
 
-Sibling layout:
+Sibling folders:
 
 ```
 workspace/
-  downpress/              ← engine (this repo)
-  example-site/      ← content-only site
+  downpress/     ← this repo
+  my-blog/       ← content-only site
 ```
 
 Site `package.json`:
@@ -34,70 +33,54 @@ Site `package.json`:
 ```
 
 ```bash
-# once
+# once, in the engine
 cd downpress && pnpm install
 
-cd ../example-site
+cd ../my-blog
 pnpm install
 pnpm dev
-pnpm build          # → ./build/
+pnpm build    # → ./build/
 ```
 
-Site config:
-
 ```ts
+// downpress.config.ts
 import { defineDownpressConfig } from 'downpress';
 
 export default defineDownpressConfig({
   title: 'My Site',
   url: 'https://my.site'
-  // …
 });
 ```
 
 ### Scaffold
 
-From the engine repo:
+From this repo:
 
 ```bash
-pnpm create-site my-site --external ../my-site --title "My Site" --url https://my.site
+pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://my.blog
 ```
 
-## Cloudflare Pages / CI (git pin)
+## CI / Cloudflare Pages
 
-`link:` only works on your machine. Once this engine is pushed to GitHub:
+`link:` only works on your machine. For builds in the cloud, pin a tag or commit:
 
 ```json
 "downpress": "github:Catalyst-Forge-LLC/downpress#v0.1.0"
 ```
 
-Pin a **tag or commit SHA** (not floating `main`) so engine upgrades are deliberate (D4).
-
-| CF Pages setting | Value |
+| Setting | Value |
 | --- | --- |
-| Root directory | `/` (site repo) |
+| Root directory | `/` (the site repo) |
 | Build command | `pnpm install && pnpm build` |
 | Output directory | `build` |
 
-No Downpress env vars required if `downpress.config.ts` + `posts/` are in the site repo. Canonical `url` in config must match the custom domain.
+If this engine repo is private, the site’s CI needs permission to clone it.
+Set `url` in `downpress.config.ts` to the live custom domain (feeds and sitemap use it).
 
-### First-time GitHub checklist
+## Sites inside this repo
 
-1. Push this engine to `Catalyst-Forge-LLC/downpress` (repo already created).
-2. Tag a release when the CLI is stable (`v0.1.0`).
-3. Create each site repo on **personal GitHub** (or elsewhere) from the content-only tree — e.g. `you/example-site`.
-4. Switch the site’s dependency from `link:../downpress` to the git pin on the engine.
-5. Wire CF Pages to the **site** repo with the table above.
-
-If the engine repo is **private**, the site’s CF/GitHub Actions install needs permission
-to read `Catalyst-Forge-LLC/downpress` (deploy key, machine user, or make the engine public).
-
-## Monorepo sites (still supported)
-
-Inside this repo, content sites under `sites/*` run with:
+Optional content under `sites/*`:
 
 ```bash
-pnpm downpress build --site example-site
+pnpm downpress build --site demo
 ```
-
-Use the monorepo for engine work + the demo site; use sibling repos for real properties you want to deploy independently.

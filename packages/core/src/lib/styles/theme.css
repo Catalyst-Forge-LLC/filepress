@@ -197,7 +197,8 @@ a:hover {
 	list-style: none;
 }
 
-.tag-list a {
+.tag-list a,
+.tag-list .tag {
 	font-family: var(--font-sans);
 	font-size: 0.72rem;
 	text-transform: uppercase;

@@ -44,10 +44,16 @@
 				&middot; updated <time datetime={post.updated}>{formatDate(post.updated!)}</time>
 			{/if}
 		</p>
-		{#if post.tags.length}
+		{#if data.tags.length}
 			<ul class="tag-list" style="margin-top:0.75rem">
-				{#each post.tags as tag (tag)}
-					<li><a href="/tags/{tag}">{tag}</a></li>
+				{#each data.tags as { tag, hasPage } (tag)}
+					<li>
+						{#if hasPage}
+							<a href="/tags/{tag}">{tag}</a>
+						{:else}
+							<span class="tag">{tag}</span>
+						{/if}
+					</li>
 				{/each}
 			</ul>
 		{/if}

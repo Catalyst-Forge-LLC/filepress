@@ -36,7 +36,7 @@ So your rules and `:root` variables override the defaults via the cascade.
 
 ```css
 /* Or restyle structure */
-.hero-title {
+.post-title {
 	letter-spacing: -0.03em;
 }
 
@@ -75,7 +75,9 @@ Treat these as the stable styling API. Prefer overriding them (or tokens) over d
 
 **Chrome:** `.wrap` · `.site-header` · `.site-title` · `.site-nav` · `.site-footer` · `.footer-links`
 
-**Index:** `.hero` · `.hero-title` · `.hero-tagline` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
+**Index:** `.hero` · `.hero-tagline` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
+
+The index hero is a one-line tagline lede; the site title lives in the masthead only (a visually-hidden `h1` keeps semantics).
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 

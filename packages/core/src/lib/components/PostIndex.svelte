@@ -26,10 +26,13 @@
 </script>
 
 {#if hero}
-	<div class="hero">
-		<h1 class="hero-title">{site.title}</h1>
+	<!-- The masthead already shows the site title; repeating it as a big h1 wastes
+	     the top of the page. The hero is a one-line lede, with a hidden h1 for
+	     semantics/SEO. -->
+	<header class="hero">
+		<h1 class="visually-hidden">{site.title}</h1>
 		<p class="hero-tagline">{site.tagline}</p>
-	</div>
+	</header>
 {:else}
 	<header class="post-header">
 		<p class="eyebrow">Posts</p>
@@ -42,6 +45,7 @@
 {:else}
 	{#if featured}
 		<div class="featured">
+			<p class="eyebrow">Latest</p>
 			<PostCard post={featured} featured />
 		</div>
 	{/if}

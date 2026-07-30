@@ -15,8 +15,9 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 	const isDraft = content.loadPostSources().some((p) => p.slug === params.slug && p.draft);
 	const adjacent = content.getAdjacentPosts(params.slug);
-	// Tag pages come from published posts, so a draft can be the only carrier of a
-	// tag. Those render unlinked; linking them would 404 and fail prerendering.
+	// Tag pages come from listed posts. In production that means published only,
+	// so a draft can be the only carrier of a tag. Those render unlinked;
+	// linking them would 404 and fail prerendering.
 	const paged = new Set(content.getAllTags().map((t) => t.tag));
 	const tags = post.tags.map((tag) => ({ tag, hasPage: paged.has(tag) }));
 	return { post, isDraft, adjacent, tags };

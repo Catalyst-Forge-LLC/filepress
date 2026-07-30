@@ -75,7 +75,7 @@ Treat these as the stable styling API. Prefer overriding them (or tokens) over d
 
 **Chrome:** `.wrap` · `.site-header` · `.site-title` · `.site-nav` · `.site-footer` · `.footer-links`
 
-**Index:** `.hero` · `.hero-title` · `.hero-tagline` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.pager` · `.page-count` · `.empty-state`
+**Index:** `.hero` · `.hero-title` · `.hero-tagline` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 

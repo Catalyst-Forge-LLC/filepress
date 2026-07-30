@@ -367,6 +367,19 @@ a:hover {
 	margin-bottom: 1.5rem;
 }
 
+.draft-label {
+	font-family: var(--font-sans);
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--accent);
+	border: 1px dashed var(--accent);
+	border-radius: 999px;
+	padding: 0.1rem 0.5rem;
+	margin-right: 0.35rem;
+}
+
 /* --- Prose (rendered Markdown) --- */
 .prose {
 	max-width: var(--measure);

@@ -2,7 +2,8 @@
 // filesystem (content loader) and must only be imported from server code
 // (`+page.server.ts`, `+server.ts`, or a `*.server.ts` lib module).
 
-export { createContent } from './content/content';
+export { createContent, resolveListDrafts } from './content/content';
+export type { CreateContentOptions } from './content/content';
 export type { ContentApi } from './content/content';
 export { renderMarkdown } from './content/markdown';
 export { buildRssXml, buildSitemapXml, buildRobotsTxt } from './content/feeds';

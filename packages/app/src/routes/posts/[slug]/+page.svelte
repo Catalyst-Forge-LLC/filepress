@@ -32,7 +32,9 @@
 <article>
 	<header class="post-header">
 		{#if data.isDraft}
-			<p class="draft-banner">Draft preview — not listed or indexed.</p>
+			<p class="draft-banner">
+				Draft — shown in local listings; excluded from production index, feeds, and sitemap.
+			</p>
 		{/if}
 		<h1>{post.title}</h1>
 		<p class="meta">

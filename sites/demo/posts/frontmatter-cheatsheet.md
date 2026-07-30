@@ -28,7 +28,7 @@ slug: my-post
 | `description` / `excerpt` | no | Listings and meta tags. |
 | `tags` | no | YAML list; lowercased and de-duplicated. |
 | `author` | no | Per-post byline; omit on single-author sites. |
-| `draft` | no | Hidden from index, feeds, and sitemap. Page still builds at its URL. |
+| `draft` | no | Hidden from production index, feeds, and sitemap. Listed under `pnpm dev`. Page still builds at its URL. |
 | `updated` | no | Shown when different from `date`. |
 
 **Images:** put files in `static/images/posts/<slug>/` and reference them as

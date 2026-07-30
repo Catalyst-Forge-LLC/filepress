@@ -11,6 +11,9 @@
 
 <article class="post-card" class:featured>
 	<p class="meta">
+		{#if post.draft}
+			<span class="draft-label">Draft</span>
+		{/if}
 		<time datetime={post.date}>{formatDate(post.date)}</time>
 		{#if post.author}
 			&middot; <span class="byline">{post.author}</span>

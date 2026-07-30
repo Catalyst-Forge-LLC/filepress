@@ -6,7 +6,14 @@ import { renderMarkdown } from './markdown';
 
 export interface ContentApi {
 	loadPostSources(): PostSource[];
+	/** Production truth: non-draft, date ≤ today. Feeds and sitemap use this. */
 	getPublishedPosts(): PostMeta[];
+	/**
+	 * What the index / tags / topics show. Same as published in production;
+	 * includes drafts under `pnpm dev` (or `DOWNPRESS_SHOW_DRAFTS=1`).
+	 */
+	getListedPosts(): PostMeta[];
+	listsDrafts(): boolean;
 	getIndexPage(
 		page: number,
 		perPage: number
@@ -19,6 +26,24 @@ export interface ContentApi {
 	getAdjacentPosts(slug: string): { older: PostMeta | null; newer: PostMeta | null };
 }
 
+export interface CreateContentOptions {
+	contentDir: string;
+	/** Override draft listing. Default: on in Vite DEV, or when DOWNPRESS_SHOW_DRAFTS is 1/true. */
+	listDrafts?: boolean;
+}
+
+/**
+ * Whether listings should include `draft: true` posts. Production builds stay
+ * closed unless DOWNPRESS_SHOW_DRAFTS forces them open (rare; mainly for checks).
+ */
+export function resolveListDrafts(override?: boolean): boolean {
+	if (override !== undefined) return override;
+	const env = process.env.DOWNPRESS_SHOW_DRAFTS?.trim();
+	if (env === '1' || env === 'true') return true;
+	if (env === '0' || env === 'false') return false;
+	return Boolean(import.meta.env.DEV);
+}
+
 /**
  * Build a content API bound to one content directory. This is the seam a site
  * wires up in a server-only module: `createContent({ contentDir: 'posts' })`.
@@ -27,10 +52,11 @@ export interface ContentApi {
  * (`+page.server.ts`, `+server.ts`, or a `*.server.ts` lib module). The pure
  * parsing/validation logic lives in `parse.ts` and is safe to import anywhere.
  */
-export function createContent(opts: { contentDir: string }): ContentApi {
+export function createContent(opts: CreateContentOptions): ContentApi {
 	const dir = isAbsolute(opts.contentDir)
 		? opts.contentDir
 		: resolve(process.cwd(), opts.contentDir);
+	const listDrafts = resolveListDrafts(opts.listDrafts);
 
 	// One prerender pass per build, so cache parsed posts in production; re-read
 	// each time in dev so edits show on refresh.
@@ -58,6 +84,8 @@ export function createContent(opts: { contentDir: string }): ContentApi {
 
 	const today = () => new Date().toISOString().slice(0, 10);
 	const isPublished = (post: PostSource, now: string) => !post.draft && post.date <= now;
+	const byDateDesc = (a: PostMeta, b: PostMeta) =>
+		a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug.localeCompare(b.slug);
 	const toMeta = (post: PostSource): PostMeta => {
 		const { body: _body, ...meta } = post;
 		return meta;
@@ -67,14 +95,27 @@ export function createContent(opts: { contentDir: string }): ContentApi {
 		const now = today();
 		return loadPostSources()
 			.filter((p) => isPublished(p, now))
-			.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug.localeCompare(b.slug)))
+			.sort(byDateDesc)
+			.map(toMeta);
+	}
+
+	function getListedPosts(): PostMeta[] {
+		const now = today();
+		return loadPostSources()
+			.filter((p) => {
+				if (isPublished(p, now)) return true;
+				// Drafts show in local listings regardless of date so future-dated
+				// work-in-progress is previewable. Future *published* posts stay hidden.
+				return listDrafts && p.draft;
+			})
+			.sort(byDateDesc)
 			.map(toMeta);
 	}
 
 	function getIndexPage(page: number, perPage: number) {
-		const published = getPublishedPosts();
-		const featured = published[0] ?? null;
-		const rest = published.slice(1);
+		const listed = getListedPosts();
+		const featured = listed[0] ?? null;
+		const rest = listed.slice(1);
 		const size = Math.max(1, Math.floor(perPage));
 		const totalPages = Math.max(1, Math.ceil(rest.length / size));
 		const current = Math.min(Math.max(1, Math.floor(page)), totalPages);
@@ -88,7 +129,7 @@ export function createContent(opts: { contentDir: string }): ContentApi {
 	}
 
 	function getIndexPageCount(perPage: number): number {
-		const rest = Math.max(0, getPublishedPosts().length - 1);
+		const rest = Math.max(0, getListedPosts().length - 1);
 		return Math.max(1, Math.ceil(rest / Math.max(1, Math.floor(perPage))));
 	}
 
@@ -113,7 +154,7 @@ export function createContent(opts: { contentDir: string }): ContentApi {
 
 	function getAllTags(): { tag: string; count: number }[] {
 		const counts = new Map<string, number>();
-		for (const post of getPublishedPosts()) {
+		for (const post of getListedPosts()) {
 			for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
 		}
 		return [...counts.entries()]
@@ -123,22 +164,24 @@ export function createContent(opts: { contentDir: string }): ContentApi {
 
 	function getPostsByTag(tag: string): PostMeta[] {
 		const normalized = normalizeTag(tag);
-		return getPublishedPosts().filter((p) => p.tags.includes(normalized));
+		return getListedPosts().filter((p) => p.tags.includes(normalized));
 	}
 
 	function getAdjacentPosts(slug: string): { older: PostMeta | null; newer: PostMeta | null } {
-		const published = getPublishedPosts();
-		const i = published.findIndex((p) => p.slug === slug);
+		const listed = getListedPosts();
+		const i = listed.findIndex((p) => p.slug === slug);
 		if (i === -1) return { older: null, newer: null };
 		return {
-			newer: i > 0 ? published[i - 1] : null,
-			older: i < published.length - 1 ? published[i + 1] : null
+			newer: i > 0 ? listed[i - 1] : null,
+			older: i < listed.length - 1 ? listed[i + 1] : null
 		};
 	}
 
 	return {
 		loadPostSources,
 		getPublishedPosts,
+		getListedPosts,
+		listsDrafts: () => listDrafts,
 		getIndexPage,
 		getIndexPageCount,
 		getBuildableSlugs,

@@ -106,7 +106,7 @@ Body content in **Markdown**.
 | `description` / `excerpt` | no | Listings and meta tags. |
 | `tags` | no | YAML list; lowercased and de-duplicated. |
 | `author` | no | Per-post byline; omit on single-author sites. |
-| `draft` | no | Hidden from listings/feeds/sitemap; page still builds at its URL for preview. |
+| `draft` | no | Hidden from production listings/feeds/sitemap; still builds at its URL. Listed with a Draft label under `pnpm dev` (localhost). |
 | `updated` | no | Shown when different from `date`. |
 
 **Images:** put files in `static/images/posts/<slug>/` and reference them as `/images/posts/<slug>/photo.jpg`.

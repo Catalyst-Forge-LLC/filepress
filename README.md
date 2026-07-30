@@ -32,11 +32,14 @@ More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 
 ### In this repo
 
-Optional demo/content sites live under `sites/`. Run them with:
+`sites/demo` is the engine's example content (frontmatter, drafts, tags, phone
+workflow, theme override). Real publications live in their own repos and depend
+on this package. From the engine root:
 
 ```bash
-pnpm downpress dev --site demo
-pnpm downpress build --site demo
+pnpm install
+pnpm dev                 # → demo
+pnpm build               # → sites/demo/build/
 ```
 
 ## Site configuration

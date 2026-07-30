@@ -12,7 +12,7 @@ Kit wiring live here. Content sites under [`../../sites`](../../sites) provide:
 From the repo root (do not run vite directly without `DOWNPRESS_SITE_ROOT`):
 
 ```bash
-pnpm downpress dev --site example-site
+pnpm downpress dev --site demo
 pnpm downpress build --site demo
 ```
 

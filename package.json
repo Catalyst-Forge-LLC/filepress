@@ -33,10 +33,9 @@
 		"downpress": "node scripts/downpress.mjs",
 		"test": "pnpm --filter @downpress/core test",
 		"check": "pnpm downpress check --site demo",
-		"build": "pnpm downpress build --site example-site && pnpm downpress build --site demo",
-		"build:nth": "pnpm downpress build --site example-site",
+		"build": "pnpm downpress build --site demo",
 		"build:demo": "pnpm downpress build --site demo",
-		"dev:nth": "pnpm downpress dev --site example-site",
+		"dev": "pnpm downpress dev --site demo",
 		"dev:demo": "pnpm downpress dev --site demo",
 		"create-site": "node scripts/create-site.mjs"
 	},

@@ -76,11 +76,13 @@ export default defineConfig({
 			prerender: {
 				entries: ['*'],
 
-				// The paginated /page/[n] route legitimately has zero pages on a small
-				// site (everything fits on page 1). Ignore that one case; stay strict
-				// for any other unseen route.
+				// Some parameterized routes legitimately have zero pages: /page/[n]
+				// when everything fits on page 1, and /tags/[tag] when no listed post
+				// carries a tag (a site before its first published essay). Ignore
+				// those; stay strict for any other unseen route.
 				handleUnseenRoutes: ({ routes }) => {
-					const unexpected = routes.filter((r) => r !== '/page/[n]');
+					const emptyOk = new Set(['/page/[n]', '/tags/[tag]']);
+					const unexpected = routes.filter((r) => !emptyOk.has(r));
 					if (unexpected.length > 0) {
 						throw new Error(
 							`Routes marked prerenderable but not prerendered: ${unexpected.join(', ')}`

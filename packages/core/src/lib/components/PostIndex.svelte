@@ -26,13 +26,9 @@
 </script>
 
 {#if hero}
-	<!-- The masthead already shows the site title; repeating it as a big h1 wastes
-	     the top of the page. The hero is a one-line lede, with a hidden h1 for
-	     semantics/SEO. -->
-	<header class="hero">
-		<h1 class="visually-hidden">{site.title}</h1>
-		<p class="hero-tagline">{site.tagline}</p>
-	</header>
+	<!-- The masthead carries the site identity (title/logo plus tagline), so the
+	     index needs only a hidden h1 for semantics/SEO. -->
+	<h1 class="visually-hidden">{site.title}</h1>
 {:else}
 	<header class="post-header">
 		<p class="eyebrow">Posts</p>

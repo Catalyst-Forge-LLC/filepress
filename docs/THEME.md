@@ -73,11 +73,11 @@ Set these on `:root` (and in a `prefers-color-scheme: dark` block if you care ab
 
 Treat these as the stable styling API. Prefer overriding them (or tokens) over depending on incidental wrappers.
 
-**Chrome:** `.wrap` · `.site-header` · `.site-title` · `.site-nav` · `.site-footer` · `.footer-links`
+**Chrome:** `.wrap` · `.site-header` · `.site-id` · `.site-title` · `.site-logo` · `.site-tagline` · `.site-nav` · `.site-footer` · `.footer-links`
 
-**Index:** `.hero` · `.hero-tagline` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
+**Index:** `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
 
-The index hero is a one-line tagline lede; the site title lives in the masthead only (a visually-hidden `h1` keeps semantics).
+The masthead carries the site identity: the title (or a `logo` image from site config, rendered inside the title link with the title as alt text) with the tagline beneath it. The index has no visible hero; a visually-hidden `h1` keeps semantics.
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 

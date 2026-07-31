@@ -101,11 +101,17 @@ body {
 
 .site-header .wrap {
 	display: flex;
-	align-items: baseline;
+	align-items: center;
 	justify-content: space-between;
 	gap: 1.5rem;
 	padding: 1.6rem 0;
 	flex-wrap: wrap;
+}
+
+.site-id {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
 }
 
 .site-title {
@@ -115,6 +121,23 @@ body {
 	letter-spacing: -0.015em;
 	color: var(--ink);
 	text-decoration: none;
+	align-self: flex-start;
+}
+
+.site-logo {
+	display: block;
+	height: 4.25rem;
+	width: auto;
+}
+
+/* The tagline is the site's thesis, carried on the masthead site-wide. */
+.site-tagline {
+	margin: 0;
+	max-width: var(--measure);
+	color: var(--ink-soft);
+	font-style: italic;
+	font-size: 0.98rem;
+	line-height: 1.45;
 }
 
 .site-nav {
@@ -227,22 +250,6 @@ a:hover {
 	color: var(--accent);
 	border-color: var(--accent);
 	background: var(--accent-wash);
-}
-
-/* --- Index hero (one-line lede under the masthead) --- */
-.hero {
-	margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
-	padding-bottom: clamp(1rem, 2.5vw, 1.4rem);
-	border-bottom: 1px solid var(--rule);
-}
-
-.hero-tagline {
-	margin: 0;
-	max-width: var(--measure);
-	color: var(--ink-soft);
-	font-style: italic;
-	font-size: 1.28rem;
-	line-height: 1.5;
 }
 
 /* --- Featured post --- */

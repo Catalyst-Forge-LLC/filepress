@@ -13,6 +13,18 @@ describe('defineDownpressConfig', () => {
 		]);
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
+		expect(cfg.logo).toBeNull();
+	});
+
+	it('keeps a trimmed logo path and nulls a blank one', () => {
+		const withLogo = defineDownpressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			logo: ' /logo.png '
+		});
+		expect(withLogo.logo).toBe('/logo.png');
+		const blank = defineDownpressConfig({ title: 'X', url: 'https://x.example.com', logo: '  ' });
+		expect(blank.logo).toBeNull();
 	});
 
 	it('strips a trailing slash from url and prefers description for tagline', () => {

@@ -252,6 +252,22 @@ a:hover {
 	background: var(--accent-wash);
 }
 
+/* --- Index hero (optional one-line lede under the masthead) --- */
+.hero {
+	margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+	padding-bottom: clamp(1rem, 2.5vw, 1.4rem);
+	border-bottom: 1px solid var(--rule);
+}
+
+.hero-lede {
+	margin: 0;
+	max-width: var(--measure);
+	color: var(--ink-soft);
+	font-style: italic;
+	font-size: 1.28rem;
+	line-height: 1.5;
+}
+
 /* --- Featured post --- */
 .featured {
 	margin-bottom: clamp(1.25rem, 3vw, 1.75rem);

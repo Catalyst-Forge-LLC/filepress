@@ -75,9 +75,9 @@ Treat these as the stable styling API. Prefer overriding them (or tokens) over d
 
 **Chrome:** `.wrap` · `.site-header` · `.site-id` · `.site-title` · `.site-logo` · `.site-tagline` · `.site-nav` · `.site-footer` · `.footer-links`
 
-**Index:** `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
+**Index:** `.hero` · `.hero-lede` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
 
-The masthead carries the site identity: the title (or a `logo` image from site config, rendered inside the title link with the title as alt text) with the tagline beneath it. The index has no visible hero; a visually-hidden `h1` keeps semantics.
+The masthead carries the site identity: the title (or a `logo` image from site config, rendered inside the title link with the title as alt text) with the tagline beneath it. The index hero shows the optional `lede` from site config; with no lede the hero collapses to a visually-hidden `h1` that keeps semantics.
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 

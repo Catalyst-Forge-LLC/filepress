@@ -26,9 +26,14 @@
 </script>
 
 {#if hero}
-	<!-- The masthead carries the site identity (title/logo plus tagline), so the
-	     index needs only a hidden h1 for semantics/SEO. -->
-	<h1 class="visually-hidden">{site.title}</h1>
+	<!-- The masthead carries the site identity (title/logo plus tagline). The
+	     index adds an optional one-line lede; a hidden h1 keeps semantics/SEO. -->
+	<header class="hero" class:visually-hidden={!site.lede}>
+		<h1 class="visually-hidden">{site.title}</h1>
+		{#if site.lede}
+			<p class="hero-lede">{site.lede}</p>
+		{/if}
+	</header>
 {:else}
 	<header class="post-header">
 		<p class="eyebrow">Posts</p>

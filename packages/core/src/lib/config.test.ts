@@ -14,6 +14,18 @@ describe('defineDownpressConfig', () => {
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
 		expect(cfg.logo).toBeNull();
+		expect(cfg.lede).toBeNull();
+	});
+
+	it('keeps a trimmed lede and nulls a blank one', () => {
+		const withLede = defineDownpressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			lede: ' Essays on things. '
+		});
+		expect(withLede.lede).toBe('Essays on things.');
+		const blank = defineDownpressConfig({ title: 'X', url: 'https://x.example.com', lede: '  ' });
+		expect(blank.lede).toBeNull();
 	});
 
 	it('keeps a trimmed logo path and nulls a blank one', () => {

@@ -32,6 +32,8 @@ export interface SiteConfig {
 	title: string;
 	description: string;
 	tagline: string;
+	/** One-line lede shown on the index hero, or null for no visible hero. */
+	lede: string | null;
 	/** Path to a masthead logo image (site-relative, e.g. "/logo.png"), or null for text. */
 	logo: string | null;
 	/** Canonical origin, no trailing slash, e.g. "https://example.com". */
@@ -50,6 +52,7 @@ export interface SiteConfigInput {
 	url: string;
 	description?: string;
 	tagline?: string;
+	lede?: string;
 	logo?: string;
 	author?: string;
 	postsPerPage?: number;
@@ -81,6 +84,7 @@ export function defineDownpressConfig(input: SiteConfigInput): SiteConfig {
 		title,
 		description,
 		tagline: (input.tagline ?? '').trim() || description || title,
+		lede: (input.lede ?? '').trim() || null,
 		logo: (input.logo ?? '').trim() || null,
 		url: url.replace(/\/+$/, ''),
 		author: (input.author ?? '').trim() || title,

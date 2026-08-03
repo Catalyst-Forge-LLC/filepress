@@ -189,25 +189,41 @@ export async function extractInspirationSignals(url: string): Promise<Inspiratio
 	};
 }
 
+function isWarmAccent(hex: string): boolean {
+	const n = parseInt(hex.slice(1), 16);
+	const r = (n >> 16) & 255;
+	const g = (n >> 8) & 255;
+	const b = n & 255;
+	return r > 160 && g > 80 && g < 220 && b < 120 && r >= g;
+}
+
+/** Near-neutral text colors only — never treat gold/amber accents as ink. */
+function isInkCandidate(hex: string): boolean {
+	if (isWarmAccent(hex)) return false;
+	const n = parseInt(hex.slice(1), 16);
+	const r = (n >> 16) & 255;
+	const g = (n >> 8) & 255;
+	const b = n & 255;
+	const max = Math.max(r, g, b);
+	const min = Math.min(r, g, b);
+	return max - min < 40; // low chroma
+}
+
 /** Guess accent/bg/ink from hex frequency when CSS vars don't resolve. */
 export function inferHexPalette(css: string): Partial<DesignBrief['tokens']> {
 	const counts = new Map<string, number>();
 	for (const m of css.matchAll(/#([0-9a-fA-F]{6})\b/g)) {
 		const hex = `#${m[1].toLowerCase()}`;
-		if (/^#(000000|ffffff|fff|000)$/i.test(hex)) continue;
+		if (/^#(000000|ffffff)$/i.test(hex)) continue;
 		counts.set(hex, (counts.get(hex) ?? 0) + 1);
 	}
 	const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-	const warm = ranked.find(([h]) => {
-		const n = parseInt(h.slice(1), 16);
-		const r = (n >> 16) & 255;
-		const g = (n >> 8) & 255;
-		const b = n & 255;
-		return r > 160 && g > 80 && g < 220 && b < 120 && r >= g;
-	})?.[0];
-	const darkBg = ranked.find(([h]) => luminance(h) < 0.2)?.[0];
-	const lightInk = ranked.find(([h]) => luminance(h) > 0.75)?.[0];
-	const darkInk = ranked.find(([h]) => luminance(h) < 0.25 && h !== darkBg)?.[0];
+	const warm = ranked.find(([h]) => isWarmAccent(h))?.[0];
+	const darkBg = ranked.find(([h]) => luminance(h) < 0.2 && !isWarmAccent(h))?.[0];
+	const lightInk = ranked.find(([h]) => luminance(h) > 0.75 && isInkCandidate(h))?.[0];
+	const darkInk = ranked.find(
+		([h]) => luminance(h) < 0.28 && h !== darkBg && isInkCandidate(h)
+	)?.[0];
 	const out: Partial<DesignBrief['tokens']> = {};
 	if (warm) {
 		out.accent = warm;

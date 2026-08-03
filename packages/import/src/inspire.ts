@@ -240,10 +240,8 @@ function pickFont(
 	key: 'fontSerif' | 'fontSans' | 'fontMono',
 	fallback: string
 ): string {
-	// Serif/mono: prefer earlier (structure). Sans: prefer later so a second
-	// product site can retint UI type without losing the first site's display face.
-	const order = key === 'fontSans' ? [...signals].reverse() : signals;
-	for (const s of order) {
+	// First inspiration URL wins font roles; later URLs mainly retint accent.
+	for (const s of signals) {
 		const v = s[key];
 		if (v) return v;
 	}

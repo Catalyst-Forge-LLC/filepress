@@ -62,7 +62,12 @@ describe('briefFromInspiration', () => {
 		expect(brief.paletteMode).toBe('dark'); // dark wins when mixed
 		expect(brief.tokens.accent).toBe('#f99c00'); // secondary accent
 		expect(brief.tokens.bg).toBe('#0a0a0c'); // dark structure from CF
+		expect(brief.fonts?.serif).toBe('Instrument Serif'); // first site fonts
 		expect(brief.cssNotes.some((n) => n.includes('Blended from'))).toBe(true);
+
+		const efFirst = briefFromInspiration([ef, forgeLike()]);
+		expect(efFirst.fonts?.sans).toBe('Syne');
+		expect(efFirst.tokens.accent).toBe('#f0c040'); // CF accent as secondary
 	});
 });
 

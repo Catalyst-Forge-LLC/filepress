@@ -37,7 +37,10 @@ Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a
 pnpm install
 pnpm downpress import --source https://example.com \
   --inspire https://www.catalystforge.com \
+  --inspire https://app.execfoundry.com/start \
   --yes
+
+# up to 3 --inspire URLs; signals are blended (first biases structure, later ones tint accent/fonts)
 
 # dry-run first (no write):
 pnpm downpress import --source https://example.com --dry-run --no-llm

@@ -38,6 +38,32 @@ describe('briefFromInspiration', () => {
 		expect(brief.atmosphere).toBe('noise');
 		expect(brief.elevatedCards).toBe(true);
 	});
+
+	it('blends a second site accent into the first site structure', () => {
+		const ef: InspirationSignals = {
+			url: 'https://app.execfoundry.com/start',
+			googleFontHrefs: [
+				'https://fonts.googleapis.com/css2?family=Syne:wght@400;700&family=Source+Serif+4:wght@400;600&display=swap'
+			],
+			fontSerif: 'Source Serif 4',
+			fontSans: 'Syne',
+			fontMono: null,
+			tokens: {
+				accent: '#f99c00',
+				accentStrong: '#dd7400',
+				bg: '#faf8f5',
+				ink: '#1c1710'
+			},
+			paletteMode: 'light',
+			hasNoise: false,
+			notes: ['EF amber']
+		};
+		const brief = briefFromInspiration([forgeLike(), ef]);
+		expect(brief.paletteMode).toBe('dark'); // dark wins when mixed
+		expect(brief.tokens.accent).toBe('#f99c00'); // secondary accent
+		expect(brief.tokens.bg).toBe('#0a0a0c'); // dark structure from CF
+		expect(brief.cssNotes.some((n) => n.includes('Blended from'))).toBe(true);
+	});
 });
 
 describe('themeCssFromBrief (punchy)', () => {

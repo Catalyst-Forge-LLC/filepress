@@ -145,12 +145,24 @@ export async function extractInspirationSignals(url: string): Promise<Inspiratio
 	fontSans ||= named(sansVar);
 	fontMono ||= named(monoVar);
 
+	// When theme tokens are CSS-var indirection (Tailwind @theme), fall back to
+	// frequent warm/dark hexes in the stylesheet.
+	const hexFallback = inferHexPalette(css);
+	const accentResolved = accent || hexFallback.accent;
+	const accentStrongResolved = accentStrong || hexFallback.accentStrong || accentResolved;
+	const bgResolved = bg || hexFallback.bg;
+	const inkResolved = ink || hexFallback.ink;
+
 	const paletteMode: 'dark' | 'light' =
-		bg && luminance(bg) < 0.35 ? 'dark' : ink && luminance(ink) > 0.6 ? 'dark' : 'light';
+		bgResolved && luminance(bgResolved) < 0.35
+			? 'dark'
+			: inkResolved && luminance(inkResolved) > 0.6
+				? 'dark'
+				: 'light';
 
 	const hasNoise = /feTurbulence|noiseFilter|fractalNoise|opacity=['"]0\.0[2-5]/.test(css);
 
-	if (accent) notes.push(`Inspiration accent ${accent}`);
+	if (accentResolved) notes.push(`Inspiration accent ${accentResolved}`);
 	if (fontSerif || fontSans) notes.push(`Fonts: ${[fontSerif, fontSans, fontMono].filter(Boolean).join(' / ')}`);
 	notes.push(`Palette mode: ${paletteMode}`);
 
@@ -161,12 +173,12 @@ export async function extractInspirationSignals(url: string): Promise<Inspiratio
 		fontSans,
 		fontMono,
 		tokens: {
-			accent: accent || undefined,
-			accentStrong: accentStrong || undefined,
-			bg: bg || undefined,
-			ink: ink || undefined,
+			accent: accentResolved || undefined,
+			accentStrong: accentStrongResolved || undefined,
+			bg: bgResolved || undefined,
+			ink: inkResolved || undefined,
 			inkSoft: inkSoft || undefined,
-			surface: surface || undefined,
+			surface: surface || hexFallback.surface || undefined,
 			rule: rule || undefined,
 			ruleStrong: ruleStrong || undefined,
 			accentWash: undefined
@@ -177,10 +189,98 @@ export async function extractInspirationSignals(url: string): Promise<Inspiratio
 	};
 }
 
-/** Merge inspiration into a punchy DesignBrief (code-owned; LLM can refine later). */
+/** Guess accent/bg/ink from hex frequency when CSS vars don't resolve. */
+export function inferHexPalette(css: string): Partial<DesignBrief['tokens']> {
+	const counts = new Map<string, number>();
+	for (const m of css.matchAll(/#([0-9a-fA-F]{6})\b/g)) {
+		const hex = `#${m[1].toLowerCase()}`;
+		if (/^#(000000|ffffff|fff|000)$/i.test(hex)) continue;
+		counts.set(hex, (counts.get(hex) ?? 0) + 1);
+	}
+	const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+	const warm = ranked.find(([h]) => {
+		const n = parseInt(h.slice(1), 16);
+		const r = (n >> 16) & 255;
+		const g = (n >> 8) & 255;
+		const b = n & 255;
+		return r > 160 && g > 80 && g < 220 && b < 120 && r >= g;
+	})?.[0];
+	const darkBg = ranked.find(([h]) => luminance(h) < 0.2)?.[0];
+	const lightInk = ranked.find(([h]) => luminance(h) > 0.75)?.[0];
+	const darkInk = ranked.find(([h]) => luminance(h) < 0.25 && h !== darkBg)?.[0];
+	const out: Partial<DesignBrief['tokens']> = {};
+	if (warm) {
+		out.accent = warm;
+		out.accentStrong = warm;
+	}
+	if (darkBg) out.bg = darkBg;
+	if (darkBg && lightInk) out.ink = lightInk;
+	else if (darkInk) out.ink = darkInk;
+	return out;
+}
+
+function pickFont(
+	signals: InspirationSignals[],
+	key: 'fontSerif' | 'fontSans' | 'fontMono',
+	fallback: string
+): string {
+	// Serif/mono: prefer earlier (structure). Sans: prefer later so a second
+	// product site can retint UI type without losing the first site's display face.
+	const order = key === 'fontSans' ? [...signals].reverse() : signals;
+	for (const s of order) {
+		const v = s[key];
+		if (v) return v;
+	}
+	return fallback;
+}
+
+function mergeGoogleHref(signals: InspirationSignals[]): string | null {
+	const families = new Set<string>();
+	for (const s of signals) {
+		for (const href of s.googleFontHrefs) {
+			try {
+				const u = new URL(href.replace(/&amp;/g, '&'));
+				const family = u.searchParams.get('family') || '';
+				for (const part of family.split('|')) {
+					const name = part.split(':')[0];
+					if (name) families.add(name);
+				}
+			} catch {
+				/* skip */
+			}
+		}
+	}
+	// Keep the mix small — display + UI + mono/serif for essays
+	const preferred = [
+		'Instrument+Serif',
+		'Syne',
+		'Fraunces',
+		'Source+Serif+4',
+		'DM+Sans',
+		'Outfit',
+		'Manrope',
+		'JetBrains+Mono'
+	];
+	const chosen: string[] = [];
+	for (const p of preferred) {
+		const hit = [...families].find((f) => f.replace(/ /g, '+') === p || f === p.replace(/\+/g, ' '));
+		if (hit) chosen.push(hit.includes(':') ? hit : `${hit.replace(/ /g, '+')}:wght@400;500;600;700`);
+		if (chosen.length >= 4) break;
+	}
+	if (!chosen.length && signals[0]?.googleFontHrefs[0]) {
+		return signals[0].googleFontHrefs[0].replace(/&amp;/g, '&');
+	}
+	if (!chosen.length) return null;
+	return `https://fonts.googleapis.com/css2?${chosen.map((f) => `family=${f}`).join('&')}&display=swap`;
+}
+
+/**
+ * Merge up to 3 inspiration signals into one brief.
+ * First URL = structure/mood bias; later URLs contribute accent/fonts/atmosphere.
+ */
 export function briefFromInspiration(signals: InspirationSignals[]): DesignBrief {
-	const primary = signals[0];
-	if (!primary) {
+	const list = signals.slice(0, 3);
+	if (!list.length) {
 		return {
 			mood: 'Modern editorial personal site',
 			do: ['Strong display type', 'Clear accent', 'Atmospheric background'],
@@ -211,21 +311,62 @@ export function briefFromInspiration(signals: InspirationSignals[]): DesignBrief
 		};
 	}
 
-	const t = primary.tokens;
-	const accent = t.accent || (primary.paletteMode === 'dark' ? '#f0c040' : '#1e4d6b');
-	const bg = t.bg || (primary.paletteMode === 'dark' ? '#0a0a0c' : '#f7f5f1');
-	const ink = t.ink || (primary.paletteMode === 'dark' ? '#e8e6e3' : '#1a1917');
+	const primary = list[0];
+	const secondary = list[1];
+	const tertiary = list[2];
+
+	// Dark wins if any inspiration is dark (personal sites look sharper that way
+	// when mixing a marketing dark site with a product light site).
+	const darkCount = list.filter((s) => s.paletteMode === 'dark').length;
+	const paletteMode: 'dark' | 'light' = darkCount > 0 ? 'dark' : 'light';
+
+	// Accent: prefer a later site's accent when it differs (keeps the blend visible).
+	const accents = list.map((s) => s.tokens.accent).filter(Boolean) as string[];
+	const accent =
+		(secondary?.tokens.accent && secondary.tokens.accent !== primary.tokens.accent
+			? secondary.tokens.accent
+			: null) ||
+		accents[0] ||
+		(paletteMode === 'dark' ? '#f0c040' : '#1e4d6b');
+	const accentStrong =
+		secondary?.tokens.accentStrong ||
+		primary.tokens.accentStrong ||
+		tertiary?.tokens.accentStrong ||
+		accent;
+
+	const bg =
+		list.find((s) => s.paletteMode === paletteMode)?.tokens.bg ||
+		primary.tokens.bg ||
+		(paletteMode === 'dark' ? '#0a0a0c' : '#f7f5f1');
+	const ink =
+		list.find((s) => s.paletteMode === paletteMode)?.tokens.ink ||
+		primary.tokens.ink ||
+		(paletteMode === 'dark' ? '#e8e6e3' : '#1a1917');
+	const surface =
+		list.find((s) => s.tokens.surface)?.tokens.surface ||
+		(paletteMode === 'dark' ? '#16161a' : '#ffffff');
+	const rule =
+		list.find((s) => s.tokens.rule)?.tokens.rule ||
+		(paletteMode === 'dark' ? '#2a2a33' : '#e7e2d8');
+	const inkSoft =
+		list.find((s) => s.tokens.inkSoft)?.tokens.inkSoft ||
+		(paletteMode === 'dark' ? '#9a9898' : '#4d4a44');
+
+	const hasNoise = list.some((s) => s.hasNoise);
+	const sources = list.map((s) => s.url).join(' · ');
 
 	return {
 		mood:
-			primary.paletteMode === 'dark'
-				? 'Dark modern forge — sharp type, gold accent, atmospheric depth'
-				: 'Bright modern editorial with confident display type',
+			list.length > 1
+				? `Blend of ${list.length} inspiration sites — ${paletteMode} editorial with a product-grade accent`
+				: paletteMode === 'dark'
+					? 'Dark modern forge — sharp type, gold accent, atmospheric depth'
+					: 'Bright modern editorial with confident display type',
 		do: [
-			'Borrow inspiration fonts and palette',
+			'Blend fonts and accent across inspiration URLs',
 			'Punchy display titles with tight tracking',
 			'Uppercase tracked nav',
-			primary.hasNoise || primary.paletteMode === 'dark' ? 'Subtle noise atmosphere' : 'Clean surfaces'
+			hasNoise || paletteMode === 'dark' ? 'Subtle noise atmosphere' : 'Clean surfaces'
 		],
 		dont: [
 			'Do not clone multi-section marketing grids onto the essay index',
@@ -233,28 +374,30 @@ export function briefFromInspiration(signals: InspirationSignals[]): DesignBrief
 		],
 		tokens: {
 			accent,
-			accentStrong: t.accentStrong || accent,
+			accentStrong,
 			bg,
 			ink,
-			inkSoft: t.inkSoft || (primary.paletteMode === 'dark' ? '#9a9898' : '#4d4a44'),
-			surface: t.surface || (primary.paletteMode === 'dark' ? '#16161a' : '#ffffff'),
-			rule: t.rule || (primary.paletteMode === 'dark' ? '#2a2a33' : '#e7e2d8'),
-			ruleStrong: t.ruleStrong || (primary.paletteMode === 'dark' ? '#3d3d4a' : '#d6cfc1'),
+			inkSoft,
+			surface,
+			rule,
+			ruleStrong:
+				list.find((s) => s.tokens.ruleStrong)?.tokens.ruleStrong ||
+				(paletteMode === 'dark' ? '#3d3d4a' : '#d6cfc1'),
 			accentWash:
-				primary.paletteMode === 'dark' ? 'rgba(240, 192, 64, 0.12)' : undefined
+				paletteMode === 'dark' ? 'color-mix(in srgb, var(--accent) 14%, transparent)' : undefined
 		},
 		density: 'balanced',
-		paletteMode: primary.paletteMode,
+		paletteMode,
 		fonts: {
-			serif: primary.fontSerif || 'Instrument Serif',
-			sans: primary.fontSans || 'DM Sans',
-			mono: primary.fontMono || 'JetBrains Mono',
-			googleHref: primary.googleFontHrefs[0] || null
+			serif: pickFont(list, 'fontSerif', 'Instrument Serif'),
+			sans: pickFont(list, 'fontSans', 'DM Sans'),
+			mono: pickFont(list, 'fontMono', 'JetBrains Mono'),
+			googleHref: mergeGoogleHref(list)
 		},
 		hero: 'bold',
-		atmosphere: primary.hasNoise || primary.paletteMode === 'dark' ? 'noise' : 'none',
+		atmosphere: hasNoise || paletteMode === 'dark' ? 'noise' : 'none',
 		navStyle: 'uppercase-tracked',
-		elevatedCards: primary.paletteMode === 'dark',
-		cssNotes: primary.notes
+		elevatedCards: paletteMode === 'dark',
+		cssNotes: [`Blended from: ${sources}`, ...list.flatMap((s) => s.notes)]
 	};
 }

@@ -105,7 +105,7 @@ async function main() {
 
 Options:
   --source <url>       Site to import (required)
-  --inspire <url>      Inspiration site (repeatable, max 3)
+  --inspire <url>      Inspiration site (repeatable, up to 3; blended into one theme)
   --out <path>         Sibling output directory
   --name <slug>        Site package name (lowercase)
   --title / --author / --url
@@ -129,10 +129,20 @@ Options:
 
 		let inspire = [...args.inspire];
 		if (!inspire.length && rl) {
-			const one = await prompt(rl, 'Inspiration URL (optional, blank to skip)');
-			if (one) inspire = [one];
+			for (let n = 1; n <= 3; n++) {
+				const q =
+					n === 1
+						? 'Inspiration URL 1/3 (optional, blank to skip)'
+						: `Inspiration URL ${n}/3 (optional, blank to stop)`;
+				const one = await prompt(rl, q);
+				if (!one) break;
+				inspire.push(one);
+			}
 		}
-		inspire = inspire.slice(0, 3);
+		if (inspire.length > 3) {
+			console.warn('import: using first 3 --inspire URLs (max 3)');
+			inspire = inspire.slice(0, 3);
+		}
 
 		const engineRoot = defaultEngineRoot();
 		const siteName = (args.name || siteNameFromUrl(source)).replace(/[^a-z0-9-]/g, '');

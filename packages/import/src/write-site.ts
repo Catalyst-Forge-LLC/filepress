@@ -124,12 +124,13 @@ function buildReport(ir: SiteIR, opts: ImportOptions, brief: DesignBrief | null)
 	const imageSection = imgs
 		? `## Chrome images
 
-${imgs.hero ? `- Hero: \`${imgs.hero}\`` : '- Hero: (none)'}
-${imgs.header ? `- Header: \`${imgs.header}\`` : '- Header: (none)'}
-${imgs.background ? `- Background: \`${imgs.background}\`` : '- Background: (none)'}
-${imgs.logo ? `- Logo (config): \`${imgs.logo}\`` : '- Logo: (none)'}
+${imgs.hero ? `- Hero cover: \`${imgs.hero}\`` : '- Hero cover: (none — typographic lede)'}
+${imgs.header ? `- Header cover: \`${imgs.header}\`` : '- Header cover: (none)'}
+${imgs.background ? `- Page background: \`${imgs.background}\`` : '- Page background: (none)'}
+${imgs.logo ? `- Logo (config): \`${imgs.logo}\`` : '- Logo: (none — text title)'}
+${imgs.portrait ? `- Portrait file (not a CSS cover): \`${imgs.portrait}\`` : '- Portrait: (none)'}
 
-Replace files under \`static/images/\` anytime; theme.css references those paths.
+Replace files under \`static/images/\` anytime; theme.css references cover paths only (not portrait).
 `
 		: `## Chrome images
 

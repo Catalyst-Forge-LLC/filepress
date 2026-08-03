@@ -4,17 +4,46 @@ import { parseHTML } from 'linkedom';
 import { fetchBuffer, fetchText, resolveUrl } from './fetch.ts';
 import type { DesignBrief, ImageCandidate, SiteIR } from './ir.ts';
 
+function isFaviconish(url: string, alt = ''): boolean {
+	return /favicon|apple-touch|android-chrome|icon-\d|\/icon\./i.test(`${url} ${alt}`);
+}
+
+function isPortraitish(url: string, context = ''): boolean {
+	const s = `${url} ${context}`.toLowerCase();
+	return /portrait|headshot|avatar|profile|photo-of|author|face|example-portrait|head-shot/.test(
+		s
+	);
+}
+
+function isAtmosphereish(url: string, context = ''): boolean {
+	const s = `${url} ${context}`.toLowerCase();
+	return /board-?room|office|conference|texture|atmosphere|background|bg-|landscape|hero-bg|banner-bg|pipeline|dossier|contender/.test(
+		s
+	);
+}
+
+function isWordmarkish(url: string, context = ''): boolean {
+	const s = `${url} ${context}`.toLowerCase();
+	if (isFaviconish(url, context)) return false;
+	return /logo|wordmark|brand/.test(s) && !/favicon|icon/.test(s);
+}
+
 function classifyImage(url: string, context: string): ImageCandidate['role'] {
 	const u = url.toLowerCase();
 	const ctx = context.toLowerCase();
-	if (/logo|wordmark|brand/.test(u) || /logo|brand/.test(ctx)) return 'logo';
+	if (isPortraitish(u, ctx)) return 'portrait';
+	if (isWordmarkish(u, ctx)) return 'logo';
+	if (isFaviconish(u, ctx)) return 'logo'; // filtered later unless nothing else
+	if (isAtmosphereish(u, ctx) || /bg|background|texture|noise|pattern/.test(u + ctx)) {
+		return 'background';
+	}
 	if (/hero|banner|masthead|header/.test(u) || /hero|banner|masthead/.test(ctx)) {
 		return /header|nav|masthead/.test(ctx) ? 'header' : 'hero';
 	}
-	if (/bg|background|texture|noise|pattern|atmosphere/.test(u) || /background/.test(ctx)) {
-		return 'background';
+	// og:image is often a portrait or card — never assume it's a CSS hero strip
+	if (/og:image|twitter:image|opengraph/.test(ctx)) {
+		return isPortraitish(u, ctx) ? 'portrait' : 'other';
 	}
-	if (/og:image|twitter:image|opengraph/.test(ctx)) return 'hero';
 	return 'other';
 }
 
@@ -41,7 +70,9 @@ export async function harvestImagesFromPage(
 		const content = document.querySelector(sel)?.getAttribute('content');
 		if (!content) continue;
 		const abs = resolveUrl(finalUrl, content);
-		if (abs) pushUnique(out, { url: abs, role: 'hero', source: label, alt: 'og:image' });
+		if (!abs) continue;
+		const role = classifyImage(abs, 'og:image');
+		pushUnique(out, { url: abs, role, source: label, alt: 'og:image' });
 	}
 
 	for (const link of document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="icon"]')) {
@@ -62,12 +93,11 @@ export async function harvestImagesFromPage(
 		const w = Number(img.getAttribute('width') || 0);
 		const cls = img.getAttribute('class') || '';
 		const role = classifyImage(abs, `${alt} ${cls}`);
-		// Prefer substantial images
 		if (role === 'other' && w > 0 && w < 200) continue;
-		pushUnique(out, { url: abs, role: role === 'other' ? 'hero' : role, source: label, alt });
+		// Don't promote unknown small imgs to hero covers
+		pushUnique(out, { url: abs, role, source: label, alt });
 	}
 
-	// CSS background-image: url(...)
 	for (const m of html.matchAll(/background-image:\s*url\((['"]?)([^'")]+)\1\)/gi)) {
 		const abs = resolveUrl(finalUrl, m[2]);
 		if (!abs || abs.startsWith('data:')) continue;
@@ -89,53 +119,109 @@ export type ImagePlan = {
 	notes: string[];
 };
 
-function isFaviconish(url: string): boolean {
-	return /favicon|apple-touch|icon-\d|android-chrome/i.test(url);
-}
-
-/** Pick hero/header/bg/logo from harvested candidates + search hints. */
+/**
+ * Pick chrome images.
+ * - Portraits are never CSS covers (they crop into "nose galleries").
+ * - Logos only from the source site, and only wordmarks (not favicons / inspire brands).
+ * - Hero/header/background prefer atmospheric / wide marketing art from inspire.
+ */
 export function planImages(
 	ir: SiteIR,
 	harvested: ImageCandidate[],
 	brief: DesignBrief
 ): ImagePlan {
+	const sourceHost = (() => {
+		try {
+			return new URL(ir.source.url).hostname.replace(/^www\./, '');
+		} catch {
+			return '';
+		}
+	})();
+
+	const fromSource = (c: ImageCandidate) => {
+		try {
+			return new URL(c.url).hostname.replace(/^www\./, '') === sourceHost;
+		} catch {
+			return c.source.includes(sourceHost);
+		}
+	};
+
 	const byRole = (role: ImageCandidate['role']) => harvested.filter((c) => c.role === role);
+
 	const pick = (
 		roles: ImageCandidate['role'][],
-		opts?: { avoid?: Set<string>; skipFavicon?: boolean }
+		opts?: {
+			avoid?: Set<string>;
+			skipFavicon?: boolean;
+			skipPortrait?: boolean;
+			sourceOnly?: boolean;
+			preferAtmosphere?: boolean;
+		}
 	) => {
 		const avoid = opts?.avoid ?? new Set();
-		for (const r of roles) {
-			for (const hit of byRole(r)) {
-				if (avoid.has(hit.url)) continue;
-				if (opts?.skipFavicon && isFaviconish(hit.url)) continue;
-				return hit.url;
-			}
+		const pool: ImageCandidate[] = [];
+		for (const r of roles) pool.push(...byRole(r));
+		if (opts?.preferAtmosphere) {
+			pool.sort((a, b) => {
+				const aa = isAtmosphereish(a.url, a.alt) ? 0 : 1;
+				const bb = isAtmosphereish(b.url, b.alt) ? 0 : 1;
+				return aa - bb;
+			});
+		}
+		for (const hit of pool) {
+			if (avoid.has(hit.url)) continue;
+			if (opts?.skipFavicon && isFaviconish(hit.url, hit.alt)) continue;
+			if (opts?.skipPortrait && isPortraitish(hit.url, hit.alt)) continue;
+			if (opts?.sourceOnly && !fromSource(hit)) continue;
+			return hit.url;
 		}
 		return null;
 	};
 
 	const used = new Set<string>();
-	const hero = pick(['hero', 'header', 'other'], { skipFavicon: true });
-	if (hero) used.add(hero);
-	const background = pick(['background', 'hero', 'other'], { avoid: used, skipFavicon: true });
-	if (background) used.add(background);
-	const header = pick(['header', 'hero', 'background'], { avoid: used, skipFavicon: true });
-	if (header) used.add(header);
-	const logo =
-		pick(['logo'], { skipFavicon: true }) ||
-		pick(['logo']) ||
-		null;
 
-	const chosen = { hero, header, background, logo };
+	// Atmosphere only for CSS covers — never headshots
+	const background = pick(['background', 'hero', 'header', 'other'], {
+		skipFavicon: true,
+		skipPortrait: true,
+		preferAtmosphere: true
+	});
+	if (background) used.add(background);
+
+	const header = pick(['header', 'background', 'hero', 'other'], {
+		avoid: used,
+		skipFavicon: true,
+		skipPortrait: true,
+		preferAtmosphere: true
+	});
+	if (header) used.add(header);
+
+	// Hero strip is short — only use a distinct atmosphere image, else leave empty
+	const hero = pick(['hero', 'background', 'header'], {
+		avoid: used,
+		skipFavicon: true,
+		skipPortrait: true,
+		preferAtmosphere: true
+	});
+	if (hero) used.add(hero);
+
+	const portrait = pick(['portrait'], { skipFavicon: true });
+
+	// Never stamp an inspiration brand mark onto the imported personal site
+	const logo = pick(['logo'], {
+		sourceOnly: true,
+		skipFavicon: true
+	});
+
+	const chosen = { hero, header, background, logo, portrait };
 
 	const mood = brief.mood || 'editorial';
 	const mode = brief.paletteMode || 'dark';
 	const unsplashQueries = [
-		`${ir.identity.author || ir.identity.title} portrait professional`,
-		`${mode} abstract ${mood.split('—')[0]?.trim() || 'editorial'} texture`,
+		`${mode} abstract editorial texture soft gradient`,
 		`executive boardroom soft light atmosphere`,
-		`minimal geometric background ${mode === 'dark' ? 'dark gold' : 'warm paper'}`
+		`minimal geometric background ${mode === 'dark' ? 'dark gold' : 'warm paper'}`,
+		`${ir.identity.author || ir.identity.title} portrait professional (use as photo, not CSS cover)`
 	];
 
 	const notes = [
@@ -143,10 +229,18 @@ export function planImages(
 		...harvested.slice(0, 12).map((c) => `- [${c.role}] ${c.url} (${c.source})`),
 		harvested.length > 12 ? `- …and ${harvested.length - 12} more` : '',
 		'',
+		'Chrome rules: portraits → portrait file only (not backgrounds); logos → source wordmarks only; CSS covers → atmosphere art.',
+		chosen.portrait
+			? `Portrait saved for optional use (About photo / avatar), not as a header cover: ${chosen.portrait}`
+			: 'No portrait candidate found.',
+		!chosen.logo
+			? 'No source wordmark logo — keeping text site title (favicons / inspire logos skipped).'
+			: `Logo: ${chosen.logo}`,
+		'',
 		'Suggested Unsplash / stock searches (manual):',
 		...unsplashQueries.map((q) => `- ${q}`),
 		'',
-		'Drop files into static/images/ as hero.jpg, header.jpg, background.jpg, logo.png — or re-run with --fetch-images.'
+		'Drop files into static/images/ as background.jpg / header.jpg / hero.jpg / logo.png / portrait.jpg — or re-run with --fetch-images.'
 	].filter(Boolean);
 
 	return { candidates: harvested, chosen, unsplashQueries, notes };
@@ -164,7 +258,7 @@ function extOf(url: string, buf: Uint8Array): string {
 }
 
 /**
- * Download chosen remote images into static/images/{hero,header,background,logo}.*
+ * Download chosen remote images into static/images/{role}.*
  * Returns local public paths for the brief.
  */
 export async function fetchChosenImages(
@@ -175,7 +269,7 @@ export async function fetchChosenImages(
 	mkdirSync(imgDir, { recursive: true });
 	const local: NonNullable<DesignBrief['images']> = {};
 
-	for (const role of ['hero', 'header', 'background', 'logo'] as const) {
+	for (const role of ['hero', 'header', 'background', 'logo', 'portrait'] as const) {
 		const url = chosen[role];
 		if (!url) continue;
 		try {

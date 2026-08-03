@@ -114,7 +114,7 @@ body::before {
 		radial-gradient(ellipse 80% 60% at 10% 0%, var(--accent-wash), transparent 55%)${
 			heroImg
 				? `,
-		linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), var(--bg)),
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 35%, transparent), color-mix(in srgb, var(--bg) 75%, transparent)),
 		url("${heroImg}") center / cover no-repeat`
 				: ''
 		};
@@ -136,12 +136,14 @@ body::before {
 }
 `;
 
+	/* Emitted after darkChrome so shorthand `background:` rules cannot wipe these. */
 	const imageChrome = `
 ${
 	bgImg
 		? `body {
+	background-color: var(--bg);
 	background-image:
-		linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent), var(--bg)),
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, transparent), color-mix(in srgb, var(--bg) 88%, transparent)),
 		url("${bgImg}");
 	background-size: cover;
 	background-attachment: fixed;
@@ -153,8 +155,9 @@ ${
 ${
 	headerImg
 		? `.site-header {
+	background-color: transparent;
 	background-image:
-		linear-gradient(180deg, color-mix(in srgb, var(--bg) 78%, transparent), var(--bg)),
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), color-mix(in srgb, var(--bg) 82%, transparent)),
 		url("${headerImg}");
 	background-size: cover;
 	background-position: center;
@@ -243,7 +246,11 @@ ${
 			? `
 .site-header {
 	border-bottom-color: var(--rule);
-	background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, #000), transparent);
+	${
+		headerImg
+			? `/* Header photo set in imageChrome — avoid background shorthand wipe */`
+			: `background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, #000), transparent);`
+	}
 	backdrop-filter: blur(12px);
 	margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
@@ -343,7 +350,7 @@ ${density}
 
 body {
 	${mode === 'dark' ? `-webkit-font-smoothing: antialiased;` : ''}
-	${mode === 'dark' ? `background: var(--bg);` : ''}
+	${mode === 'dark' && !bgImg ? `background-color: var(--bg);` : ''}
 }
 
 ${noise}
@@ -368,9 +375,9 @@ ${noise}
 
 ${navBlock}
 ${heroBlock}
-${imageChrome}
 ${cardBlock}
 ${darkChrome}
+${imageChrome}
 
 .site-tagline {
 	color: var(--ink-soft);

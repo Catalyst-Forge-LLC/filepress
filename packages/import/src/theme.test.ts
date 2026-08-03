@@ -49,6 +49,13 @@ describe('themeCssFromBrief', () => {
 		expect(css).toContain('url("/images/header.jpg")');
 		expect(css).toContain('url("/images/background.jpg")');
 		expect(css).toContain('max-width: none');
+		// Header photo must win over darkChrome's background shorthand.
+		const headerImgAt = css.lastIndexOf('url("/images/header.jpg")');
+		const headerWipeAt = css.indexOf(
+			'background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, #000)'
+		);
+		expect(headerImgAt).toBeGreaterThan(-1);
+		expect(headerWipeAt).toBe(-1);
 	});
 });
 

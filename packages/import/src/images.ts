@@ -89,6 +89,10 @@ export type ImagePlan = {
 	notes: string[];
 };
 
+function isFaviconish(url: string): boolean {
+	return /favicon|apple-touch|icon-\d|android-chrome/i.test(url);
+}
+
 /** Pick hero/header/bg/logo from harvested candidates + search hints. */
 export function planImages(
 	ir: SiteIR,
@@ -96,20 +100,34 @@ export function planImages(
 	brief: DesignBrief
 ): ImagePlan {
 	const byRole = (role: ImageCandidate['role']) => harvested.filter((c) => c.role === role);
-	const first = (...roles: ImageCandidate['role'][]) => {
+	const pick = (
+		roles: ImageCandidate['role'][],
+		opts?: { avoid?: Set<string>; skipFavicon?: boolean }
+	) => {
+		const avoid = opts?.avoid ?? new Set();
 		for (const r of roles) {
-			const hit = byRole(r)[0];
-			if (hit) return hit.url;
+			for (const hit of byRole(r)) {
+				if (avoid.has(hit.url)) continue;
+				if (opts?.skipFavicon && isFaviconish(hit.url)) continue;
+				return hit.url;
+			}
 		}
 		return null;
 	};
 
-	const chosen = {
-		hero: first('hero', 'header', 'other'),
-		header: first('header', 'hero'),
-		background: first('background', 'hero'),
-		logo: first('logo')
-	};
+	const used = new Set<string>();
+	const hero = pick(['hero', 'header', 'other'], { skipFavicon: true });
+	if (hero) used.add(hero);
+	const background = pick(['background', 'hero', 'other'], { avoid: used, skipFavicon: true });
+	if (background) used.add(background);
+	const header = pick(['header', 'hero', 'background'], { avoid: used, skipFavicon: true });
+	if (header) used.add(header);
+	const logo =
+		pick(['logo'], { skipFavicon: true }) ||
+		pick(['logo']) ||
+		null;
+
+	const chosen = { hero, header, background, logo };
 
 	const mood = brief.mood || 'editorial';
 	const mode = brief.paletteMode || 'dark';

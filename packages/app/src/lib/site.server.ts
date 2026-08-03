@@ -31,6 +31,11 @@ export function getContentDir(): string {
 	return join(getSiteRoot(), 'posts');
 }
 
+/** Absolute path to the site's pages/ directory (static Markdown pages). */
+export function getPagesDir(): string {
+	return join(getSiteRoot(), 'pages');
+}
+
 /** Absolute path to downpress.config.ts at the site root. */
 export function getSiteConfigPath(): string {
 	return join(getSiteRoot(), 'downpress.config.ts');

@@ -1,5 +1,6 @@
 import matter from 'gray-matter';
-import type { PostSource, RawFrontmatter } from './types';
+import type { PageSource, PostSource, RawFrontmatter, RawPageFrontmatter } from './types';
+import { RESERVED_PAGE_SLUGS } from './types';
 
 /**
  * A content error that names the offending file. The build must fail loudly and
@@ -139,16 +140,75 @@ export function parsePost(path: string, raw: string): PostSource {
 }
 
 /** Throw if any two sources resolve to the same slug, naming both files (edge case 3). */
-export function assertUniqueSlugs(sources: PostSource[]): void {
+export function assertUniqueSlugs(sources: { slug: string; sourcePath: string }[]): void {
 	const bySlug = new Map<string, string>();
-	for (const post of sources) {
-		const existing = bySlug.get(post.slug);
+	for (const item of sources) {
+		const existing = bySlug.get(item.slug);
 		if (existing) {
 			throw new ContentError(
-				`Duplicate slug "${post.slug}" produced by two files: ${existing} and ${post.sourcePath}. ` +
+				`Duplicate slug "${item.slug}" produced by two files: ${existing} and ${item.sourcePath}. ` +
 					`Set a distinct \`slug\` in one file's frontmatter or rename it.`
 			);
 		}
-		bySlug.set(post.slug, post.sourcePath);
+		bySlug.set(item.slug, item.sourcePath);
 	}
+}
+
+const RESERVED = new Set<string>(RESERVED_PAGE_SLUGS);
+
+/** Parse and validate one static page Markdown file. Throws ContentError. */
+export function parsePage(path: string, raw: string): PageSource {
+	let parsed: matter.GrayMatterFile<string>;
+	try {
+		parsed = matter(raw);
+	} catch (e: unknown) {
+		const detail = e instanceof Error ? e.message : String(e);
+		throw new ContentError(`${path}: could not parse YAML frontmatter — ${detail}`);
+	}
+
+	const fm = parsed.data as RawPageFrontmatter;
+
+	if (fm.title === undefined || fm.title === null || String(fm.title).trim() === '') {
+		throw new ContentError(`${path}: missing required frontmatter field \`title\`.`);
+	}
+
+	const title = String(fm.title).trim();
+	const explicitSlug = fm.slug !== undefined && fm.slug !== null && String(fm.slug).trim() !== '';
+	const slug = slugify(explicitSlug ? String(fm.slug) : filenameOf(path));
+	if (slug === '') {
+		throw new ContentError(
+			`${path}: could not derive a non-empty slug from ${explicitSlug ? 'the `slug` field' : 'the filename'}.`
+		);
+	}
+	if (RESERVED.has(slug)) {
+		throw new ContentError(
+			`${path}: slug "${slug}" is reserved by the engine (${RESERVED_PAGE_SLUGS.join(', ')}). ` +
+				`Rename the file or set a different \`slug\` in frontmatter.`
+		);
+	}
+
+	const descriptionRaw = fm.description ?? fm.excerpt;
+	const description =
+		descriptionRaw !== undefined && descriptionRaw !== null && String(descriptionRaw).trim() !== ''
+			? String(descriptionRaw).trim()
+			: null;
+
+	let order = 0;
+	if (fm.order !== undefined && fm.order !== null && String(fm.order).trim() !== '') {
+		const n = Number(fm.order);
+		if (!Number.isFinite(n)) {
+			throw new ContentError(`${path}: \`order\` must be a number (got ${JSON.stringify(fm.order)}).`);
+		}
+		order = n;
+	}
+
+	return {
+		slug,
+		title,
+		description,
+		draft: fm.draft === true,
+		order,
+		sourcePath: path,
+		body: parsed.content
+	};
 }

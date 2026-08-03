@@ -1,6 +1,6 @@
 import type { SiteConfig } from '../config';
 import { absoluteUrl } from '../config';
-import type { PostMeta } from './types';
+import type { PageMeta, PostMeta } from './types';
 
 function escapeXml(value: string): string {
 	return value
@@ -46,21 +46,30 @@ ${items}
 `;
 }
 
-/** Build a sitemap covering the index, paginated pages, topics, tags, and posts. */
+/** Build a sitemap covering the index, static pages, paginated pages, topics, tags, and posts. */
 export function buildSitemapXml(
 	site: SiteConfig,
-	data: { posts: PostMeta[]; tags: { tag: string }[]; pageCount: number }
+	data: {
+		posts: PostMeta[];
+		tags: { tag: string }[];
+		pageCount: number;
+		/** Published static pages (`pages/*.md`). */
+		pages?: PageMeta[];
+	}
 ): string {
 	const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 	const extraPages: { loc: string }[] = [];
 	for (let n = 2; n <= data.pageCount; n++) extraPages.push({ loc: absoluteUrl(site, `/page/${n}`) });
 
+	const staticPages = data.pages ?? [];
+
 	const urls: { loc: string; lastmod?: string }[] = [
 		{ loc: absoluteUrl(site, '/') },
 		{ loc: absoluteUrl(site, '/topics') },
 		{ loc: absoluteUrl(site, '/tags') },
 		...extraPages,
+		...staticPages.map((p) => ({ loc: absoluteUrl(site, `/${p.slug}`) })),
 		...data.posts.map((p) => ({
 			loc: absoluteUrl(site, `/posts/${p.slug}`),
 			lastmod: p.updated ?? p.date

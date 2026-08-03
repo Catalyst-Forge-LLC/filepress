@@ -376,11 +376,13 @@ a:hover {
 }
 
 /* --- Article --- */
-.post-header {
+.post-header,
+.page-header {
 	margin-bottom: clamp(2rem, 5vw, 3rem);
 }
 
-.post-header h1 {
+.post-header h1,
+.page-header h1 {
 	font-size: clamp(2rem, 5vw, 3rem);
 	line-height: 1.1;
 	letter-spacing: -0.022em;

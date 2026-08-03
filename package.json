@@ -31,13 +31,14 @@
 	],
 	"scripts": {
 		"downpress": "node scripts/downpress.mjs",
-		"test": "pnpm --filter @downpress/core test",
+		"test": "pnpm --filter @downpress/core test && pnpm --filter @downpress/import test",
 		"check": "pnpm downpress check --site demo",
 		"build": "pnpm downpress build --site demo",
 		"build:demo": "pnpm downpress build --site demo",
 		"dev": "pnpm downpress dev --site demo",
 		"dev:demo": "pnpm downpress dev --site demo",
-		"create-site": "node scripts/create-site.mjs"
+		"create-site": "node scripts/create-site.mjs",
+		"import": "node scripts/downpress.mjs import"
 	},
 	"dependencies": {
 		"@downpress/app": "workspace:*",

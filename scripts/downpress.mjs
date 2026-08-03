@@ -50,6 +50,28 @@ function parseArgs(argv) {
 	return args;
 }
 
+/** `downpress import …` → @downpress/import CLI (does not need a site root). */
+function runImport(argv) {
+	const importCli = join(packageRoot, 'packages', 'import', 'src', 'cli.ts');
+	if (!existsSync(importCli)) fail(`import CLI missing at ${importCli}`);
+	if (!existsSync(join(packageRoot, 'node_modules'))) {
+		fail(
+			`downpress dependencies are missing at ${packageRoot}.\n` +
+				`  Run \`pnpm install\` once inside the downpress repo, then retry.`
+		);
+	}
+	const isWin = process.platform === 'win32';
+	const child = spawn(
+		isWin ? 'pnpm.cmd' : 'pnpm',
+		['--filter', '@downpress/import', 'exec', 'tsx', importCli, ...argv],
+		{ cwd: packageRoot, stdio: 'inherit', shell: isWin }
+	);
+	child.on('exit', (code, signal) => {
+		if (signal) process.kill(process.pid, signal);
+		process.exit(code ?? 1);
+	});
+}
+
 function listSites() {
 	if (!existsSync(sitesDir)) return [];
 	return readdirSync(sitesDir).filter((name) => {
@@ -74,7 +96,15 @@ function resolveSiteRoot(args) {
 	return resolve(process.cwd());
 }
 
-const args = parseArgs(process.argv.slice(2));
+const argv = process.argv.slice(2);
+if (argv[0] === 'import') {
+	runImport(argv.slice(1));
+} else {
+	runSiteCommand(argv);
+}
+
+function runSiteCommand(argv) {
+const args = parseArgs(argv);
 const command = args._[0];
 
 if (!command || !COMMANDS.has(command)) {
@@ -83,6 +113,7 @@ if (!command || !COMMANDS.has(command)) {
 			`  downpress <${[...COMMANDS].join('|')}> --site <name>   # monorepo\n` +
 			`  downpress <${[...COMMANDS].join('|')}>                 # cwd is the site\n` +
 			`  downpress <${[...COMMANDS].join('|')}> --root <path>\n` +
+			`  downpress import --source <url> [--inspire <url>] …\n` +
 			`monorepo sites: ${listSites().join(', ') || '(none)'}`
 	);
 }
@@ -122,3 +153,4 @@ child.on('exit', (code, signal) => {
 	if (signal) process.kill(process.pid, signal);
 	process.exit(code ?? 1);
 });
+}

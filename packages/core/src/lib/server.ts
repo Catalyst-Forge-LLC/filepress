@@ -5,11 +5,14 @@
 export { createContent, resolveListDrafts } from './content/content';
 export type { CreateContentOptions } from './content/content';
 export type { ContentApi } from './content/content';
+export { createPages } from './content/pages';
+export type { CreatePagesOptions, PagesApi } from './content/pages';
 export { renderMarkdown } from './content/markdown';
 export { buildRssXml, buildSitemapXml, buildRobotsTxt } from './content/feeds';
 export {
 	ContentError,
 	parsePost,
+	parsePage,
 	slugify,
 	normalizeTag,
 	assertUniqueSlugs,
@@ -19,4 +22,12 @@ export {
 
 export { absoluteUrl } from './config';
 export type { SiteConfig } from './config';
-export type { PostMeta, PostSource, RenderedPost } from './content/types';
+export type {
+	PostMeta,
+	PostSource,
+	RenderedPost,
+	PageMeta,
+	PageSource,
+	RenderedPage
+} from './content/types';
+export { RESERVED_PAGE_SLUGS } from './content/types';

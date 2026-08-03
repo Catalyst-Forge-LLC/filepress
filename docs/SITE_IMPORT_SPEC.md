@@ -1,8 +1,18 @@
 # Spec: `downpress import` — migrate a site with Ollama-assisted restyle
 
-**Status:** draft for review (not implemented)  
-**Date:** 2026-08-02  
-**Working name:** `downpress import` (aliases considered: `migrate`, `forge-site`, `bootstrap-from`)
+**Status:** v1 implemented (pages + content import + optional Ollama token theme)  
+**Date:** 2026-08-02 (updated 2026-08-03)  
+**Command:** `downpress import`
+
+### Defaults locked for v1
+
+| Question | Decision |
+| --- | --- |
+| Static pages routing | Top-level `/[slug]` from `pages/*.md`; reserved: posts, tags, topics, page, feeds |
+| URL parity | Clean break to `/posts/<slug>`; remaps listed in `.downpress-import/import-report.md` |
+| Home | Posts index; source home bio → config `lede`; long About stays a page |
+| Theme | Pass A — token `theme.css` from design brief / source CSS |
+| Framing | Downpress product feature (`@downpress/import`) |
 
 This document fleshes out an interactive CLI that:
 

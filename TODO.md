@@ -63,6 +63,15 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Site config validation: `defineDownpressConfig` fails loudly on missing `title`/`url` (edge case 19, unit-tested)
 - [ ] _(deferred to when a second repo is actually needed)_ Split core into its own repo + pin sites via git URL+SHA (D4); add a CI workflow template to the scaffold
 
+## Site import + static pages (2026-08)
+
+- [x] Static pages: `pages/*.md` → `/[slug]` (reserved slug guard, sitemap, demo About)
+- [x] `downpress import` CLI (`@downpress/import`): discover → extract → sibling scaffold
+- [x] Optional Ollama design brief → token `theme.css` (pass A); `--no-llm` fallback
+- [ ] Vision screenshots in brief prompt (Playwright); richer home-as-page mode
+- [ ] Cloudflare `_redirects` emitter for old `/writing/*` paths
+- [ ] Offline HTML fixtures for import integration tests (no live net in CI)
+
 ## M5 — Polish (optional)
 
 - [x] Pagination for the index once post count grows _(`/page/[n]`)_

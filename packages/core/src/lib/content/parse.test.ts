@@ -5,6 +5,7 @@ import {
 	assertValidDate,
 	filenameOf,
 	normalizeTag,
+	parsePage,
 	parsePost,
 	slugify
 } from './parse';
@@ -149,6 +150,34 @@ describe('parsePost', () => {
 		expect(withAuthor.author).toBe('Jane Roe');
 		const withoutAuthor = parsePost('/posts/b.md', frontmatter('title: X\ndate: 2026-01-01'));
 		expect(withoutAuthor.author).toBeNull();
+	});
+});
+
+describe('parsePage', () => {
+	it('parses a valid page without requiring a date', () => {
+		const page = parsePage(
+			'/pages/about.md',
+			frontmatter('title: About\ndescription: Who we are\norder: 2', 'Hello **there**.')
+		);
+		expect(page.slug).toBe('about');
+		expect(page.title).toBe('About');
+		expect(page.description).toBe('Who we are');
+		expect(page.order).toBe(2);
+		expect(page.draft).toBe(false);
+		expect(page.body).toContain('Hello');
+	});
+
+	it('rejects reserved slugs', () => {
+		expect(() =>
+			parsePage('/pages/posts.md', frontmatter('title: Nope'))
+		).toThrow(/reserved by the engine/);
+		expect(() =>
+			parsePage('/pages/x.md', frontmatter('title: Nope\nslug: tags'))
+		).toThrow(/reserved by the engine/);
+	});
+
+	it('requires title', () => {
+		expect(() => parsePage('/pages/a.md', frontmatter('order: 1'))).toThrow(/missing required.*title/);
 	});
 });
 

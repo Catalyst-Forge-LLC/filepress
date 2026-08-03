@@ -81,6 +81,8 @@ The masthead carries the site identity: the title (or a `logo` image from site c
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 
+**Static page:** `.static-page` · `.page-header` · `.prose` · `.draft-banner`
+
 **Shared:** `.meta` · `.eyebrow` · `.tag-list` · `.newsletter` · `.button`
 
 **Topics:** `.topic-group` · `.topic-posts` · `.count` · `.date`

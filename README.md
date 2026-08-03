@@ -24,9 +24,26 @@ pnpm build    # → build/
 The site folder only needs:
 
 - `downpress.config.ts` — title, URL, and other site settings
-- `posts/` — Markdown posts
+- `posts/` — Markdown posts (`/posts/<slug>`)
+- `pages/` — optional static Markdown pages (`about.md` → `/about`)
 - `static/` — favicon, images, etc.
 - `package.json` — depends on this engine (`link:../downpress` locally, or a git URL + tag/SHA in CI)
+
+### Import an existing site
+
+Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling Downpress site, and optionally ask a local Ollama model for a token theme:
+
+```bash
+pnpm install
+pnpm downpress import --source https://example.com \
+  --inspire https://www.catalystforge.com \
+  --yes
+
+# dry-run first (no write):
+pnpm downpress import --source https://example.com --dry-run --no-llm
+```
+
+See [`docs/SITE_IMPORT_SPEC.md`](docs/SITE_IMPORT_SPEC.md).
 
 More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 

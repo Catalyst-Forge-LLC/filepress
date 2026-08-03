@@ -1,0 +1,254 @@
+#!/usr/bin/env node
+/**
+ * downpress import — crawl a site, extract content, scaffold a sibling Downpress site.
+ *
+ * Usage:
+ *   pnpm --filter @downpress/import import -- --source https://example.com
+ *   downpress import --source https://example.com --inspire https://www.catalystforge.com
+ */
+import { createInterface } from 'node:readline/promises';
+import { isAbsolute, resolve } from 'node:path';
+import { stdin as input, stdout as output } from 'node:process';
+import { discoverSite } from './discover.ts';
+import { extractSite } from './extract.ts';
+import { fetchText } from './fetch.ts';
+import type { DesignBrief, ImportOptions } from './ir.ts';
+import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
+import {
+	DEFAULT_BRIEF,
+	themeCssFromBrief,
+	tokensFromSourceCss
+} from './theme.ts';
+import {
+	defaultEngineRoot,
+	defaultOutPath,
+	siteNameFromUrl,
+	writeSite
+} from './write-site.ts';
+
+/** pnpm sets INIT_CWD to the directory where the user invoked the command. */
+function resolveUserPath(p: string): string {
+	if (isAbsolute(p)) return p;
+	const base = process.env.INIT_CWD?.trim() || process.cwd();
+	return resolve(base, p);
+}
+
+function fail(msg: string): never {
+	console.error(`downpress import: ${msg}`);
+	process.exit(1);
+}
+
+function parseArgs(argv: string[]) {
+	const out: {
+		_: string[];
+		source?: string;
+		inspire: string[];
+		out?: string;
+		name?: string;
+		title?: string;
+		author?: string;
+		url?: string;
+		ollama: string;
+		model: string;
+		noLlm: boolean;
+		dryRun: boolean;
+		force: boolean;
+		yes: boolean;
+	} = {
+		_: [],
+		inspire: [],
+		ollama: process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434',
+		model: process.env.DOWNPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b',
+		noLlm: false,
+		dryRun: false,
+		force: false,
+		yes: false
+	};
+
+	for (let i = 0; i < argv.length; i++) {
+		const a = argv[i];
+		const next = () => {
+			const v = argv[++i];
+			if (!v) fail(`${a} requires a value`);
+			return v;
+		};
+		if (a === '--source') out.source = next();
+		else if (a === '--inspire') out.inspire.push(next());
+		else if (a === '--out') out.out = next();
+		else if (a === '--name') out.name = next();
+		else if (a === '--title') out.title = next();
+		else if (a === '--author') out.author = next();
+		else if (a === '--url') out.url = next();
+		else if (a === '--ollama') out.ollama = next();
+		else if (a === '--model') out.model = next();
+		else if (a === '--no-llm') out.noLlm = true;
+		else if (a === '--dry-run') out.dryRun = true;
+		else if (a === '--force') out.force = true;
+		else if (a === '--yes' || a === '-y') out.yes = true;
+		else if (a === '--help' || a === '-h') out._.push('help');
+		else out._.push(a);
+	}
+	return out;
+}
+
+async function prompt(rl: ReturnType<typeof createInterface>, q: string, def?: string) {
+	const hint = def ? ` [${def}]` : '';
+	const ans = (await rl.question(`${q}${hint}: `)).trim();
+	return ans || def || '';
+}
+
+async function main() {
+	const args = parseArgs(process.argv.slice(2));
+	if (args._.includes('help')) {
+		console.log(`Usage: downpress import --source <url> [options]
+
+Options:
+  --source <url>       Site to import (required)
+  --inspire <url>      Inspiration site (repeatable, max 3)
+  --out <path>         Sibling output directory
+  --name <slug>        Site package name (lowercase)
+  --title / --author / --url
+  --ollama <host>      Default http://127.0.0.1:11434
+  --model <name>       Default gemma4:12b
+  --no-llm             Skip Ollama; token theme from source CSS / defaults
+  --dry-run            Crawl + report only (no write)
+  --force              Overwrite generated content in --out
+  --yes                Skip confirmation prompt
+`);
+		return;
+	}
+
+	const interactive = Boolean(process.stdin.isTTY) && !args.yes;
+	const rl = interactive ? createInterface({ input, output }) : null;
+
+	try {
+		let source = args.source || '';
+		if (!source && rl) source = await prompt(rl, 'Source site URL');
+		if (!source) fail('`--source` is required');
+
+		let inspire = [...args.inspire];
+		if (!inspire.length && rl) {
+			const one = await prompt(rl, 'Inspiration URL (optional, blank to skip)');
+			if (one) inspire = [one];
+		}
+		inspire = inspire.slice(0, 3);
+
+		const engineRoot = defaultEngineRoot();
+		const siteName = (args.name || siteNameFromUrl(source)).replace(/[^a-z0-9-]/g, '');
+		if (!siteName) fail('could not derive a site name; pass --name');
+
+		let out = args.out
+			? resolveUserPath(args.out)
+			: defaultOutPath(engineRoot, siteName);
+		if (rl && !args.out) {
+			const picked = await prompt(rl, 'Output directory', out);
+			if (picked) out = resolveUserPath(picked);
+		}
+
+		const opts: ImportOptions = {
+			source,
+			inspire,
+			out,
+			siteName,
+			title: args.title,
+			author: args.author,
+			canonicalUrl: args.url,
+			ollamaHost: args.ollama,
+			ollamaModel: args.model,
+			noLlm: args.noLlm,
+			dryRun: args.dryRun,
+			force: args.force,
+			engineRoot
+		};
+
+		console.log(`\nimport: discovering ${source} …`);
+		const discovered = await discoverSite(source);
+		console.log(
+			`import: found ${discovered.urls.length} URLs, ${discovered.rss.length} RSS items`
+		);
+
+		console.log('import: extracting content …');
+		const ir = await extractSite(discovered);
+		if (opts.title) ir.identity.title = opts.title;
+		if (opts.author) ir.identity.author = opts.author;
+		if (opts.canonicalUrl) ir.identity.canonicalUrl = opts.canonicalUrl.replace(/\/+$/, '');
+
+		console.log(
+			`import: ${ir.posts.length} posts, ${ir.pages.length} pages, title="${ir.identity.title}"`
+		);
+
+		let brief: DesignBrief | null = null;
+		const homeHtml = await fetchText(discovered.origin)
+			.then((r) => r.text)
+			.catch(() => '');
+
+		if (!opts.noLlm) {
+			const up = await ollamaAvailable(opts.ollamaHost);
+			if (!up) {
+				console.warn(
+					`import: Ollama not reachable at ${opts.ollamaHost}; using source CSS / defaults (--no-llm)`
+				);
+				opts.noLlm = true;
+			} else {
+				console.log(`import: asking ${opts.ollamaModel} for a design brief …`);
+				const inspireSummaries: string[] = [];
+				for (const u of inspire) {
+					try {
+						const { text } = await fetchText(u);
+						inspireSummaries.push(`${u}: ${summarizeHtmlForBrief(text)}`);
+					} catch (e) {
+						console.warn(
+							`import: inspiration fetch failed ${u}: ${e instanceof Error ? e.message : e}`
+						);
+					}
+				}
+				brief = await generateDesignBrief({
+					host: opts.ollamaHost,
+					model: opts.ollamaModel,
+					ir,
+					inspireSummaries
+				});
+				const fromSource = tokensFromSourceCss(homeHtml);
+				brief.tokens = { ...fromSource, ...brief.tokens };
+			}
+		}
+
+		if (opts.noLlm) {
+			brief = {
+				...DEFAULT_BRIEF,
+				tokens: { ...DEFAULT_BRIEF.tokens, ...tokensFromSourceCss(homeHtml) }
+			};
+		}
+
+		if (opts.dryRun) {
+			console.log('\n--- dry-run SiteIR summary ---');
+			console.log(JSON.stringify({ identity: ir.identity, posts: ir.posts.map((p) => ({ slug: p.slug, date: p.date, title: p.title, tags: p.tags })), pages: ir.pages.map((p) => ({ slug: p.slug, title: p.title })), nav: ir.nav, topics: ir.topics, lede: ir.lede, notes: ir.notes }, null, 2));
+			if (brief) {
+				console.log('\n--- design brief ---');
+				console.log(JSON.stringify(brief, null, 2));
+				console.log('\n--- theme.css preview (first 40 lines) ---');
+				console.log(themeCssFromBrief(brief).split('\n').slice(0, 40).join('\n'));
+			}
+			console.log(`\nimport: dry-run complete (would write to ${out})`);
+			return;
+		}
+
+		if (rl && !args.yes) {
+			const ok = await prompt(rl, `Write site to ${out}?`, 'y');
+			if (!/^y(es)?$/i.test(ok)) {
+				console.log('import: aborted');
+				return;
+			}
+		}
+
+		console.log(`import: writing ${out} …`);
+		const { reportPath } = await writeSite(ir, opts, brief);
+		console.log(`import: done.\n  report: ${reportPath}\n  next: cd ${out} && pnpm install && pnpm downpress dev`);
+	} finally {
+		rl?.close();
+	}
+}
+
+main().catch((e) => {
+	fail(e instanceof Error ? e.message : String(e));
+});

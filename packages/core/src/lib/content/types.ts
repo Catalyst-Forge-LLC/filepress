@@ -40,3 +40,48 @@ export interface PostSource extends PostMeta {
 export interface RenderedPost extends PostMeta {
 	html: string;
 }
+
+/** Frontmatter as authored in a static page's YAML block (before validation). */
+export interface RawPageFrontmatter {
+	title?: unknown;
+	slug?: unknown;
+	description?: unknown;
+	excerpt?: unknown;
+	draft?: unknown;
+	/** Optional nav/sort weight; lower first. */
+	order?: unknown;
+}
+
+/** Validated metadata for a static Markdown page (`pages/*.md` → `/<slug>`). */
+export interface PageMeta {
+	slug: string;
+	title: string;
+	description: string | null;
+	draft: boolean;
+	/** Sort weight for listings/nav helpers; default 0. */
+	order: number;
+	/** Source file path, e.g. "/pages/about.md". */
+	sourcePath: string;
+}
+
+export interface PageSource extends PageMeta {
+	body: string;
+}
+
+export interface RenderedPage extends PageMeta {
+	html: string;
+}
+
+/**
+ * Path segments reserved by the engine. A `pages/<slug>.md` file must not use
+ * these (or collide with another page slug).
+ */
+export const RESERVED_PAGE_SLUGS = [
+	'posts',
+	'tags',
+	'topics',
+	'page',
+	'rss.xml',
+	'sitemap.xml',
+	'robots.txt'
+] as const;

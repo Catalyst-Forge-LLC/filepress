@@ -13,7 +13,7 @@
 // Refuses a non-empty target (edge case 18), unless --force is passed (still
 // refuses to overwrite downpress.config.ts / package.json if present).
 
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -69,7 +69,13 @@ const title = args.title || name;
 const url = args.url || `https://${name}.example.com`;
 
 mkdirSync(join(target, 'posts'), { recursive: true });
+mkdirSync(join(target, 'pages'), { recursive: true });
 mkdirSync(join(target, 'static'), { recursive: true });
+
+const defaultFavicon = join(repoRoot, 'packages', 'core', 'src', 'lib', 'assets', 'favicon.svg');
+if (existsSync(defaultFavicon)) {
+	copyFileSync(defaultFavicon, join(target, 'static', 'favicon.svg'));
+}
 
 const configImport = external
 	? `import { defineDownpressConfig } from 'downpress';`
@@ -109,6 +115,18 @@ tags: [meta]
 ---
 
 This is your first post. Edit or replace \`posts/hello-world.md\`, then push.
+`
+);
+
+writeFileSync(
+	join(target, 'pages', 'about.md'),
+	`---
+title: About
+description: About ${title}.
+order: 1
+---
+
+Tell visitors who you are. This page lives at \`/about\` — edit \`pages/about.md\`.
 `
 );
 

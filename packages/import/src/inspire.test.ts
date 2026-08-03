@@ -1,0 +1,54 @@
+import { describe, expect, it } from 'vitest';
+import { briefFromInspiration, type InspirationSignals } from './inspire.ts';
+import { themeCssFromBrief } from './theme.ts';
+
+function forgeLike(): InspirationSignals {
+	return {
+		url: 'https://www.catalystforge.com/',
+		googleFontHrefs: [
+			'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;500&display=swap'
+		],
+		fontSerif: 'Instrument Serif',
+		fontSans: 'DM Sans',
+		fontMono: 'JetBrains Mono',
+		tokens: {
+			accent: '#f0c040',
+			accentStrong: '#b8922e',
+			bg: '#0a0a0c',
+			ink: '#e8e6e3',
+			inkSoft: '#9a9898',
+			surface: '#16161a',
+			rule: '#2a2a33',
+			ruleStrong: '#3d3d4a'
+		},
+		paletteMode: 'dark',
+		hasNoise: true,
+		notes: ['Inspiration accent #f0c040', 'Palette mode: dark']
+	};
+}
+
+describe('briefFromInspiration', () => {
+	it('builds a dark punchy brief from forge-like signals', () => {
+		const brief = briefFromInspiration([forgeLike()]);
+		expect(brief.paletteMode).toBe('dark');
+		expect(brief.tokens.bg).toBe('#0a0a0c');
+		expect(brief.tokens.accent).toBe('#f0c040');
+		expect(brief.fonts?.serif).toBe('Instrument Serif');
+		expect(brief.hero).toBe('bold');
+		expect(brief.atmosphere).toBe('noise');
+		expect(brief.elevatedCards).toBe(true);
+	});
+});
+
+describe('themeCssFromBrief (punchy)', () => {
+	it('emits google fonts, noise, and dark tokens', () => {
+		const css = themeCssFromBrief(briefFromInspiration([forgeLike()]));
+		expect(css).toContain('@import url("https://fonts.googleapis.com');
+		expect(css).toContain('--bg: #0a0a0c');
+		expect(css).toContain('--font-serif: "Instrument Serif"');
+		expect(css).toContain('body::before');
+		expect(css).toContain('.site-nav a::after');
+		expect(css).toContain('.post-card');
+		expect(css).toContain('radial-gradient');
+	});
+});

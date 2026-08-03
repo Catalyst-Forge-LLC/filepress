@@ -52,8 +52,25 @@ export type DesignBrief = {
 		bg?: string;
 		ink?: string;
 		inkSoft?: string;
+		surface?: string;
+		rule?: string;
+		ruleStrong?: string;
+		accentWash?: string;
 	};
 	density: 'sparse' | 'balanced' | 'dense';
+	/** When set, theme generator punches up structure — not just token swaps. */
+	paletteMode?: 'dark' | 'light';
+	fonts?: {
+		serif: string;
+		sans: string;
+		mono: string;
+		/** Full Google Fonts CSS2 URL, or null to skip remote fonts. */
+		googleHref: string | null;
+	};
+	hero?: 'editorial' | 'bold';
+	atmosphere?: 'none' | 'noise';
+	navStyle?: 'soft' | 'uppercase-tracked';
+	elevatedCards?: boolean;
 	cssNotes: string[];
 };
 

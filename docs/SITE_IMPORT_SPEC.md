@@ -11,7 +11,7 @@
 | Static pages routing | Top-level `/[slug]` from `pages/*.md`; reserved: posts, tags, topics, page, feeds |
 | URL parity | Clean break to `/posts/<slug>`; remaps listed in `.downpress-import/import-report.md` |
 | Home | Posts index; source home bio → config `lede`; long About stays a page |
-| Theme | Pass A — token `theme.css` from design brief / source CSS |
+| Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
 | Framing | Downpress product feature (`@downpress/import`) |
 
 This document fleshes out an interactive CLI that:

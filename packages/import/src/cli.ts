@@ -13,12 +13,13 @@ import { discoverSite } from './discover.ts';
 import { extractSite } from './extract.ts';
 import { fetchText } from './fetch.ts';
 import type { DesignBrief, ImportOptions } from './ir.ts';
-import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
 import {
-	DEFAULT_BRIEF,
-	themeCssFromBrief,
-	tokensFromSourceCss
-} from './theme.ts';
+	briefFromInspiration,
+	extractInspirationSignals,
+	type InspirationSignals
+} from './inspire.ts';
+import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
+import { DEFAULT_BRIEF, themeCssFromBrief, tokensFromSourceCss } from './theme.ts';
 import {
 	defaultEngineRoot,
 	defaultOutPath,
@@ -182,52 +183,81 @@ Options:
 			.then((r) => r.text)
 			.catch(() => '');
 
+		// Inspiration drives the look. Source site only fills gaps when no --inspire.
+		const inspireSignals: InspirationSignals[] = [];
+		const inspireSummaries: string[] = [];
+		for (const u of inspire) {
+			try {
+				console.log(`import: sampling inspiration ${u} …`);
+				const signals = await extractInspirationSignals(u);
+				inspireSignals.push(signals);
+				const { text } = await fetchText(u);
+				inspireSummaries.push(`${u}: ${summarizeHtmlForBrief(text)}`);
+				console.log(`  → ${signals.paletteMode} · ${signals.notes.join(' · ')}`);
+			} catch (e) {
+				console.warn(
+					`import: inspiration fetch failed ${u}: ${e instanceof Error ? e.message : e}`
+				);
+			}
+		}
+
+		const seed =
+			inspireSignals.length > 0
+				? briefFromInspiration(inspireSignals)
+				: {
+						...DEFAULT_BRIEF,
+						tokens: { ...DEFAULT_BRIEF.tokens, ...tokensFromSourceCss(homeHtml) }
+					};
+
 		if (!opts.noLlm) {
 			const up = await ollamaAvailable(opts.ollamaHost);
 			if (!up) {
 				console.warn(
-					`import: Ollama not reachable at ${opts.ollamaHost}; using source CSS / defaults (--no-llm)`
+					`import: Ollama not reachable at ${opts.ollamaHost}; using extracted inspiration brief`
 				);
-				opts.noLlm = true;
+				brief = seed;
 			} else {
-				console.log(`import: asking ${opts.ollamaModel} for a design brief …`);
-				const inspireSummaries: string[] = [];
-				for (const u of inspire) {
-					try {
-						const { text } = await fetchText(u);
-						inspireSummaries.push(`${u}: ${summarizeHtmlForBrief(text)}`);
-					} catch (e) {
-						console.warn(
-							`import: inspiration fetch failed ${u}: ${e instanceof Error ? e.message : e}`
-						);
-					}
-				}
+				console.log(`import: refining design brief with ${opts.ollamaModel} …`);
 				brief = await generateDesignBrief({
 					host: opts.ollamaHost,
 					model: opts.ollamaModel,
 					ir,
-					inspireSummaries
+					inspireSummaries,
+					inspireSignals,
+					seed
 				});
-				const fromSource = tokensFromSourceCss(homeHtml);
-				brief.tokens = { ...fromSource, ...brief.tokens };
 			}
-		}
-
-		if (opts.noLlm) {
-			brief = {
-				...DEFAULT_BRIEF,
-				tokens: { ...DEFAULT_BRIEF.tokens, ...tokensFromSourceCss(homeHtml) }
-			};
+		} else {
+			brief = seed;
 		}
 
 		if (opts.dryRun) {
 			console.log('\n--- dry-run SiteIR summary ---');
-			console.log(JSON.stringify({ identity: ir.identity, posts: ir.posts.map((p) => ({ slug: p.slug, date: p.date, title: p.title, tags: p.tags })), pages: ir.pages.map((p) => ({ slug: p.slug, title: p.title })), nav: ir.nav, topics: ir.topics, lede: ir.lede, notes: ir.notes }, null, 2));
+			console.log(
+				JSON.stringify(
+					{
+						identity: ir.identity,
+						posts: ir.posts.map((p) => ({
+							slug: p.slug,
+							date: p.date,
+							title: p.title,
+							tags: p.tags
+						})),
+						pages: ir.pages.map((p) => ({ slug: p.slug, title: p.title })),
+						nav: ir.nav,
+						topics: ir.topics,
+						lede: ir.lede,
+						notes: ir.notes
+					},
+					null,
+					2
+				)
+			);
 			if (brief) {
 				console.log('\n--- design brief ---');
 				console.log(JSON.stringify(brief, null, 2));
-				console.log('\n--- theme.css preview (first 40 lines) ---');
-				console.log(themeCssFromBrief(brief).split('\n').slice(0, 40).join('\n'));
+				console.log('\n--- theme.css preview (first 60 lines) ---');
+				console.log(themeCssFromBrief(brief).split('\n').slice(0, 60).join('\n'));
 			}
 			console.log(`\nimport: dry-run complete (would write to ${out})`);
 			return;

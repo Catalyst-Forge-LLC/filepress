@@ -12,7 +12,7 @@
 | URL parity | Clean break to `/posts/<slug>`; remaps listed in `.downpress-import/import-report.md` |
 | Home | Posts index; source home bio → config `lede`; long About stays a page |
 | Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards, wider measure). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
-| Chrome images | Harvest og:image / hero / CSS backgrounds / logos from source + inspire; suggest Unsplash queries in the import report; `--fetch-images` downloads into `static/images/` and wires `theme.css` + optional config `logo`. |
+| Chrome images | Source site: portrait + wordmark logo only. CSS covers (background/header) from **Openverse** Creative Commons stock (not `--inspire` photos). `--fetch-images` downloads into `static/images/`, wires `theme.css`, writes `.downpress-import/IMAGE_ATTRIBUTION.md`. |
 | Framing | Downpress product feature (`@downpress/import`) |
 
 This document fleshes out an interactive CLI that:

@@ -14,6 +14,26 @@ import { fetchBuffer } from './fetch.ts';
 import { fetchChosenImages } from './images.ts';
 import { themeCssFromBrief } from './theme.ts';
 
+function writeAttribution(metaDir: string, ir: SiteIR) {
+	const stockLines = ir.notes.filter(
+		(n) =>
+			n.includes('Openverse') ||
+			n.startsWith('- **') ||
+			n.startsWith('Stock attribution')
+	);
+	if (!stockLines.length) return;
+	writeFileSync(
+		join(metaDir, 'IMAGE_ATTRIBUTION.md'),
+		`# Image attribution
+
+Chrome covers were fetched via [Openverse](https://openverse.org/) (Creative Commons).
+Keep this file with the site if you redistribute.
+
+${stockLines.join('\n')}
+`
+	);
+}
+
 const DEFAULT_FAVICON = resolve(
 	dirname(fileURLToPath(import.meta.url)),
 	'../../core/src/lib/assets/favicon.svg'
@@ -311,6 +331,7 @@ ${topicsLit}
 	writeFileSync(join(metaDir, 'site-ir.json'), JSON.stringify(ir, null, 2));
 	if (activeBrief)
 		writeFileSync(join(metaDir, 'design-brief.json'), JSON.stringify(activeBrief, null, 2));
+	writeAttribution(metaDir, ir);
 	const reportPath = join(metaDir, 'import-report.md');
 	writeFileSync(reportPath, buildReport(ir, opts, activeBrief));
 

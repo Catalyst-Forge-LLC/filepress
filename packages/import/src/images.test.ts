@@ -62,10 +62,10 @@ describe('planImages', () => {
 
 		const { chosen } = planImages(ir, harvested, brief);
 		expect(chosen.portrait).toContain('example-portrait');
-		expect(chosen.background).toContain('board-room');
-		expect(chosen.header).toContain('landing-pipeline');
-		// Second atmosphere image may fill hero, or stay null — never the portrait.
-		expect(chosen.hero == null || !chosen.hero.includes('portrait')).toBe(true);
+		// Covers are stock-filled later — never inspire boardrooms / pipelines.
+		expect(chosen.background).toBeNull();
+		expect(chosen.header).toBeNull();
+		expect(chosen.hero).toBeNull();
 		expect(chosen.logo).toBeNull();
 	});
 });

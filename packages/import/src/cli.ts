@@ -20,6 +20,7 @@ import {
 } from './inspire.ts';
 import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
 import { harvestImagesFromPage, planImages, type ImagePlan } from './images.ts';
+import { formatAttributionMarkdown, planStockCovers } from './stock.ts';
 import { DEFAULT_BRIEF, themeCssFromBrief, tokensFromSourceCss } from './theme.ts';
 import {
 	defaultEngineRoot,
@@ -118,7 +119,7 @@ Options:
   --no-llm             Skip Ollama; token theme from source CSS / defaults
   --dry-run            Crawl + report only (no write)
   --force              Overwrite generated content in --out
-  --fetch-images       Download suggested hero/header/bg/logo into static/images/
+  --fetch-images       Download Openverse CC covers + source portrait/logo into static/images/
   --yes                Skip confirmation prompt
 `);
 		return;
@@ -307,8 +308,25 @@ Options:
 		}
 
 		if (opts.fetchImages) {
-			// Remote candidates — writeSite downloads after wiping/creating static/.
-			brief = { ...brief, images: imagePlan.chosen };
+			console.log('import: searching Openverse for free stock covers …');
+			const stock = await planStockCovers(brief, {
+				author: ir.identity.author,
+				includeHeader: true,
+				includeHero: false
+			});
+			ir.notes.push(...stock.notes);
+			const attr = formatAttributionMarkdown(stock.hits);
+			if (attr) ir.notes.push('Stock attribution:', attr);
+			// Covers from stock; portrait/logo from source harvest only.
+			brief = {
+				...brief,
+				images: {
+					...imagePlan.chosen,
+					...stock.images,
+					portrait: imagePlan.chosen.portrait,
+					logo: imagePlan.chosen.logo
+				}
+			};
 		}
 
 		console.log(`import: writing ${out} …`);

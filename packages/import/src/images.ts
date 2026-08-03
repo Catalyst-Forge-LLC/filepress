@@ -120,10 +120,9 @@ export type ImagePlan = {
 };
 
 /**
- * Pick chrome images.
- * - Portraits are never CSS covers (they crop into "nose galleries").
- * - Logos only from the source site, and only wordmarks (not favicons / inspire brands).
- * - Hero/header/background prefer atmospheric / wide marketing art from inspire.
+ * Pick site-owned assets from the crawl.
+ * CSS covers (hero/header/background) come from Openverse stock via planStockCovers —
+ * never from --inspire marketing photos.
  */
 export function planImages(
 	ir: SiteIR,
@@ -150,97 +149,56 @@ export function planImages(
 
 	const pick = (
 		roles: ImageCandidate['role'][],
-		opts?: {
-			avoid?: Set<string>;
-			skipFavicon?: boolean;
-			skipPortrait?: boolean;
-			sourceOnly?: boolean;
-			preferAtmosphere?: boolean;
-		}
+		opts?: { skipFavicon?: boolean; sourceOnly?: boolean }
 	) => {
-		const avoid = opts?.avoid ?? new Set();
-		const pool: ImageCandidate[] = [];
-		for (const r of roles) pool.push(...byRole(r));
-		if (opts?.preferAtmosphere) {
-			pool.sort((a, b) => {
-				const aa = isAtmosphereish(a.url, a.alt) ? 0 : 1;
-				const bb = isAtmosphereish(b.url, b.alt) ? 0 : 1;
-				return aa - bb;
-			});
-		}
-		for (const hit of pool) {
-			if (avoid.has(hit.url)) continue;
-			if (opts?.skipFavicon && isFaviconish(hit.url, hit.alt)) continue;
-			if (opts?.skipPortrait && isPortraitish(hit.url, hit.alt)) continue;
-			if (opts?.sourceOnly && !fromSource(hit)) continue;
-			return hit.url;
+		for (const r of roles) {
+			for (const hit of byRole(r)) {
+				if (opts?.skipFavicon && isFaviconish(hit.url, hit.alt)) continue;
+				if (opts?.sourceOnly && !fromSource(hit)) continue;
+				return hit.url;
+			}
 		}
 		return null;
 	};
 
-	const used = new Set<string>();
-
-	// Atmosphere only for CSS covers — never headshots
-	const background = pick(['background', 'hero', 'header', 'other'], {
-		skipFavicon: true,
-		skipPortrait: true,
-		preferAtmosphere: true
-	});
-	if (background) used.add(background);
-
-	const header = pick(['header', 'background', 'hero', 'other'], {
-		avoid: used,
-		skipFavicon: true,
-		skipPortrait: true,
-		preferAtmosphere: true
-	});
-	if (header) used.add(header);
-
-	// Hero strip is short — only use a distinct atmosphere image, else leave empty
-	const hero = pick(['hero', 'background', 'header'], {
-		avoid: used,
-		skipFavicon: true,
-		skipPortrait: true,
-		preferAtmosphere: true
-	});
-	if (hero) used.add(hero);
-
 	const portrait = pick(['portrait'], { skipFavicon: true });
+	const logo = pick(['logo'], { sourceOnly: true, skipFavicon: true });
 
-	// Never stamp an inspiration brand mark onto the imported personal site
-	const logo = pick(['logo'], {
-		sourceOnly: true,
-		skipFavicon: true
-	});
-
-	const chosen = { hero, header, background, logo, portrait };
+	// Covers filled later by Openverse when --fetch-images is set
+	const chosen = {
+		hero: null,
+		header: null,
+		background: null,
+		logo,
+		portrait
+	};
 
 	const mood = brief.mood || 'editorial';
 	const mode = brief.paletteMode || 'dark';
 	const unsplashQueries = [
-		`${mode} abstract editorial texture soft gradient`,
-		`executive boardroom soft light atmosphere`,
+		`${mode} abstract ${mood.split(/[—,:]/)[0]?.trim() || 'editorial'} texture`,
 		`minimal geometric background ${mode === 'dark' ? 'dark gold' : 'warm paper'}`,
-		`${ir.identity.author || ir.identity.title} portrait professional (use as photo, not CSS cover)`
+		`soft atmospheric gradient ${mode}`,
+		`${ir.identity.author || ir.identity.title} portrait professional (photo slot, not CSS cover)`
 	];
 
 	const notes = [
-		`Image candidates found: ${harvested.length}`,
-		...harvested.slice(0, 12).map((c) => `- [${c.role}] ${c.url} (${c.source})`),
-		harvested.length > 12 ? `- …and ${harvested.length - 12} more` : '',
+		`Source/inspire image candidates (logos & portraits only used from source): ${harvested.length}`,
+		...harvested.slice(0, 10).map((c) => `- [${c.role}] ${c.url} (${c.source})`),
+		harvested.length > 10 ? `- …and ${harvested.length - 10} more` : '',
 		'',
-		'Chrome rules: portraits → portrait file only (not backgrounds); logos → source wordmarks only; CSS covers → atmosphere art.',
+		'CSS covers use Openverse Creative Commons stock (not inspiration-site photos).',
 		chosen.portrait
-			? `Portrait saved for optional use (About photo / avatar), not as a header cover: ${chosen.portrait}`
+			? `Portrait candidate (not a cover): ${chosen.portrait}`
 			: 'No portrait candidate found.',
 		!chosen.logo
-			? 'No source wordmark logo — keeping text site title (favicons / inspire logos skipped).'
+			? 'No source wordmark logo — keeping text site title.'
 			: `Logo: ${chosen.logo}`,
 		'',
-		'Suggested Unsplash / stock searches (manual):',
+		'Manual stock search ideas:',
 		...unsplashQueries.map((q) => `- ${q}`),
 		'',
-		'Drop files into static/images/ as background.jpg / header.jpg / hero.jpg / logo.png / portrait.jpg — or re-run with --fetch-images.'
+		'Re-run with --fetch-images to download Openverse covers + source portrait/logo.'
 	].filter(Boolean);
 
 	return { candidates: harvested, chosen, unsplashQueries, notes };

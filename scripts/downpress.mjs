@@ -161,12 +161,14 @@ const env = {
 	DOWNPRESS_SITE_ROOT: siteRoot
 };
 
-// Forward port/host to Vite for dev + preview (build/check ignore these).
-const viteArgs = [];
+// Port is applied via DOWNPRESS_PORT in packages/app/vite.config.ts (more
+// reliable on Windows than forwarding CLI args through `pnpm run`).
 if (args.port) {
-	viteArgs.push('--port', String(args.port), '--strictPort');
+	env.DOWNPRESS_PORT = String(args.port);
 	console.log(`downpress: ${command} on http://localhost:${args.port} (site: ${siteRoot})`);
 }
+
+const viteArgs = [];
 if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? 'true' : args.host);
 viteArgs.push(...args.extra);
 

@@ -44,7 +44,23 @@ const coreEntry = join(appRoot, '../core/src/lib/index.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
 const coreTheme = join(appRoot, '../core/src/lib/theme.ts');
 
+/** Optional fixed port from `downpress dev|preview --port` (via DOWNPRESS_PORT). */
+function resolvePort(): number | undefined {
+	const raw = process.env.DOWNPRESS_PORT?.trim();
+	if (!raw) return undefined;
+	const n = Number(raw);
+	return Number.isInteger(n) && n > 0 && n <= 65535 ? n : undefined;
+}
+
+const fixedPort = resolvePort();
+
 export default defineConfig({
+	server: fixedPort
+		? { port: fixedPort, strictPort: true }
+		: undefined,
+	preview: fixedPort
+		? { port: fixedPort, strictPort: true }
+		: undefined,
 	plugins: [
 		sveltekit({
 			alias: {

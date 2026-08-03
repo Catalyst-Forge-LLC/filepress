@@ -4,6 +4,7 @@
 	import '$site-theme';
 	import { SiteHeader, SiteFooter } from '@downpress/core';
 	import config from '$site-config';
+	import GenieHost from '$lib/genie/GenieHost.svelte';
 
 	let { children } = $props();
 </script>
@@ -20,3 +21,6 @@
 </main>
 
 <SiteFooter site={config} />
+
+<!-- Dev-only Genie Mode (tree-shaken when import.meta.env.DEV is false). -->
+<GenieHost />

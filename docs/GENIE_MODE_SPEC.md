@@ -1,10 +1,12 @@
 # Spec: Downpress Genie Mode
 
-**Status:** locked (open questions resolved 2026-08-03)  
+**Status:** locked — M0/M1 implemented (2026-08-03)  
 **Date:** 2026-08-03  
 **Phase:** 4-feature-iteration  
 **Related:** [THEME.md](./THEME.md) · [SITE_IMPORT_SPEC.md](./SITE_IMPORT_SPEC.md)  
 **Former working title:** Assistant Mode (see [ASSISTANT_MODE_SPEC.md](./ASSISTANT_MODE_SPEC.md) redirect)
+
+**M0/M1 surface:** floating Genie drawer in `pnpm downpress dev`; APIs under `/__downpress/genie/*` via Vite plugin (`apply: 'serve'` only); versions in `.downpress-genie/`.
 
 ---
 

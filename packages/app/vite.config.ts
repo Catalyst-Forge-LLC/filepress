@@ -1,9 +1,10 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { geniePlugin } from './vite-plugin-genie.ts';
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
 const defaultSiteRoot = resolve(appRoot, '../../sites/demo');
@@ -18,7 +19,6 @@ const siteConfig = join(siteRoot, 'downpress.config.ts');
 const siteStatic = join(siteRoot, 'static');
 const siteBuild = join(siteRoot, 'build');
 const fallbackStatic = join(appRoot, 'static');
-const emptyTheme = join(appRoot, 'src/lib/empty-theme.css');
 
 // SvelteKit requires an assets directory to exist. Prefer the site's static/;
 // fall back to packages/app/static for sites that haven't added one yet.
@@ -29,13 +29,17 @@ if (!existsSync(siteConfig)) {
 	throw new Error(`No downpress.config.ts at site root: ${siteConfig}`);
 }
 
-/** Optional site override: theme.css, else theme.scss, else empty stub. */
+/**
+ * Prefer site-root theme.css so Genie activate can overwrite a real file Vite watches.
+ * Fall back to theme.scss, else create an empty theme.css (not the app stub path).
+ */
 function resolveSiteTheme(): string {
 	const css = join(siteRoot, 'theme.css');
 	if (existsSync(css)) return css;
 	const scss = join(siteRoot, 'theme.scss');
 	if (existsSync(scss)) return scss;
-	return emptyTheme;
+	writeFileSync(css, '/* Downpress site theme — edit freely or use Genie Mode in dev */\n');
+	return css;
 }
 
 const siteTheme = resolveSiteTheme();
@@ -62,6 +66,7 @@ export default defineConfig({
 		? { port: fixedPort, strictPort: true }
 		: undefined,
 	plugins: [
+		geniePlugin(siteRoot),
 		sveltekit({
 			alias: {
 				// Site configs (monorepo or linked) import from `downpress`.

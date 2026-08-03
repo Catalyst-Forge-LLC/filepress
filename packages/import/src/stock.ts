@@ -79,6 +79,11 @@ function scoreCover(r: OpenverseResult): number {
 	return score;
 }
 
+/** Public: search Openverse for a single cover-quality image. */
+export async function searchStockImage(query: string): Promise<StockHit | null> {
+	return searchOpenverse(query);
+}
+
 async function searchOpenverse(query: string): Promise<StockHit | null> {
 	const trySearch = async (params: URLSearchParams) => {
 		const res = await fetch(`${OPENVERSE}?${params}`, {

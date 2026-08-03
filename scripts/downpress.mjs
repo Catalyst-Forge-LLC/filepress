@@ -125,7 +125,8 @@ if (!command || !COMMANDS.has(command)) {
 			`  downpress <${[...COMMANDS].join('|')}> --site <name>   # monorepo\n` +
 			`  downpress <${[...COMMANDS].join('|')}>                 # cwd is the site\n` +
 			`  downpress <${[...COMMANDS].join('|')}> --root <path>\n` +
-			`  downpress dev|preview --port <n>   # avoid clashing with other Vite apps\n` +
+			`  downpress preview [--port 27777]  # serves <site>/build (default 27777)\n` +
+			`  downpress dev --port <n>            # vite dev; optional fixed port\n` +
 			`  downpress import --source <url> [--inspire <url>] …\n` +
 			`monorepo sites: ${listSites().join(', ') || '(none)'}`
 	);
@@ -173,7 +174,8 @@ if (command === 'preview') {
 				`  Run \`downpress build\` first, then preview.`
 		);
 	}
-	const port = args.port || process.env.DOWNPRESS_PORT || '5537';
+	// Sticky default so sibling previews don't scatter across random ports.
+	const port = args.port || process.env.DOWNPRESS_PORT || '27777';
 	console.log(`downpress: preview http://localhost:${port} → ${buildDir}`);
 	const child = spawn(
 		isWin ? 'pnpm.cmd' : 'pnpm',

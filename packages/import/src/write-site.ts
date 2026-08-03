@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import type { DesignBrief, ImportOptions, SiteIR } from './ir.ts';
 import { fetchBuffer } from './fetch.ts';
+import { fetchChosenImages } from './images.ts';
 import { themeCssFromBrief } from './theme.ts';
 
 const DEFAULT_FAVICON = resolve(
@@ -119,6 +120,22 @@ function guessExt(url: string, buf: Uint8Array): string {
 }
 
 function buildReport(ir: SiteIR, opts: ImportOptions, brief: DesignBrief | null): string {
+	const imgs = brief?.images;
+	const imageSection = imgs
+		? `## Chrome images
+
+${imgs.hero ? `- Hero: \`${imgs.hero}\`` : '- Hero: (none)'}
+${imgs.header ? `- Header: \`${imgs.header}\`` : '- Header: (none)'}
+${imgs.background ? `- Background: \`${imgs.background}\`` : '- Background: (none)'}
+${imgs.logo ? `- Logo (config): \`${imgs.logo}\`` : '- Logo: (none)'}
+
+Replace files under \`static/images/\` anytime; theme.css references those paths.
+`
+		: `## Chrome images
+
+Not fetched. Re-run with \`--fetch-images\` to download suggested hero/header/background/logo into \`static/images/\`, or drop your own files there and set paths in \`theme.css\` / \`logo\` in config.
+`;
+
 	return `# Downpress import report
 
 Source: ${ir.source.url}
@@ -154,6 +171,7 @@ ${ir.notes.map((n) => `- ${n}`).join('\n')}
 
 ${brief ? `Mood: ${brief.mood}\nDensity: ${brief.density}\nDo: ${brief.do.join('; ')}\nDon't: ${brief.dont.join('; ')}` : 'No LLM brief (token theme from defaults / source CSS).'}
 
+${imageSection}
 ## Next
 
 \`\`\`bash
@@ -206,13 +224,23 @@ export async function writeSite(
 		}
 	}
 
+	const staticDir = join(out, 'static');
+	mkdirSync(staticDir, { recursive: true });
+
+	let activeBrief = brief;
+	if (opts.fetchImages && brief?.images) {
+		console.log('import: fetching chrome images …');
+		const local = await fetchChosenImages(brief.images, staticDir);
+		activeBrief = { ...brief, images: local };
+	}
+
 	const allImages = [
 		...new Set([...ir.posts.flatMap((p) => p.imageUrls), ...ir.pages.flatMap((p) => p.imageUrls)])
 	];
-	const imageMap = await downloadImages(allImages, join(out, 'static'));
-	await downloadRootAssets(ir.assets ?? [], join(out, 'static'));
+	const imageMap = await downloadImages(allImages, staticDir);
+	await downloadRootAssets(ir.assets ?? [], staticDir);
 	// Layout always links /favicon.svg — guarantee one exists for prerender.
-	const faviconDest = join(out, 'static', 'favicon.svg');
+	const faviconDest = join(staticDir, 'favicon.svg');
 	if (!existsSync(faviconDest) && existsSync(DEFAULT_FAVICON)) {
 		copyFileSync(DEFAULT_FAVICON, faviconDest);
 	}
@@ -253,6 +281,8 @@ ${body}
 		.map((n) => `\t\t{ label: ${yamlQuote(n.label)}, href: ${yamlQuote(n.href)} }`)
 		.join(',\n');
 	const ledeLine = ir.lede ? `\n\tlede: ${yamlQuote(ir.lede)},` : '';
+	const logo = activeBrief?.images?.logo;
+	const logoLine = logo ? `\n\tlogo: ${yamlQuote(logo)},` : '';
 
 	writeFileSync(
 		join(out, 'downpress.config.ts'),
@@ -262,7 +292,7 @@ export default defineDownpressConfig({
 	title: ${yamlQuote(title)},
 	description: ${yamlQuote(ir.identity.description)},
 	url: ${yamlQuote(url)},
-	author: ${yamlQuote(author)},${ledeLine}
+	author: ${yamlQuote(author)},${ledeLine}${logoLine}
 	nav: [
 ${navLit}
 	],
@@ -273,14 +303,15 @@ ${topicsLit}
 `
 	);
 
-	writeFileSync(join(out, 'theme.css'), themeCssFromBrief(brief ?? undefined));
+	writeFileSync(join(out, 'theme.css'), themeCssFromBrief(activeBrief ?? undefined));
 
 	const metaDir = join(out, '.downpress-import');
 	mkdirSync(metaDir, { recursive: true });
 	writeFileSync(join(metaDir, 'site-ir.json'), JSON.stringify(ir, null, 2));
-	if (brief) writeFileSync(join(metaDir, 'design-brief.json'), JSON.stringify(brief, null, 2));
+	if (activeBrief)
+		writeFileSync(join(metaDir, 'design-brief.json'), JSON.stringify(activeBrief, null, 2));
 	const reportPath = join(metaDir, 'import-report.md');
-	writeFileSync(reportPath, buildReport(ir, opts, brief));
+	writeFileSync(reportPath, buildReport(ir, opts, activeBrief));
 
 	// gitignore import cache
 	const gi = join(out, '.gitignore');

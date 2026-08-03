@@ -104,7 +104,8 @@ body {
 	align-items: center;
 	justify-content: space-between;
 	gap: 1.5rem;
-	padding: 1.6rem 0;
+	/* Keep horizontal gap so masthead lines up with main.wrap content. */
+	padding: 1.6rem var(--gap);
 	flex-wrap: wrap;
 }
 

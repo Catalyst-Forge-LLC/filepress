@@ -11,7 +11,8 @@
 | Static pages routing | Top-level `/[slug]` from `pages/*.md`; reserved: posts, tags, topics, page, feeds |
 | URL parity | Clean break to `/posts/<slug>`; remaps listed in `.downpress-import/import-report.md` |
 | Home | Posts index; source home bio → config `lede`; long About stays a page |
-| Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
+| Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards, wider measure). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
+| Chrome images | Harvest og:image / hero / CSS backgrounds / logos from source + inspire; suggest Unsplash queries in the import report; `--fetch-images` downloads into `static/images/` and wires `theme.css` + optional config `logo`. |
 | Framing | Downpress product feature (`@downpress/import`) |
 
 This document fleshes out an interactive CLI that:
@@ -127,6 +128,9 @@ The product pitch: “Point Downpress at your old site + 1–3 sites you like �
 pnpm downpress import
 # or:
 downpress import --source https://example.com --inspire https://www.catalystforge.com
+# Optional: download suggested hero/header/background/logo into static/images/
+downpress import --source https://example.com --inspire https://app.execfoundry.com/start \
+  --inspire https://www.catalystforge.com --fetch-images --no-llm
 ```
 
 ### Wizard questions (proposed)

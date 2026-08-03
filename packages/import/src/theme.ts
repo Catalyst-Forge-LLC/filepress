@@ -54,11 +54,15 @@ export function themeCssFromBrief(brief: DesignBrief = DEFAULT_BRIEF): string {
 	const atmosphere = brief.atmosphere || 'none';
 	const navStyle = brief.navStyle || 'soft';
 	const cards = Boolean(brief.elevatedCards);
+	const imgs = brief.images || {};
+	const punchy = mode === 'dark' || hero === 'bold' || cards;
 	const wash =
 		t.accentWash ||
 		(mode === 'dark'
 			? 'color-mix(in srgb, var(--accent) 12%, transparent)'
 			: 'color-mix(in srgb, var(--accent) 7%, transparent)');
+	const safeImg = (path: string | null | undefined) =>
+		path && /^\/[\w./%-]+$/.test(path) ? path : null;
 
 	const importBlock =
 		fonts?.googleHref && /^https:\/\/fonts\.googleapis\.com\//.test(fonts.googleHref)
@@ -95,6 +99,10 @@ body::before {
 `
 			: '';
 
+	const heroImg = safeImg(imgs.hero ?? null);
+	const headerImg = safeImg(imgs.header ?? null);
+	const bgImg = safeImg(imgs.background ?? null);
+
 	const heroBlock =
 		hero === 'bold'
 			? `
@@ -103,7 +111,13 @@ body::before {
 	padding: clamp(1.75rem, 4vw, 2.75rem) 0 clamp(1.5rem, 3vw, 2.25rem);
 	border-bottom: 1px solid var(--rule);
 	background:
-		radial-gradient(ellipse 80% 60% at 10% 0%, var(--accent-wash), transparent 55%);
+		radial-gradient(ellipse 80% 60% at 10% 0%, var(--accent-wash), transparent 55%)${
+			heroImg
+				? `,
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), var(--bg)),
+		url("${heroImg}") center / cover no-repeat`
+				: ''
+		};
 }
 
 .hero-lede {
@@ -113,7 +127,7 @@ body::before {
 	line-height: 1.35;
 	letter-spacing: -0.02em;
 	color: var(--ink);
-	max-width: 38rem;
+	max-width: none;
 }
 `
 			: `
@@ -121,6 +135,33 @@ body::before {
 	font-size: 1.28rem;
 }
 `;
+
+	const imageChrome = `
+${
+	bgImg
+		? `body {
+	background-image:
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent), var(--bg)),
+		url("${bgImg}");
+	background-size: cover;
+	background-attachment: fixed;
+	background-position: center;
+}
+`
+		: ''
+}
+${
+	headerImg
+		? `.site-header {
+	background-image:
+		linear-gradient(180deg, color-mix(in srgb, var(--bg) 78%, transparent), var(--bg)),
+		url("${headerImg}");
+	background-size: cover;
+	background-position: center;
+}
+`
+		: ''
+}`;
 
 	const navBlock =
 		navStyle === 'uppercase-tracked'
@@ -276,6 +317,8 @@ ${importBlock}:root {
 	--rule: ${t.rule || (mode === 'dark' ? '#2a2a33' : '#e7e2d8')};
 	--rule-strong: ${t.ruleStrong || (mode === 'dark' ? '#3d3d4a' : '#d6cfc1')};
 	--radius: ${mode === 'dark' ? '8px' : '6px'};
+	/* Essay defaults are editorial-narrow (46rem). Punchy import themes open up. */
+	${punchy ? `--measure: 48rem;\n\t--measure-wide: 72rem;` : ''}
 }
 
 ${
@@ -325,6 +368,7 @@ ${noise}
 
 ${navBlock}
 ${heroBlock}
+${imageChrome}
 ${cardBlock}
 ${darkChrome}
 

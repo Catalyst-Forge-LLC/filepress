@@ -19,6 +19,7 @@ import {
 	type InspirationSignals
 } from './inspire.ts';
 import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
+import { harvestImagesFromPage, planImages, type ImagePlan } from './images.ts';
 import { DEFAULT_BRIEF, themeCssFromBrief, tokensFromSourceCss } from './theme.ts';
 import {
 	defaultEngineRoot,
@@ -55,6 +56,7 @@ function parseArgs(argv: string[]) {
 		dryRun: boolean;
 		force: boolean;
 		yes: boolean;
+		fetchImages: boolean;
 	} = {
 		_: [],
 		inspire: [],
@@ -63,7 +65,8 @@ function parseArgs(argv: string[]) {
 		noLlm: false,
 		dryRun: false,
 		force: false,
-		yes: false
+		yes: false,
+		fetchImages: false
 	};
 
 	for (let i = 0; i < argv.length; i++) {
@@ -86,6 +89,7 @@ function parseArgs(argv: string[]) {
 		else if (a === '--dry-run') out.dryRun = true;
 		else if (a === '--force') out.force = true;
 		else if (a === '--yes' || a === '-y') out.yes = true;
+		else if (a === '--fetch-images') out.fetchImages = true;
 		else if (a === '--help' || a === '-h') out._.push('help');
 		else out._.push(a);
 	}
@@ -114,6 +118,7 @@ Options:
   --no-llm             Skip Ollama; token theme from source CSS / defaults
   --dry-run            Crawl + report only (no write)
   --force              Overwrite generated content in --out
+  --fetch-images       Download suggested hero/header/bg/logo into static/images/
   --yes                Skip confirmation prompt
 `);
 		return;
@@ -169,6 +174,7 @@ Options:
 			noLlm: args.noLlm,
 			dryRun: args.dryRun,
 			force: args.force,
+			fetchImages: args.fetchImages,
 			engineRoot
 		};
 
@@ -241,6 +247,23 @@ Options:
 			brief = seed;
 		}
 
+		console.log('import: harvesting image candidates …');
+		const harvested = [];
+		for (const u of [source, ...inspire]) {
+			try {
+				harvested.push(...(await harvestImagesFromPage(u, u)));
+			} catch (e) {
+				console.warn(
+					`import: image harvest failed ${u}: ${e instanceof Error ? e.message : e}`
+				);
+			}
+		}
+		let imagePlan: ImagePlan = planImages(ir, harvested, brief);
+		ir.notes.push(...imagePlan.notes);
+		console.log(
+			`import: ${harvested.length} image candidates · hero=${imagePlan.chosen.hero ? 'yes' : 'no'}`
+		);
+
 		if (opts.dryRun) {
 			console.log('\n--- dry-run SiteIR summary ---');
 			console.log(
@@ -257,7 +280,9 @@ Options:
 						nav: ir.nav,
 						topics: ir.topics,
 						lede: ir.lede,
-						notes: ir.notes
+						notes: ir.notes,
+						images: imagePlan.chosen,
+						unsplashQueries: imagePlan.unsplashQueries
 					},
 					null,
 					2
@@ -279,6 +304,11 @@ Options:
 				console.log('import: aborted');
 				return;
 			}
+		}
+
+		if (opts.fetchImages) {
+			// Remote candidates — writeSite downloads after wiping/creating static/.
+			brief = { ...brief, images: imagePlan.chosen };
 		}
 
 		console.log(`import: writing ${out} …`);

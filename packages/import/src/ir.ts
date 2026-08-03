@@ -71,7 +71,21 @@ export type DesignBrief = {
 	atmosphere?: 'none' | 'noise';
 	navStyle?: 'soft' | 'uppercase-tracked';
 	elevatedCards?: boolean;
+	/** Local static paths wired into theme.css after fetch (e.g. /images/hero.jpg). */
+	images?: {
+		hero?: string | null;
+		header?: string | null;
+		background?: string | null;
+		logo?: string | null;
+	};
 	cssNotes: string[];
+};
+
+export type ImageCandidate = {
+	url: string;
+	role: 'hero' | 'header' | 'background' | 'logo' | 'other';
+	source: string;
+	alt?: string;
 };
 
 export type ImportOptions = {
@@ -87,5 +101,7 @@ export type ImportOptions = {
 	noLlm: boolean;
 	dryRun: boolean;
 	force: boolean;
+	/** Download suggested hero/header/bg images into static/images/. */
+	fetchImages: boolean;
 	engineRoot: string;
 };

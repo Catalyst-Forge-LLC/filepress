@@ -26,6 +26,30 @@ describe('themeCssFromBrief', () => {
 		expect(css).toContain('--accent: #abcdef');
 		expect(css).toContain('--bg: #fffef8');
 	});
+
+	it('widens measure and wires local chrome images for punchy themes', () => {
+		const css = themeCssFromBrief({
+			mood: 'forge',
+			do: [],
+			dont: [],
+			tokens: { accent: '#f0c040', accentStrong: '#e0b030', bg: '#1e1e2e', ink: '#e6e6e6' },
+			density: 'balanced',
+			paletteMode: 'dark',
+			hero: 'bold',
+			elevatedCards: true,
+			images: {
+				hero: '/images/hero.jpg',
+				header: '/images/header.jpg',
+				background: '/images/background.jpg'
+			},
+			cssNotes: []
+		});
+		expect(css).toContain('--measure-wide: 72rem');
+		expect(css).toContain('url("/images/hero.jpg")');
+		expect(css).toContain('url("/images/header.jpg")');
+		expect(css).toContain('url("/images/background.jpg")');
+		expect(css).toContain('max-width: none');
+	});
 });
 
 describe('tokensFromSourceCss', () => {

@@ -161,6 +161,43 @@ const env = {
 	DOWNPRESS_SITE_ROOT: siteRoot
 };
 
+const isWin = process.platform === 'win32';
+
+// Preview must serve the site's own build/ — not packages/app/.svelte-kit
+// (shared across sites; another agent's last build can leak onto vite preview).
+if (command === 'preview') {
+	const buildDir = join(siteRoot, 'build');
+	if (!existsSync(join(buildDir, 'index.html'))) {
+		fail(
+			`no build at ${buildDir}\n` +
+				`  Run \`downpress build\` first, then preview.`
+		);
+	}
+	const port = args.port || process.env.DOWNPRESS_PORT || '5537';
+	console.log(`downpress: preview http://localhost:${port} → ${buildDir}`);
+	const child = spawn(
+		isWin ? 'pnpm.cmd' : 'pnpm',
+		[
+			'--filter',
+			'@downpress/app',
+			'exec',
+			'sirv',
+			buildDir,
+			'--dev',
+			'--port',
+			String(port),
+			'--host',
+			args.host && args.host !== 'true' ? args.host : '127.0.0.1'
+		],
+		{ cwd: packageRoot, env, stdio: 'inherit', shell: isWin }
+	);
+	child.on('exit', (code, signal) => {
+		if (signal) process.kill(process.pid, signal);
+		process.exit(code ?? 1);
+	});
+	return;
+}
+
 // Port is applied via DOWNPRESS_PORT in packages/app/vite.config.ts (more
 // reliable on Windows than forwarding CLI args through `pnpm run`).
 if (args.port) {
@@ -172,9 +209,8 @@ const viteArgs = [];
 if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? 'true' : args.host);
 viteArgs.push(...args.extra);
 
-const isWin = process.platform === 'win32';
 const pnpmArgs = ['--filter', '@downpress/app', 'run', command];
-if (viteArgs.length && (command === 'dev' || command === 'preview')) {
+if (viteArgs.length && command === 'dev') {
 	pnpmArgs.push('--', ...viteArgs);
 }
 

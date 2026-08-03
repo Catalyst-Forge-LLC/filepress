@@ -30,7 +30,7 @@ function fail(msg) {
 }
 
 function parseArgs(argv) {
-	const args = { _: [], site: null, root: null };
+	const args = { _: [], site: null, root: null, port: null, host: null, extra: [] };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === '--site') {
@@ -43,6 +43,18 @@ function parseArgs(argv) {
 			if (!args.root) fail('`--root` requires a path.');
 		} else if (a.startsWith('--root=')) {
 			args.root = a.slice('--root='.length);
+		} else if (a === '--port' || a === '-p') {
+			args.port = argv[++i];
+			if (!args.port) fail('`--port` requires a number.');
+		} else if (a.startsWith('--port=')) {
+			args.port = a.slice('--port='.length);
+		} else if (a === '--host') {
+			args.host = argv[++i] ?? 'true';
+		} else if (a.startsWith('--host=')) {
+			args.host = a.slice('--host='.length);
+		} else if (a === '--') {
+			args.extra.push(...argv.slice(i + 1));
+			break;
 		} else {
 			args._.push(a);
 		}
@@ -113,6 +125,7 @@ if (!command || !COMMANDS.has(command)) {
 			`  downpress <${[...COMMANDS].join('|')}> --site <name>   # monorepo\n` +
 			`  downpress <${[...COMMANDS].join('|')}>                 # cwd is the site\n` +
 			`  downpress <${[...COMMANDS].join('|')}> --root <path>\n` +
+			`  downpress dev|preview --port <n>   # avoid clashing with other Vite apps\n` +
 			`  downpress import --source <url> [--inspire <url>] …\n` +
 			`monorepo sites: ${listSites().join(', ') || '(none)'}`
 	);
@@ -136,13 +149,34 @@ if (!existsSync(join(packageRoot, 'node_modules'))) {
 	);
 }
 
+if (args.port !== null) {
+	const n = Number(args.port);
+	if (!Number.isInteger(n) || n < 1 || n > 65535) {
+		fail(`\`--port\` must be an integer 1–65535 (got "${args.port}").`);
+	}
+}
+
 const env = {
 	...process.env,
 	DOWNPRESS_SITE_ROOT: siteRoot
 };
 
+// Forward port/host to Vite for dev + preview (build/check ignore these).
+const viteArgs = [];
+if (args.port) {
+	viteArgs.push('--port', String(args.port), '--strictPort');
+	console.log(`downpress: ${command} on http://localhost:${args.port} (site: ${siteRoot})`);
+}
+if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? 'true' : args.host);
+viteArgs.push(...args.extra);
+
 const isWin = process.platform === 'win32';
-const child = spawn(isWin ? 'pnpm.cmd' : 'pnpm', ['--filter', '@downpress/app', 'run', command], {
+const pnpmArgs = ['--filter', '@downpress/app', 'run', command];
+if (viteArgs.length && (command === 'dev' || command === 'preview')) {
+	pnpmArgs.push('--', ...viteArgs);
+}
+
+const child = spawn(isWin ? 'pnpm.cmd' : 'pnpm', pnpmArgs, {
 	cwd: packageRoot,
 	env,
 	stdio: 'inherit',

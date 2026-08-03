@@ -13,6 +13,17 @@ export async function ollamaAvailable(host: string): Promise<boolean> {
 	}
 }
 
+/** Shared copy for import + Genie Mode when Ollama is missing or unused. */
+export function ollamaSetupHint(host: string): string {
+	const h = host.replace(/\/+$/, '') || 'http://127.0.0.1:11434';
+	return [
+		`Ollama not reachable at ${h}.`,
+		`Install from https://ollama.com then pull a model (e.g. ollama pull gemma4:12b).`,
+		`For a GPU-tuned named variant, use Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`,
+		`Then set DOWNPRESS_OLLAMA_MODEL to that name (and OLLAMA_HOST if remote).`
+	].join(' ');
+}
+
 export async function generateDesignBrief(opts: {
 	host: string;
 	model: string;

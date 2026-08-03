@@ -18,7 +18,12 @@ import {
 	extractInspirationSignals,
 	type InspirationSignals
 } from './inspire.ts';
-import { generateDesignBrief, ollamaAvailable, summarizeHtmlForBrief } from './ollama.ts';
+import {
+	generateDesignBrief,
+	ollamaAvailable,
+	ollamaSetupHint,
+	summarizeHtmlForBrief
+} from './ollama.ts';
 import { harvestImagesFromPage, planImages, type ImagePlan } from './images.ts';
 import { formatAttributionMarkdown, planStockCovers } from './stock.ts';
 import { DEFAULT_BRIEF, themeCssFromBrief, tokensFromSourceCss } from './theme.ts';
@@ -229,9 +234,8 @@ Options:
 		if (!opts.noLlm) {
 			const up = await ollamaAvailable(opts.ollamaHost);
 			if (!up) {
-				console.warn(
-					`import: Ollama not reachable at ${opts.ollamaHost}; using extracted inspiration brief`
-				);
+				console.warn(`import: ${ollamaSetupHint(opts.ollamaHost)}`);
+				console.warn('import: continuing with extracted inspiration brief (--no-llm path)');
 				brief = seed;
 			} else {
 				console.log(`import: refining design brief with ${opts.ollamaModel} …`);

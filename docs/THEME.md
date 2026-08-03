@@ -95,6 +95,6 @@ Prose content also uses standard elements inside `.prose` (`h2`–`h4`, `a`, `im
 - Keep specificity low so future engine CSS doesn’t fight you.
 - Custom fonts: self-host under `static/` and set `--font-serif` / `--font-sans`, or `@import` in `theme.css` (third-party font URLs affect privacy/perf).
 
-## Assistant Mode (planned)
+## Genie Mode (planned)
 
-For a **local, dev-only** loop that steers tokens/structure/images via versions and bakes into `theme.css` on activate/build, see [ASSISTANT_MODE_SPEC.md](./ASSISTANT_MODE_SPEC.md). Hand-edited `theme.css` remains fully supported; Assistant Mode is optional authoring chrome, never shipped in preview or production builds.
+For a **local, dev-only** loop that steers tokens/structure/images (including hero background upload or Openverse) via versions and bakes into `theme.css` on activate/build, see [GENIE_MODE_SPEC.md](./GENIE_MODE_SPEC.md). Hand-edited `theme.css` remains fully supported; Genie Mode is optional authoring chrome, never shipped in preview or production builds. Requires [Ollama](https://ollama.com) for the LLM path; [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) is recommended for tuning a local model.

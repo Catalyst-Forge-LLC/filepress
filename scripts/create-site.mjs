@@ -101,6 +101,8 @@ writeFileSync(
 /node_modules
 .DS_Store
 Thumbs.db
+.downpress-genie/
+.downpress-import/crawl-cache/
 `
 );
 

@@ -49,7 +49,7 @@ What’s missing for this story:
 
 The product pitch: “Point Downpress at your old site + 1–3 sites you like → walk away with a sibling repo you can `pnpm install && pnpm downpress dev`.”
 
-**After import:** the planned local [Assistant Mode](./ASSISTANT_MODE_SPEC.md) continues the taste loop in `pnpm downpress dev` (steer backgrounds, fonts, colors, inspire URLs, version toggles)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay assistant-free.
+**After import:** the planned local [Genie Mode](./GENIE_MODE_SPEC.md) continues the taste loop in `pnpm downpress dev` (steer backgrounds, fonts, colors, inspire URLs, version toggles, uploads)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay Genie-free. Both import and Genie should detect Ollama and may suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) for a tuned local model.
 
 ---
 

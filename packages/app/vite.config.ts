@@ -77,11 +77,12 @@ export default defineConfig({
 				entries: ['*'],
 
 				// Some parameterized routes legitimately have zero pages: /page/[n]
-				// when everything fits on page 1, and /tags/[tag] when no listed post
-				// carries a tag (a site before its first published essay). Ignore
+				// when everything fits on page 1, /tags/[tag] when no listed post
+				// carries a tag, and /[slug] itself when every post is still
+				// draft:true (a site before its first published essay). Ignore
 				// those; stay strict for any other unseen route.
 				handleUnseenRoutes: ({ routes }) => {
-					const emptyOk = new Set(['/page/[n]', '/tags/[tag]']);
+					const emptyOk = new Set(['/page/[n]', '/tags/[tag]', '/[slug]']);
 					const unexpected = routes.filter((r) => !emptyOk.has(r));
 					if (unexpected.length > 0) {
 						throw new Error(

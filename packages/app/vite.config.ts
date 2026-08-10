@@ -78,6 +78,12 @@ export default defineConfig({
 				'$site-theme': siteTheme
 			},
 
+			// Absolute `/_app/...` asset URLs — more reliable on CDN/custom domains
+			// than `./_app/...` relative links (avoids unstyled flashes on deploy).
+			paths: {
+				relative: false
+			},
+
 			files: {
 				assets: assetsDir
 			},

@@ -78,6 +78,7 @@ export interface RenderedPage extends PageMeta {
  */
 export const RESERVED_PAGE_SLUGS = [
 	'posts',
+	'writing',
 	'tags',
 	'topics',
 	'page',

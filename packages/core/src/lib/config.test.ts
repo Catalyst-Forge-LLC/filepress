@@ -7,6 +7,7 @@ describe('defineDownpressConfig', () => {
 		expect(cfg.author).toBe('My Site'); // falls back to title
 		expect(cfg.tagline).toBe('My Site'); // falls back to description -> title
 		expect(cfg.postsPerPage).toBe(10);
+		expect(cfg.homePage).toBeNull();
 		expect(cfg.nav).toEqual([
 			{ label: 'Posts', href: '/' },
 			{ label: 'Topics', href: '/topics' }
@@ -15,6 +16,20 @@ describe('defineDownpressConfig', () => {
 		expect(cfg.newsletter).toBeNull();
 		expect(cfg.logo).toBeNull();
 		expect(cfg.lede).toBeNull();
+	});
+
+	it('defaults nav to Home + /writing when homePage is set', () => {
+		const cfg = defineDownpressConfig({
+			title: 'My Site',
+			url: 'https://my.site',
+			homePage: 'about'
+		});
+		expect(cfg.homePage).toBe('about');
+		expect(cfg.nav).toEqual([
+			{ label: 'Home', href: '/' },
+			{ label: 'Posts', href: '/writing' },
+			{ label: 'Topics', href: '/topics' }
+		]);
 	});
 
 	it('keeps a trimmed lede and nulls a blank one', () => {

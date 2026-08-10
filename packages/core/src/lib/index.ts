@@ -8,7 +8,7 @@ export { default as Newsletter } from './components/Newsletter.svelte';
 export { default as SiteHeader } from './components/SiteHeader.svelte';
 export { default as SiteFooter } from './components/SiteFooter.svelte';
 
-export { defineDownpressConfig, absoluteUrl } from './config';
+export { defineDownpressConfig, absoluteUrl, postsIndexPath } from './config';
 export type {
 	SiteConfig,
 	SiteConfigInput,

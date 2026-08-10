@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PostIndex } from '@downpress/core';
+	import { PostIndex, postsIndexPath } from '@downpress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
@@ -18,4 +18,5 @@
 	posts={data.posts}
 	page={data.page}
 	totalPages={data.totalPages}
+	indexHref={postsIndexPath(config)}
 />

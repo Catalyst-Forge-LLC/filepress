@@ -41,6 +41,11 @@ export interface SiteConfig {
 	author: string;
 	/** Posts per page on the index (after the featured one). */
 	postsPerPage: number;
+	/**
+	 * When set, `/` renders this static page slug (`pages/<slug>.md`) and the
+	 * chronological post index moves to `/writing`.
+	 */
+	homePage: string | null;
 	nav: NavItem[];
 	topics: Topic[];
 	newsletter: NewsletterConfig | null;
@@ -56,9 +61,16 @@ export interface SiteConfigInput {
 	logo?: string;
 	author?: string;
 	postsPerPage?: number;
+	/** Static page slug to show at `/` (post index then lives at `/writing`). */
+	homePage?: string;
 	nav?: NavItem[];
 	topics?: Topic[];
 	newsletter?: NewsletterConfig | null;
+}
+
+/** Path to page 1 of the chronological post index. */
+export function postsIndexPath(site: Pick<SiteConfig, 'homePage'>): string {
+	return site.homePage ? '/writing' : '/';
 }
 
 /**
@@ -79,6 +91,23 @@ export function defineDownpressConfig(input: SiteConfigInput): SiteConfig {
 	}
 
 	const description = (input.description ?? '').trim();
+	const homePage = (input.homePage ?? '').trim() || null;
+	if (homePage && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(homePage)) {
+		throw new Error(
+			`downpress.config: \`homePage\` must be a simple slug (got "${homePage}").`
+		);
+	}
+
+	const defaultNav: NavItem[] = homePage
+		? [
+				{ label: 'Home', href: '/' },
+				{ label: 'Posts', href: '/writing' },
+				{ label: 'Topics', href: '/topics' }
+			]
+		: [
+				{ label: 'Posts', href: '/' },
+				{ label: 'Topics', href: '/topics' }
+			];
 
 	return {
 		title,
@@ -92,13 +121,8 @@ export function defineDownpressConfig(input: SiteConfigInput): SiteConfig {
 			Number.isFinite(input.postsPerPage) && (input.postsPerPage as number) > 0
 				? Math.floor(input.postsPerPage as number)
 				: 10,
-		nav:
-			input.nav && input.nav.length
-				? input.nav
-				: [
-						{ label: 'Posts', href: '/' },
-						{ label: 'Topics', href: '/topics' }
-					],
+		homePage,
+		nav: input.nav && input.nav.length ? input.nav : defaultNav,
 		topics: input.topics ?? [],
 		newsletter: input.newsletter ?? null
 	};

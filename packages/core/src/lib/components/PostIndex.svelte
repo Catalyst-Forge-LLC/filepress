@@ -10,7 +10,9 @@
 		featured = null,
 		posts,
 		page = 1,
-		totalPages = 1
+		totalPages = 1,
+		/** Page-1 URL for the post index (`/` or `/writing`). */
+		indexHref = '/'
 	}: {
 		site: SiteConfig;
 		hero?: boolean;
@@ -18,10 +20,11 @@
 		posts: PostMeta[];
 		page?: number;
 		totalPages?: number;
+		indexHref?: string;
 	} = $props();
 
 	const hasContent = $derived(featured !== null || posts.length > 0);
-	const prevHref = $derived(page <= 2 ? '/' : `/page/${page - 1}`);
+	const prevHref = $derived(page <= 2 ? indexHref : `/page/${page - 1}`);
 	const nextHref = $derived(`/page/${page + 1}`);
 </script>
 

@@ -84,6 +84,15 @@ export default defineFilepressConfig({
   author: 'Me',
   postsPerPage: 10,
   topics: [{ label: 'Essays', tag: 'essays' }],
+  nav: [
+    { label: 'Posts', href: '/' },
+    { label: 'GitHub', href: 'https://github.com/acme/site', icon: 'github' }
+  ],
+  // Replaces the default RSS + Topics row when set.
+  footerLinks: [
+    { label: 'RSS', href: '/rss.xml' },
+    { label: 'GitHub', href: 'https://github.com/acme/site', icon: 'github' }
+  ],
   newsletter: {
     url: 'https://buttondown.email/me',
     blurb: 'Occasional notes.',
@@ -92,7 +101,7 @@ export default defineFilepressConfig({
 });
 ```
 
-`title` and `url` are required; missing values fail the build with a clear error.
+`title` and `url` are required; missing values fail the build with a clear error. Nav/footer items may set `icon: 'github'` for a built-in mark.
 
 ## Theming
 

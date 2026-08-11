@@ -36,6 +36,11 @@ export interface SiteConfig {
 	lede: string | null;
 	/** Path to a masthead logo image (site-relative, e.g. "/logo.png"), or null for text. */
 	logo: string | null;
+	/**
+	 * Absolute or site-relative Open Graph image (e.g. "/logo.png").
+	 * Defaults to `logo` when unset.
+	 */
+	ogImage: string | null;
 	/** Canonical origin, no trailing slash, e.g. "https://example.com". */
 	url: string;
 	author: string;
@@ -59,6 +64,8 @@ export interface SiteConfigInput {
 	tagline?: string;
 	lede?: string;
 	logo?: string;
+	/** Open Graph image path; defaults to `logo`. */
+	ogImage?: string;
 	author?: string;
 	postsPerPage?: number;
 	/** Static page slug to show at `/` (post index then lives at `/writing`). */
@@ -115,6 +122,8 @@ export function defineDownpressConfig(input: SiteConfigInput): SiteConfig {
 		tagline: (input.tagline ?? '').trim() || description || title,
 		lede: (input.lede ?? '').trim() || null,
 		logo: (input.logo ?? '').trim() || null,
+		ogImage:
+			(input.ogImage ?? '').trim() || (input.logo ?? '').trim() || null,
 		url: url.replace(/\/+$/, ''),
 		author: (input.author ?? '').trim() || title,
 		postsPerPage:
@@ -133,4 +142,13 @@ export function absoluteUrl(site: Pick<SiteConfig, 'url'>, path: string): string
 	const base = site.url.replace(/\/+$/, '');
 	const suffix = path.startsWith('/') ? path : `/${path}`;
 	return `${base}${suffix}`;
+}
+
+/** Absolute URL for Open Graph / Twitter cards, or null when unset. */
+export function ogImageUrl(
+	site: Pick<SiteConfig, 'url' | 'ogImage'>
+): string | null {
+	if (!site.ogImage) return null;
+	if (/^https?:\/\//i.test(site.ogImage)) return site.ogImage;
+	return absoluteUrl(site, site.ogImage);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { absoluteUrl } from '@downpress/core';
+	import { absoluteUrl, ogImageUrl } from '@downpress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
@@ -8,6 +8,7 @@
 	const page = $derived(data.page);
 	const pageTitle = $derived(`${page.title} — ${config.title}`);
 	const canonical = $derived(absoluteUrl(config, `/${page.slug}`));
+	const ogImage = $derived(ogImageUrl(config));
 </script>
 
 <svelte:head>
@@ -22,6 +23,11 @@
 		<meta property="og:description" content={page.description} />
 	{/if}
 	<meta property="og:url" content={canonical} />
+	{#if ogImage}
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:image" content={ogImage} />
+	{/if}
 	{#if data.isDraft}
 		<meta name="robots" content="noindex" />
 	{/if}

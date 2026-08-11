@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Newsletter, absoluteUrl, formatDate } from '@downpress/core';
+	import { Newsletter, absoluteUrl, formatDate, ogImageUrl } from '@downpress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
@@ -8,6 +8,7 @@
 	const post = $derived(data.post);
 	const pageTitle = $derived(`${post.title} — ${config.title}`);
 	const canonical = $derived(absoluteUrl(config, `/posts/${post.slug}`));
+	const ogImage = $derived(ogImageUrl(config));
 	const showUpdated = $derived(post.updated && post.updated !== post.date);
 	const adjacent = $derived(data.adjacent);
 </script>
@@ -24,6 +25,11 @@
 		<meta property="og:description" content={post.description} />
 	{/if}
 	<meta property="og:url" content={canonical} />
+	{#if ogImage}
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:image" content={ogImage} />
+	{/if}
 	{#if data.isDraft}
 		<meta name="robots" content="noindex" />
 	{/if}

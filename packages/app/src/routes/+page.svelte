@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PostIndex, absoluteUrl, postsIndexPath } from '@downpress/core';
+	import { PostIndex, absoluteUrl, ogImageUrl, postsIndexPath } from '@downpress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
@@ -8,6 +8,7 @@
 	const isHomePage = $derived(data.mode === 'page');
 	const page = $derived(data.mode === 'page' ? data.page : null);
 	const canonical = $derived(absoluteUrl(config, '/'));
+	const ogImage = $derived(ogImageUrl(config));
 	const description = $derived(
 		(page?.description || config.description || '').trim() || null
 	);
@@ -26,6 +27,11 @@
 			<meta property="og:description" content={description} />
 		{/if}
 		<meta property="og:url" content={canonical} />
+		{#if ogImage}
+			<meta property="og:image" content={ogImage} />
+			<meta name="twitter:card" content="summary" />
+			<meta name="twitter:image" content={ogImage} />
+		{/if}
 		{#if data.mode === 'page' && data.isDraft}
 			<meta name="robots" content="noindex" />
 		{/if}

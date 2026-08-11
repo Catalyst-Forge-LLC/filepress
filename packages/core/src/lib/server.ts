@@ -20,7 +20,7 @@ export {
 	filenameOf
 } from './content/parse';
 
-export { absoluteUrl } from './config';
+export { absoluteUrl, ogImageUrl } from './config';
 export type { SiteConfig } from './config';
 export type {
 	PostMeta,

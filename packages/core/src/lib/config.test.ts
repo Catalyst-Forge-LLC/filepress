@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { defineDownpressConfig, absoluteUrl } from './config';
+import { defineDownpressConfig, absoluteUrl, ogImageUrl } from './config';
 
 describe('defineDownpressConfig', () => {
 	it('applies defaults for optional fields', () => {
@@ -15,6 +15,7 @@ describe('defineDownpressConfig', () => {
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
 		expect(cfg.logo).toBeNull();
+		expect(cfg.ogImage).toBeNull();
 		expect(cfg.lede).toBeNull();
 	});
 
@@ -50,8 +51,21 @@ describe('defineDownpressConfig', () => {
 			logo: ' /logo.png '
 		});
 		expect(withLogo.logo).toBe('/logo.png');
+		expect(withLogo.ogImage).toBe('/logo.png');
 		const blank = defineDownpressConfig({ title: 'X', url: 'https://x.example.com', logo: '  ' });
 		expect(blank.logo).toBeNull();
+		expect(blank.ogImage).toBeNull();
+	});
+
+	it('lets ogImage override logo for social cards', () => {
+		const cfg = defineDownpressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			logo: '/logo.png',
+			ogImage: '/og.png'
+		});
+		expect(cfg.ogImage).toBe('/og.png');
+		expect(ogImageUrl(cfg)).toBe('https://x.example.com/og.png');
 	});
 
 	it('strips a trailing slash from url and prefers description for tagline', () => {

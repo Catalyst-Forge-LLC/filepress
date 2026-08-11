@@ -1,5 +1,7 @@
 import { defineFilepressConfig } from 'getfilepress';
 
+const github = 'https://github.com/Catalyst-Forge-LLC/filepress';
+
 export default defineFilepressConfig({
 	title: 'FilePress',
 	description:
@@ -17,7 +19,13 @@ export default defineFilepressConfig({
 		{ label: 'Docs', href: '/getting-started' },
 		{ label: 'Import', href: '/import' },
 		{ label: 'Genie', href: '/genie' },
-		{ label: 'About', href: '/about' }
+		{ label: 'About', href: '/about' },
+		{ label: 'GitHub', href: github, icon: 'github' }
+	],
+	footerLinks: [
+		{ label: 'RSS', href: '/rss.xml' },
+		{ label: 'Topics', href: '/topics' },
+		{ label: 'GitHub', href: github, icon: 'github' }
 	],
 	topics: [
 		{ label: 'Getting started', tag: 'getting-started' },

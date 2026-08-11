@@ -1,7 +1,7 @@
 <script lang="ts">
-	import '@downpress/core/theme';
-	// Optional site override (theme.css or theme.scss at the site root).
-	import '$site-theme';
+	// Essay + site theme from one module (avoids Essay flash before site overrides).
+	import '$lib/theme-entry';
+	import criticalTheme from 'virtual:downpress-critical-theme';
 	import { SiteHeader, SiteFooter } from '@downpress/core';
 	import config from '$site-config';
 	import GenieHost from '$lib/genie/GenieHost.svelte';
@@ -10,6 +10,9 @@
 </script>
 
 <svelte:head>
+	{#if criticalTheme}
+		{@html `<style data-downpress-critical>${criticalTheme}</style>`}
+	{/if}
 	<link rel="icon" href="/favicon.svg" />
 	<link rel="alternate" type="application/rss+xml" title={config.title} href="/rss.xml" />
 </svelte:head>

@@ -1,19 +1,35 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PostIndex, postsIndexPath } from '@downpress/core';
+	import { PostIndex, absoluteUrl, ogImageUrl, postsIndexPath } from '@downpress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
+
+	const pageTitle = $derived(`Posts — ${config.title}`);
+	const canonical = $derived(absoluteUrl(config, postsIndexPath(config)));
+	const ogImage = $derived(ogImageUrl(config));
+	const description = $derived(
+		`Posts from ${config.title}. ${config.description}`.trim()
+	);
 </script>
 
 <svelte:head>
-	<title>Posts — {config.title}</title>
-	<meta name="description" content={config.description} />
+	<title>{pageTitle}</title>
+	<meta name="description" content={description} />
+	<link rel="canonical" href={canonical} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Posts — {config.title}" />
+	<meta property="og:description" content={description} />
+	<meta property="og:url" content={canonical} />
+	{#if ogImage}
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:image" content={ogImage} />
+	{/if}
 </svelte:head>
 
 <PostIndex
 	site={config}
-	hero
 	featured={data.featured}
 	posts={data.posts}
 	page={data.page}

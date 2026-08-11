@@ -39,8 +39,12 @@
 	</header>
 {:else}
 	<header class="post-header">
-		<p class="eyebrow">Posts</p>
-		<h1>Page {page}</h1>
+		{#if page <= 1}
+			<h1>Posts</h1>
+		{:else}
+			<p class="eyebrow">Posts</p>
+			<h1>Page {page}</h1>
+		{/if}
 	</header>
 {/if}
 

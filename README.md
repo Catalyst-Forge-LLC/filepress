@@ -101,7 +101,9 @@ export default defineFilepressConfig({
 });
 ```
 
-`title` and `url` are required; missing values fail the build with a clear error. Nav/footer items may set `icon: 'github'` for a built-in mark.
+`title` and `url` are required; missing values fail the build with a clear error.
+
+**Nav / footer:** `nav` is the header; `footerLinks` replaces the default RSS + Topics footer row when set (include those entries yourself if you still want them). Items may set `icon: 'github'` for a built-in mark (`.nav-github` in themes).
 
 ## Theming
 
@@ -161,16 +163,21 @@ Body content in **Markdown**.
 
 ## Deploy
 
-Build output is a static folder. For a site that depends on this engine:
+`filepress build` emits a static `build/` folder — no Node server in production.
+
+**Happy path: [Cloudflare Pages](https://pages.cloudflare.com/)** (git-connected site repo or Wrangler upload).
 
 | Setting | Value |
 | --- | --- |
 | Build command | `pnpm install && pnpm build` |
 | Output directory | `build` |
+| Node | 20+ |
 
-Point the site's dependency at a pinned commit or tag of this repo (not a floating branch) so upgrades are intentional. If this engine repo is private, the host's build needs permission to clone it.
+Pin the engine in the site `package.json` (`"getfilepress": "^0.1.1"` or `github:Catalyst-Forge-LLC/filepress#v0.1.1`). Do not use `link:` in CI. Set config `url` to the live origin.
 
-More at [getfilepress.com](https://getfilepress.com).
+Any other static host works the same way: publish `build/` as the web root.
+
+Full notes (including an agent checklist): [`docs/DEPLOY.md`](docs/DEPLOY.md) · product page: [getfilepress.com/deploy](https://getfilepress.com/deploy).
 
 ## Repository layout
 

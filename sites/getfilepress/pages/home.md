@@ -16,7 +16,8 @@ Edit on a laptop, on GitHub’s web UI, or from your phone. Push when you’re r
 
 ## Start here
 
-- **[Getting started](/getting-started)** — install `getfilepress`, scaffold a site, run dev and build.
+- **[Getting started](/getting-started)** — install `getfilepress`, scaffold a site, configure nav/footer (including GitHub icon).
+- **[Deploy](/deploy)** — Cloudflare Pages happy path; static `build/` anywhere else.
 - **[Import](/import)** — crawl an existing public site into a FilePress content tree.
 - **[Writing](/writing)** — essays and walkthroughs from the FilePress team.
 - **npm:** [`getfilepress`](https://www.npmjs.com/package/getfilepress) · **GitHub:** [Catalyst-Forge-LLC/filepress](https://github.com/Catalyst-Forge-LLC/filepress)

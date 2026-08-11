@@ -17,6 +17,7 @@ export default defineFilepressConfig({
 		{ label: 'Home', href: '/' },
 		{ label: 'Writing', href: '/writing' },
 		{ label: 'Docs', href: '/getting-started' },
+		{ label: 'Deploy', href: '/deploy' },
 		{ label: 'Import', href: '/import' },
 		{ label: 'Genie', href: '/genie' },
 		{ label: 'About', href: '/about' },

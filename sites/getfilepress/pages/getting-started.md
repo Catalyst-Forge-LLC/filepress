@@ -22,19 +22,31 @@ pnpm dev      # local preview
 pnpm build    # → build/
 ```
 
+Or depend on the published package from an empty folder (after scaffolding by hand or copying a site tree):
+
+```json
+{
+  "devDependencies": {
+    "getfilepress": "^0.1.1"
+  }
+}
+```
+
 The site folder stays content-only:
 
-- `filepress.config.ts` — title, URL, nav, topics, optional `homePage`
+- `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`
 - `posts/` — dated Markdown posts (`/posts/<slug>`)
 - `pages/` — evergreen Markdown pages (`about.md` → `/about`)
 - `static/` — favicon, images, logo
 - `theme.css` — optional Essay overrides
-- `package.json` — depends on `"getfilepress": "link:../filepress"` locally
+- `package.json` — `"getfilepress": "link:../filepress"` locally, or npm / git pin in CI
 
 ## Config
 
 ```ts
 import { defineFilepressConfig } from 'getfilepress';
+
+const github = 'https://github.com/acme/my-blog';
 
 export default defineFilepressConfig({
   title: 'My Blog',
@@ -42,11 +54,28 @@ export default defineFilepressConfig({
   url: 'https://my.blog',
   author: 'Me',
   tagline: 'Ends before means.',
-  topics: [{ label: 'Essays', tag: 'essays' }]
+  topics: [{ label: 'Essays', tag: 'essays' }],
+  nav: [
+    { label: 'Home', href: '/' },
+    { label: 'About', href: '/about' },
+    { label: 'GitHub', href: github, icon: 'github' }
+  ],
+  // Omitting footerLinks keeps the default RSS + Topics row.
+  footerLinks: [
+    { label: 'RSS', href: '/rss.xml' },
+    { label: 'Topics', href: '/topics' },
+    { label: 'GitHub', href: github, icon: 'github' }
+  ]
 });
 ```
 
 `title` and `url` are required. Missing values fail the build with a clear error.
+
+### Nav, footer, and icons
+
+- `nav` — header links (defaults to Posts + Topics, or Home + Posts + Topics when `homePage` is set).
+- `footerLinks` — footer row (defaults to RSS + Topics when omitted). Setting it **replaces** the default list, so keep RSS/Topics if you still want them.
+- `icon: 'github'` — built-in mark beside the label; opens in a new tab. Theme class: `.nav-github` (see [`docs/THEME.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/THEME.md)).
 
 For a product-style home (static page at `/`, posts at `/writing`), set `homePage: 'home'` and add `pages/home.md` — this site does exactly that.
 
@@ -63,6 +92,7 @@ In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`)
 
 ## Next
 
+- Ship it: [Deploy](/deploy)
 - Import an existing site: [Import](/import)
 - Tune look and feel in dev: [Genie](/genie)
 - Walkthrough posts: [Writing](/writing)

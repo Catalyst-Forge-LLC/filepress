@@ -74,7 +74,7 @@ Treat these as the stable styling API. Prefer overriding them (or tokens) over d
 
 **Chrome:** `.wrap` · `.site-header` · `.site-id` · `.site-title` · `.site-logo` · `.site-brand-copy` · `.site-wordmark` · `.site-tagline` · `.site-nav` · `.nav-icon` · `.nav-label` · `.has-icon` · `.nav-github` · `.site-footer` · `.footer-links`
 
-Nav and `footerLinks` entries may set `icon: 'github'`. Chrome renders the mark beside the label and adds `.has-icon` / `.nav-github` for theme overrides.
+Nav and `footerLinks` entries may set `icon: 'github'`. Chrome renders the mark beside the label, opens the link in a new tab, and adds `.has-icon` / `.nav-github` for theme overrides (see product-site `theme.css` or IngotVault for a pill-style control).
 
 **Index:** `.hero` · `.hero-lede` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
 

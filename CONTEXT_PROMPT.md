@@ -54,8 +54,8 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 ### What’s next (likely)
 
 1. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
-2. M3 Cloudflare Pages + getfilepress.com for `sites/getfilepress`  
-3. Prefer site pins on `getfilepress@^0.1.1` or `github:…#v0.1.1`  
+2. Prefer site pins on `getfilepress@^0.1.1` or `github:…#v0.1.1`  
+3. Deploy docs: `docs/DEPLOY.md` + site `/deploy` (CF-first)  
 4. Polish product-site copy / assets as needed
 
 ### Agent prefs (still true)

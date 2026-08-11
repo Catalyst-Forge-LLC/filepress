@@ -198,24 +198,17 @@ pnpm build    # → build/
 Optional: add \`theme.css\` next to \`filepress.config.ts\` to
 override the default Essay theme.
 
-## Deploy (Cloudflare Pages)
+## Deploy
 
-\`link:\` only works on your machine. For CI/hosting, switch to npm or a git pin:
+\`link:\` only works on your machine. For CI/hosting, pin npm or a git tag:
 
 \`\`\`json
 "getfilepress": "^0.1.1"
 \`\`\`
 
-or:
+**Cloudflare Pages (recommended):** build \`pnpm install && pnpm build\`, output \`build\`, Node 20+.
 
-\`\`\`json
-"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.1"
-\`\`\`
-
-| Setting | Value |
-| --- | --- |
-| Build command | \`pnpm install && pnpm build\` |
-| Output directory | \`build\` |
+Any static host: publish the \`build/\` folder. Details: https://getfilepress.com/deploy
 `
 	);
 

@@ -49,12 +49,22 @@ import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
   title: 'My Site',
-  url: 'https://my.site'
+  url: 'https://my.site',
+  nav: [
+    { label: 'Home', href: '/' },
+    { label: 'GitHub', href: 'https://github.com/acme/my-site', icon: 'github' }
+  ],
+  footerLinks: [
+    { label: 'RSS', href: '/rss.xml' },
+    { label: 'Topics', href: '/topics' },
+    { label: 'GitHub', href: 'https://github.com/acme/my-site', icon: 'github' }
+  ]
 });
 ```
 
 Optional: `theme.css` at the site root overrides the default
-Essay theme. See [`THEME.md`](THEME.md).
+Essay theme. See [`THEME.md`](THEME.md). Chrome classes for the GitHub control:
+`.nav-github`, `.nav-icon`, `.has-icon`.
 
 ### Scaffold
 
@@ -64,12 +74,19 @@ From this repo:
 pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://my.blog
 ```
 
-## CI / Cloudflare Pages
+## CI / deploy
 
-`link:` only works on your machine. For builds in the cloud, pin a tag or commit:
+`link:` only works on your machine. See **[`DEPLOY.md`](DEPLOY.md)** for the full
+contract (Cloudflare Pages happy path, Wrangler, any static host, agent checklist).
+
+Short form — pin npm or a git tag:
 
 ```json
-"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
+"getfilepress": "^0.1.1"
+```
+
+```json
+"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.1"
 ```
 
 | Setting | Value |
@@ -78,7 +95,6 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 | Build command | `pnpm install && pnpm build` |
 | Output directory | `build` |
 
-If this engine repo is private, the site’s CI needs permission to clone it.
 Set `url` in `filepress.config.ts` to the live custom domain (feeds and sitemap use it).
 
 ## Sites inside this repo
@@ -87,4 +103,6 @@ Optional content under `sites/*`:
 
 ```bash
 pnpm filepress build --site demo
+pnpm build:www          # product site → sites/getfilepress/build/
+pnpm deploy:www         # Wrangler Pages project `getfilepress`
 ```

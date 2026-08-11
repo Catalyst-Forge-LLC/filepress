@@ -58,10 +58,11 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ## M3 — Deployed and automated
 
-- [ ] Cloudflare Pages project wired for `sites/getfilepress` (or a sibling extract) — see SITE_PACKAGING_OPTIONS §6
-- [ ] Confirm push-to-`main` → live deploy with no manual step
-- [ ] Custom domain getfilepress.com attached; verify site serves at root (no base path)
-- [ ] `robots.txt` + `sitemap.xml` verified live and cross-referenced
+- [x] Cloudflare Pages + getfilepress.com live (Wrangler `deploy:www` / Pages project)
+- [x] Deploy docs: [`docs/DEPLOY.md`](docs/DEPLOY.md), site `/deploy`, README + EXTERNAL_SITES
+- [ ] Confirm push-to-`main` → live deploy with no manual step (if/when git-connected)
+- [x] Custom domain getfilepress.com attached; site serves at root
+- [x] `robots.txt` + `sitemap.xml` verified live
 - [ ] Responsive styling pass on real mobile + desktop
 - [ ] Lighthouse: confirm 95+ performance on a typical post page
 

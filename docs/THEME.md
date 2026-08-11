@@ -96,6 +96,17 @@ Prose content also uses standard elements inside `.prose` (`h2`–`h4`, `a`, `im
 - Keep specificity low so future engine CSS doesn’t fight you.
 - Custom fonts: self-host under `static/` and set `--font-serif` / `--font-sans`, or `@import` in `theme.css` (third-party font URLs affect privacy/perf).
 
-## Genie Mode (planned)
+## Genie Mode (dev-only — shipped)
 
-For a **local, dev-only** loop that steers tokens/structure/images (including hero background upload or Openverse) via versions and bakes into `theme.css` on activate/build, see [GENIE_MODE_SPEC.md](./GENIE_MODE_SPEC.md). Hand-edited `theme.css` remains fully supported; Genie Mode is optional authoring chrome, never shipped in preview or production builds. Requires [Ollama](https://ollama.com) for the LLM path; [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) is recommended for tuning a local model.
+In `filepress dev`, a floating **Genie** control opens a design cockpit:
+
+| Available now (M0–M2) | Notes |
+| --- | --- |
+| Token / structure steers | Accent, density, dark/light presets |
+| Openverse stock + local upload | Hero / page background (and logo upload → config) |
+| Version rail + activate | Gitignored `.filepress-genie/`; bake into `theme.css` / `static/` |
+| Live inspire (1–3 URLs) | Reuses import inspire pipeline |
+| Ollama refine | Optional; falls back to deterministic brief |
+| Config patch | `lede` / `tagline` / `logo` on activate |
+
+Hand-edited `theme.css` remains fully supported. Genie never ships in `preview` or production builds. Spec: [GENIE_MODE_SPEC.md](./GENIE_MODE_SPEC.md). Ollama optional for the LLM path; [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) recommended for a tuned local model.

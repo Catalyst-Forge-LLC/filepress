@@ -44,4 +44,39 @@ describe('genie store', () => {
 			true
 		);
 	});
+
+	it('applies config-patch.json on activate', () => {
+		const root = mkdtempSync(join(tmpdir(), 'filepress-genie-cfg-'));
+		mkdirSync(join(root, 'static', 'images'), { recursive: true });
+		writeFileSync(join(root, 'theme.css'), ':root { --accent: #111111; }\n');
+		writeFileSync(
+			join(root, 'filepress.config.ts'),
+			`import { defineFilepressConfig } from 'getfilepress';
+export default defineFilepressConfig({
+	title: 'X',
+	url: 'https://x.example'
+});
+`
+		);
+
+		const brief = {
+			mood: 'test',
+			do: [],
+			dont: [],
+			tokens: { accent: '#111111', accentStrong: '#000000' },
+			density: 'sparse' as const,
+			cssNotes: []
+		};
+		ensureBaseline(root, { brief, themeCss: ':root{}\n' });
+		const meta = writeSnapshot(root, {
+			label: 'Lede patch',
+			brief,
+			themeCss: ':root{}\n',
+			configPatch: { lede: 'From Genie', tagline: 'Tagged' }
+		});
+		activateVersion(root, meta.id);
+		const cfg = readFileSync(join(root, 'filepress.config.ts'), 'utf8');
+		expect(cfg).toContain('lede: "From Genie"');
+		expect(cfg).toContain('tagline: "Tagged"');
+	});
 });

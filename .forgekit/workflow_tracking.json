@@ -78,7 +78,7 @@
       ],
       "exitCriteriaRemaining": [
         "Features tested beyond happy path",
-        "Remaining product gaps: Genie M2 (live inspire/Ollama refine/config patches); M3 Cloudflare Pages + getfilepress.com; public tag for git-dep installs"
+        "Remaining product gaps: Genie M3 polish; optional git-connected Pages for product site"
       ],
       "notes": [
         "2026-07-05: User confirmed advancing from 2-scaffolding straight to 4-feature-iteration (Phase 3 stabilization was effectively covered during early hardening: env resolution, server-only loaders, real-data render). Phase 2 spine + feature batch (D11/D12) are done and committed.",
@@ -126,8 +126,8 @@
         },
         {
           "feature": "Genie Mode M2",
-          "status": "planned",
-          "notes": "live inspire + Ollama brief + lede/tagline/logo patches"
+          "status": "complete",
+          "notes": "live inspire + Ollama refine + model picker + lede/tagline/logo config patches (2026-08-11)"
         },
         {
           "feature": "homePage product landings",

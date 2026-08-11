@@ -8,7 +8,13 @@
 	};
 
 	type Health = {
-		ollama: { available: boolean; hint: string; model: string; host: string };
+		ollama: {
+			available: boolean;
+			hint: string;
+			model: string;
+			host: string;
+			models: string[];
+		};
 		active: { versionId: string; activatedAt: string } | null;
 		versions: VersionRow[];
 		brief: {
@@ -28,6 +34,13 @@
 	let health = $state<Health | null>(null);
 	let stockQuery = $state('abstract dark texture');
 	let accent = $state('#1e4d6b');
+	let inspireUrls = $state('https://www.catalystforge.com\n');
+	let useLlm = $state(true);
+	let selectedModel = $state('');
+	let refinePrompt = $state('');
+	let cfgLede = $state('');
+	let cfgTagline = $state('');
+	let cfgLogo = $state('');
 
 	async function api(path: string, init?: RequestInit) {
 		const res = await fetch(`/__filepress/genie${path}`, {
@@ -48,6 +61,10 @@
 		try {
 			health = await api('/health');
 			if (health?.brief?.tokens?.accent) accent = health.brief.tokens.accent;
+			if (health?.ollama?.model && !selectedModel) selectedModel = health.ollama.model;
+			else if (health?.ollama?.models?.length && !selectedModel) {
+				selectedModel = health.ollama.models[0];
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -101,7 +118,7 @@
 		}
 	}
 
-	async function onUpload(ev: Event, role: 'hero' | 'background') {
+	async function onUpload(ev: Event, role: 'hero' | 'background' | 'logo') {
 		const input = ev.currentTarget as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file) return;
@@ -130,6 +147,63 @@
 			input.value = '';
 		}
 	}
+
+	async function runInspire() {
+		loading = true;
+		error = '';
+		try {
+			await api('/inspire', {
+				method: 'POST',
+				body: JSON.stringify({
+					urls: inspireUrls.split(/\n+/).map((s) => s.trim()).filter(Boolean),
+					useLlm,
+					model: selectedModel || undefined
+				})
+			});
+			location.reload();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	async function runRefine() {
+		loading = true;
+		error = '';
+		try {
+			await api('/refine', {
+				method: 'POST',
+				body: JSON.stringify({
+					prompt: refinePrompt,
+					model: selectedModel || undefined
+				})
+			});
+			location.reload();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	async function runConfig() {
+		loading = true;
+		error = '';
+		try {
+			const patch: Record<string, string | null> = {};
+			if (cfgLede.trim()) patch.lede = cfgLede.trim();
+			if (cfgTagline.trim()) patch.tagline = cfgTagline.trim();
+			if (cfgLogo.trim()) patch.logo = cfgLogo.trim();
+			if (!Object.keys(patch).length) throw new Error('Fill at least one config field');
+			await api('/config', {
+				method: 'POST',
+				body: JSON.stringify({ patch })
+			});
+			location.reload();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
 </script>
 
 {#if !open}
@@ -151,8 +225,18 @@
 			<section class="genie-sec">
 				<h3>Status</h3>
 				<p class="genie-muted">
-					Ollama: {health.ollama.available ? 'up' : 'down'} · {health.ollama.model}
+					Ollama: {health.ollama.available ? 'up' : 'down'} · default {health.ollama.model}
 				</p>
+				{#if health.ollama.available && health.ollama.models?.length}
+					<label class="genie-row">
+						Model
+						<select bind:value={selectedModel} disabled={loading}>
+							{#each health.ollama.models as m (m)}
+								<option value={m}>{m}</option>
+							{/each}
+						</select>
+					</label>
+				{/if}
 				<p class="genie-hint">{health.ollama.hint}</p>
 			</section>
 
@@ -249,6 +333,65 @@
 						onchange={(e) => onUpload(e, 'background')}
 					/>
 				</label>
+				<label class="genie-row">
+					Logo (also sets config)
+					<input
+						type="file"
+						accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+						disabled={loading}
+						onchange={(e) => onUpload(e, 'logo')}
+					/>
+				</label>
+			</section>
+
+			<section class="genie-sec">
+				<h3>Inspire</h3>
+				<label class="genie-row">
+					URLs (1–3, one per line)
+					<textarea rows="3" bind:value={inspireUrls} disabled={loading}></textarea>
+				</label>
+				<label class="genie-check">
+					<input type="checkbox" bind:checked={useLlm} disabled={loading} />
+					Refine with Ollama when available
+				</label>
+				<button type="button" disabled={loading} onclick={runInspire}>Crawl &amp; apply</button>
+			</section>
+
+			<section class="genie-sec">
+				<h3>Ollama refine</h3>
+				<label class="genie-row">
+					Direction
+					<input
+						type="text"
+						bind:value={refinePrompt}
+						placeholder="warmer gold, denser nav, softer hero"
+						disabled={loading || !health.ollama.available}
+					/>
+					<button
+						type="button"
+						disabled={loading || !health.ollama.available || !refinePrompt.trim()}
+						onclick={runRefine}
+					>
+						Refine
+					</button>
+				</label>
+			</section>
+
+			<section class="genie-sec">
+				<h3>Config</h3>
+				<label class="genie-row">
+					Lede
+					<input type="text" bind:value={cfgLede} disabled={loading} />
+				</label>
+				<label class="genie-row">
+					Tagline
+					<input type="text" bind:value={cfgTagline} disabled={loading} />
+				</label>
+				<label class="genie-row">
+					Logo path
+					<input type="text" bind:value={cfgLogo} placeholder="/images/logo.svg" disabled={loading} />
+				</label>
+				<button type="button" disabled={loading} onclick={runConfig}>Apply config</button>
 			</section>
 
 			<section class="genie-sec">
@@ -371,8 +514,19 @@
 	}
 
 	.genie-row input[type='text'],
-	.genie-row input[type='file'] {
+	.genie-row input[type='file'],
+	.genie-row textarea,
+	.genie-row select {
 		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.genie-check {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.8rem;
+		margin-bottom: 0.65rem;
 	}
 
 	.genie-chips {

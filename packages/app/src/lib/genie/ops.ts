@@ -6,9 +6,20 @@ import {
 	tokensFromSourceCss
 } from '../../../../import/src/theme.ts';
 import { formatAttributionMarkdown, searchStockImage } from '../../../../import/src/stock.ts';
-import { fetchBuffer } from '../../../../import/src/fetch.ts';
-import { ollamaAvailable, ollamaSetupHint } from '../../../../import/src/ollama.ts';
-import type { DesignBrief } from '../../../../import/src/ir.ts';
+import { fetchBuffer, fetchText } from '../../../../import/src/fetch.ts';
+import {
+	briefFromInspiration,
+	extractInspirationSignals,
+	type InspirationSignals
+} from '../../../../import/src/inspire.ts';
+import {
+	generateDesignBrief,
+	listOllamaModels,
+	ollamaAvailable,
+	ollamaSetupHint,
+	summarizeHtmlForBrief
+} from '../../../../import/src/ollama.ts';
+import type { DesignBrief, SiteIR } from '../../../../import/src/ir.ts';
 import {
 	activateVersion,
 	ensureBaseline,
@@ -17,6 +28,7 @@ import {
 	readVersionBrief,
 	writeSnapshot
 } from './store.ts';
+import { stubIdentityFromConfig, type GenieConfigPatch } from './config-patch.ts';
 import type { GenieSteerPatch } from './types.ts';
 
 /** Build a starting brief from on-disk theme.css + optional prior genie brief. */
@@ -88,10 +100,19 @@ export function ensureBaselineIfNeeded(siteRoot: string) {
 	return ensureBaseline(siteRoot, { brief, themeCss });
 }
 
+function ollamaHost() {
+	return process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434';
+}
+
+function defaultOllamaModel() {
+	return process.env.FILEPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b';
+}
+
 export async function health(siteRoot: string) {
-	const host = process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434';
-	const model = process.env.FILEPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b';
+	const host = ollamaHost();
+	const model = defaultOllamaModel();
 	const up = await ollamaAvailable(host);
+	const models = up ? await listOllamaModels(host) : [];
 	ensureBaselineIfNeeded(siteRoot);
 	return {
 		ok: true,
@@ -100,9 +121,12 @@ export async function health(siteRoot: string) {
 		ollama: {
 			host,
 			model,
+			models,
 			available: up,
 			hint: up
-				? `Ollama is reachable. For a GPU-tuned named variant, try Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna — then set FILEPRESS_OLLAMA_MODEL.`
+				? models.length
+					? `Ollama is reachable (${models.length} model${models.length === 1 ? '' : 's'}). Pick one below, or tune with Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`
+					: `Ollama is up but no models listed. Pull one (e.g. ollama pull ${model}) or use Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`
 				: ollamaSetupHint(host)
 		},
 		active: getActive(siteRoot),
@@ -129,7 +153,10 @@ function collectImageFiles(siteRoot: string, brief: DesignBrief) {
 	return imageFiles;
 }
 
-export function applySteer(siteRoot: string, patch: GenieSteerPatch) {
+export function applySteer(
+	siteRoot: string,
+	patch: GenieSteerPatch & { configPatch?: GenieConfigPatch }
+) {
 	ensureBaselineIfNeeded(siteRoot);
 	const base = loadWorkingBrief(siteRoot);
 	const brief = mergeBrief(base, patch.brief || {});
@@ -145,7 +172,8 @@ export function applySteer(siteRoot: string, patch: GenieSteerPatch) {
 		brief,
 		themeCss,
 		imageFiles: collectImageFiles(siteRoot, brief),
-		steers: [{ type: 'steer', patch: patch.brief || {} }]
+		steers: [{ type: 'steer', patch: patch.brief || {} }],
+		configPatch: patch.configPatch
 	});
 
 	const shouldActivate = patch.activate !== false;
@@ -214,7 +242,7 @@ export function receiveUpload(
 	if (buf.length > MAX_UPLOAD) throw new Error('Upload exceeds 5MB limit');
 
 	const safeBase = opts.filename.replace(/[^\w.-]+/g, '-').slice(0, 80) || opts.role;
-	const extMatch = safeBase.match(/\.(jpe?g|png|webp|gif)$/i);
+	const extMatch = safeBase.match(/\.(jpe?g|png|webp|gif|svg)$/i);
 	let ext = extMatch ? extMatch[0].toLowerCase() : '.jpg';
 	if (ext === '.jpeg') ext = '.jpg';
 	const destName = `${opts.role}${ext}`;
@@ -223,10 +251,12 @@ export function receiveUpload(
 	mkdirSync(staticImg, { recursive: true });
 	writeFileSync(join(staticImg, destName), buf);
 
+	const imagePath = `/images/${destName}`;
 	return applySteer(siteRoot, {
 		label: `Upload ${opts.role}`,
 		prompt: `Local upload → ${opts.role}`,
-		brief: { images: { [opts.role]: `/images/${destName}` } },
+		brief: { images: { [opts.role]: imagePath } },
+		configPatch: opts.role === 'logo' ? { logo: imagePath } : undefined,
 		activate: opts.activate !== false
 	});
 }
@@ -234,4 +264,178 @@ export function receiveUpload(
 export function doActivate(siteRoot: string, versionId: string) {
 	ensureBaselineIfNeeded(siteRoot);
 	return activateVersion(siteRoot, versionId);
+}
+
+function assertHttpUrls(urls: string[]): string[] {
+	const out: string[] = [];
+	for (const raw of urls) {
+		const u = raw.trim();
+		if (!u) continue;
+		let parsed: URL;
+		try {
+			parsed = new URL(u);
+		} catch {
+			throw new Error(`Invalid URL: ${u}`);
+		}
+		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+			throw new Error(`Only http(s) inspire URLs allowed: ${u}`);
+		}
+		out.push(parsed.href);
+	}
+	if (!out.length) throw new Error('Provide 1–3 inspire URLs');
+	if (out.length > 3) throw new Error('At most 3 inspire URLs');
+	return out;
+}
+
+function stubSiteIr(siteRoot: string): SiteIR {
+	const identity = stubIdentityFromConfig(siteRoot);
+	return {
+		source: { url: identity.canonicalUrl, generator: null },
+		identity,
+		posts: [],
+		pages: [],
+		nav: [],
+		topics: [],
+		lede: null,
+		notes: [],
+		assets: []
+	};
+}
+
+/** Live inspire crawl → DesignBrief snapshot (optional Ollama refine). */
+export async function runInspire(
+	siteRoot: string,
+	opts: {
+		urls: string[];
+		useLlm?: boolean;
+		model?: string;
+		activate?: boolean;
+		label?: string;
+	}
+) {
+	ensureBaselineIfNeeded(siteRoot);
+	const urls = assertHttpUrls(opts.urls);
+	const signals: InspirationSignals[] = [];
+	const summaries: string[] = [];
+	const notes: string[] = [];
+
+	for (const u of urls) {
+		try {
+			const sig = await extractInspirationSignals(u);
+			signals.push(sig);
+			const { text } = await fetchText(u);
+			summaries.push(`${u}: ${summarizeHtmlForBrief(text)}`);
+			notes.push(`${u} → ${sig.paletteMode}`);
+		} catch (e) {
+			throw new Error(
+				`Inspire failed for ${u}: ${e instanceof Error ? e.message : String(e)}`
+			);
+		}
+	}
+
+	let brief = mergeBrief(loadWorkingBrief(siteRoot), briefFromInspiration(signals));
+	// Prefer inspire look for chrome; keep any already-chosen image paths unless inspire cleared them
+	const host = ollamaHost();
+	const model = (opts.model || defaultOllamaModel()).trim();
+	let llm = { used: false, model: null as string | null, host: null as string | null };
+
+	if (opts.useLlm !== false) {
+		const up = await ollamaAvailable(host);
+		if (up) {
+			brief = await generateDesignBrief({
+				host,
+				model,
+				ir: stubSiteIr(siteRoot),
+				inspireSummaries: summaries,
+				inspireSignals: signals,
+				seed: brief
+			});
+			llm = { used: true, model, host };
+		} else {
+			notes.push('Ollama unavailable — used deterministic inspire brief');
+		}
+	}
+
+	const themeCss = themeCssFromBrief(brief);
+	const meta = writeSnapshot(siteRoot, {
+		label: opts.label || `Inspire: ${urls.map((u) => new URL(u).hostname).join(', ')}`.slice(0, 72),
+		prompt: urls.join('\n'),
+		brief,
+		themeCss,
+		imageFiles: collectImageFiles(siteRoot, brief),
+		inspireUrls: urls,
+		llm,
+		steers: [{ type: 'inspire', urls, notes }]
+	});
+	const active =
+		opts.activate !== false ? activateVersion(siteRoot, meta.id) : getActive(siteRoot);
+	return { meta, active, brief, notes, llm };
+}
+
+/** Ollama refine of the working brief from a short natural-language prompt. */
+export async function refineWithOllama(
+	siteRoot: string,
+	opts: { prompt: string; model?: string; activate?: boolean }
+) {
+	ensureBaselineIfNeeded(siteRoot);
+	const prompt = opts.prompt.trim();
+	if (!prompt) throw new Error('`prompt` is required');
+
+	const host = ollamaHost();
+	const model = (opts.model || defaultOllamaModel()).trim();
+	if (!(await ollamaAvailable(host))) {
+		throw new Error(ollamaSetupHint(host));
+	}
+
+	const seed = loadWorkingBrief(siteRoot);
+	const brief = await generateDesignBrief({
+		host,
+		model,
+		ir: stubSiteIr(siteRoot),
+		inspireSummaries: [`Author steer: ${prompt}`],
+		inspireSignals: [],
+		seed
+	});
+	const themeCss = themeCssFromBrief(brief);
+	const meta = writeSnapshot(siteRoot, {
+		label: `Refine: ${prompt.slice(0, 40)}`,
+		prompt,
+		brief,
+		themeCss,
+		imageFiles: collectImageFiles(siteRoot, brief),
+		llm: { used: true, model, host },
+		steers: [{ type: 'refine', prompt }]
+	});
+	const active =
+		opts.activate !== false ? activateVersion(siteRoot, meta.id) : getActive(siteRoot);
+	return { meta, active, brief, llm: { used: true, model, host } };
+}
+
+/** Snapshot a config-only chrome patch (lede / tagline / logo). */
+export function applyConfigOnly(
+	siteRoot: string,
+	opts: { patch: GenieConfigPatch; label?: string; activate?: boolean }
+) {
+	ensureBaselineIfNeeded(siteRoot);
+	const keys = Object.keys(opts.patch).filter(
+		(k) => opts.patch[k as keyof GenieConfigPatch] !== undefined
+	);
+	if (!keys.length) throw new Error('No config fields to patch');
+
+	const brief = opts.patch.logo
+		? mergeBrief(loadWorkingBrief(siteRoot), { images: { logo: opts.patch.logo } })
+		: loadWorkingBrief(siteRoot);
+	const themeCss = loadWorkingThemeCss(siteRoot, brief);
+	const meta = writeSnapshot(siteRoot, {
+		label: opts.label || `Config: ${keys.join(', ')}`,
+		prompt: JSON.stringify(opts.patch),
+		brief,
+		themeCss,
+		imageFiles: collectImageFiles(siteRoot, brief),
+		configPatch: opts.patch,
+		steers: [{ type: 'config', patch: opts.patch }]
+	});
+	const active =
+		opts.activate !== false ? activateVersion(siteRoot, meta.id) : getActive(siteRoot);
+	return { meta, active, brief };
 }

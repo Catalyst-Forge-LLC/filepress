@@ -47,7 +47,7 @@
 	"scripts": {
 		"postinstall": "node scripts/postinstall.mjs",
 		"filepress": "node scripts/filepress.mjs",
-		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test",
+		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test",
 		"check": "pnpm filepress check --site demo",
 		"build": "pnpm filepress build --site demo",
 		"build:demo": "pnpm filepress build --site demo",

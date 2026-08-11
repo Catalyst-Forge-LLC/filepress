@@ -1,11 +1,14 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import {
+	applyConfigOnly,
 	applySteer,
 	doActivate,
 	fetchStockCover,
 	health,
-	receiveUpload
+	receiveUpload,
+	refineWithOllama,
+	runInspire
 } from './src/lib/genie/ops.ts';
 import { deleteVersion, listVersions } from './src/lib/genie/store.ts';
 
@@ -95,6 +98,58 @@ export function geniePlugin(siteRoot: string): Plugin {
 						return sendJson(res, 200, {
 							active: doActivate(siteRoot, body.versionId)
 						});
+					}
+
+					if (method === 'POST' && path === '/__filepress/genie/inspire') {
+						const body = JSON.parse(await readBody(req));
+						const urls = Array.isArray(body.urls)
+							? body.urls
+							: typeof body.urls === 'string'
+								? body.urls.split(/\n+/).map((s: string) => s.trim())
+								: [];
+						return sendJson(
+							res,
+							200,
+							await runInspire(siteRoot, {
+								urls,
+								useLlm: body.useLlm,
+								model: body.model,
+								activate: body.activate,
+								label: body.label
+							})
+						);
+					}
+
+					if (method === 'POST' && path === '/__filepress/genie/refine') {
+						const body = JSON.parse(await readBody(req));
+						if (!body.prompt || typeof body.prompt !== 'string') {
+							return sendJson(res, 400, { error: '`prompt` string required' });
+						}
+						return sendJson(
+							res,
+							200,
+							await refineWithOllama(siteRoot, {
+								prompt: body.prompt,
+								model: body.model,
+								activate: body.activate
+							})
+						);
+					}
+
+					if (method === 'POST' && path === '/__filepress/genie/config') {
+						const body = JSON.parse(await readBody(req));
+						if (!body.patch || typeof body.patch !== 'object') {
+							return sendJson(res, 400, { error: '`patch` object required' });
+						}
+						return sendJson(
+							res,
+							200,
+							applyConfigOnly(siteRoot, {
+								patch: body.patch,
+								label: body.label,
+								activate: body.activate
+							})
+						);
 					}
 
 					if (method === 'POST' && path === '/__filepress/genie/delete') {

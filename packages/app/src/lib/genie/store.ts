@@ -10,6 +10,7 @@ import {
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import type { DesignBrief, GenieActive, GenieVersionMeta } from './types.ts';
+import { applyConfigPatch, readConfigPatchFile, type GenieConfigPatch } from './config-patch.ts';
 
 const GENIE_DIR = '.filepress-genie';
 
@@ -85,6 +86,9 @@ export type SnapshotInput = {
 	/** Absolute or site-relative files to copy into version images/ as basename */
 	imageFiles?: Array<{ absPath: string; destName: string }>;
 	attribution?: string;
+	configPatch?: GenieConfigPatch;
+	inspireUrls?: string[];
+	llm?: { used: boolean; model: string | null; host: string | null };
 };
 
 export function writeSnapshot(siteRoot: string, input: SnapshotInput): GenieVersionMeta {
@@ -101,13 +105,13 @@ export function writeSnapshot(siteRoot: string, input: SnapshotInput): GenieVers
 		starred: false,
 		prompt: input.prompt || '',
 		steers: input.steers || [],
-		inspireUrls: [],
-		llm: { used: false, model: null, host: null }
+		inspireUrls: input.inspireUrls || [],
+		llm: input.llm || { used: false, model: null, host: null }
 	};
 
 	writeJson(join(dir, 'meta.json'), meta);
 	writeJson(join(dir, 'design-brief.json'), input.brief);
-	writeJson(join(dir, 'config-patch.json'), {});
+	writeJson(join(dir, 'config-patch.json'), input.configPatch || {});
 	writeFileSync(join(dir, 'theme.css'), input.themeCss);
 	if (input.attribution) {
 		writeFileSync(join(dir, 'attribution.md'), input.attribution);
@@ -142,6 +146,11 @@ export function activateVersion(siteRoot: string, versionId: string): GenieActiv
 	if (existsSync(attr)) {
 		mkdirSync(join(siteRoot, '.filepress-import'), { recursive: true });
 		copyFileSync(attr, join(siteRoot, '.filepress-import', 'IMAGE_ATTRIBUTION.md'));
+	}
+
+	const patch = readConfigPatchFile(join(dir, 'config-patch.json'));
+	if (Object.keys(patch).length > 0) {
+		applyConfigPatch(siteRoot, patch);
 	}
 
 	const active: GenieActive = {

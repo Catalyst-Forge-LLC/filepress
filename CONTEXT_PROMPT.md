@@ -53,9 +53,9 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 
 ### What’s next (likely)
 
-1. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
+1. Genie **M3** polish (star/label, harder acceptance) — M0–M2 done  
 2. Prefer site pins on `getfilepress@^0.1.1` or `github:…#v0.1.1`  
-3. Deploy docs: `docs/DEPLOY.md` + site `/deploy` (CF-first)  
+3. Manual Genie smoke in `filepress dev` + deploy product site when ready  
 4. Polish product-site copy / assets as needed
 
 ### Agent prefs (still true)
@@ -135,13 +135,13 @@ D1 gray-matter+remark · D2 adapter-static · D3/D4 core/site + pinned deps · D
 - Full content engine + routes + RSS/sitemap/robots + Essay theme + D12 feature batch  
 - Option C+D packaging (one app, content-only sites, CLI, external scaffold)  
 - Site import CLI (`filepress import`) + inspire/theme/stock/Openverse  
-- Genie Mode **M0+M1** (health, versions, steers, stock, upload, activate)  
+- Genie Mode **M0–M2** (health, versions, steers, stock, upload, activate, inspire, Ollama refine, config patches)  
 - Public-prep: MIT, latin fonts, hljs allowlist, publish `files` includes import  
 - Rebrand to FilePress / `getfilepress`
 
 ### Not done / next
 
-- Genie **M2** (live inspire, Ollama refine, config patches for lede/tagline/logo)  
+- Genie **M3** (star/label/duplicate, denser acceptance tests)  
 - Push/tag for `github:Catalyst-Forge-LLC/filepress#…` installs when asked  
 - M3 Cloudflare Pages + getfilepress.com (`sites/getfilepress` content ready)  
 - M5 polish (404, reading-time, search, …)

@@ -49,7 +49,7 @@ What’s missing for this story:
 
 The product pitch: “Point filepress at your old site + 1–3 sites you like → walk away with a sibling repo you can `pnpm install && pnpm filepress dev`.”
 
-**After import:** the planned local [Genie Mode](./GENIE_MODE_SPEC.md) continues the taste loop in `pnpm filepress dev` (steer backgrounds, fonts, colors, inspire URLs, version toggles, uploads)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay Genie-free. Both import and Genie should detect Ollama and may suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) for a tuned local model.
+**After import:** [Genie Mode](./GENIE_MODE_SPEC.md) continues the taste loop in `pnpm filepress dev` (steers, Openverse / upload, live inspire URLs, Ollama refine, version toggles)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay Genie-free. Both import and Genie detect Ollama and may suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) for a tuned local model.
 
 ---
 

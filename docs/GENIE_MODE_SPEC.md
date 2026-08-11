@@ -1,12 +1,12 @@
 # Spec: filepress Genie Mode
 
-**Status:** locked — M0/M1 implemented (2026-08-03)  
-**Date:** 2026-08-03  
+**Status:** locked — **M0–M2 implemented** (M2: 2026-08-11)  
+**Date:** 2026-08-03 (M2 update 2026-08-11)  
 **Phase:** 4-feature-iteration  
 **Related:** [THEME.md](./THEME.md) · [SITE_IMPORT_SPEC.md](./SITE_IMPORT_SPEC.md)  
 **Former working title:** Assistant Mode (see [ASSISTANT_MODE_SPEC.md](./ASSISTANT_MODE_SPEC.md) redirect)
 
-**M0/M1 surface:** floating Genie drawer in `pnpm filepress dev`; APIs under `/__filepress/genie/*` via Vite plugin (`apply: 'serve'` only); versions in `.filepress-genie/`.
+**Surface:** floating Genie drawer in `pnpm filepress dev`; APIs under `/__filepress/genie/*` via Vite plugin (`apply: 'serve'` only); versions in `.filepress-genie/`. M2 adds live inspire, Ollama refine, model picker, and `lede` / `tagline` / `logo` config patches.
 
 ---
 
@@ -330,7 +330,7 @@ Before first Genie write, snapshot current look as `baseline`.
 - Version rail + activate → working tree + HMR.
 - `.filepress-genie/` gitignored in create-site / external scaffold.
 
-### M2 — Inspire + Ollama
+### M2 — Inspire + Ollama ✅
 
 - Live inspire URLs; Ollama brief refine + fallbacks.
 - Config patch: lede / tagline / logo.
@@ -338,7 +338,7 @@ Before first Genie write, snapshot current look as `baseline`.
 
 ### M3 — Polish + harden
 
-- Star/label/duplicate; verbose errors; acceptance tests; README/THEME docs.
+- Star/label/duplicate; fuller acceptance tests; UX polish.
 
 ---
 

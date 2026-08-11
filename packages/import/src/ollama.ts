@@ -13,6 +13,23 @@ export async function ollamaAvailable(host: string): Promise<boolean> {
 	}
 }
 
+/** Model names from `GET /api/tags` (empty if unreachable). */
+export async function listOllamaModels(host: string): Promise<string[]> {
+	try {
+		const res = await fetch(`${host.replace(/\/+$/, '')}/api/tags`, {
+			signal: AbortSignal.timeout(4000)
+		});
+		if (!res.ok) return [];
+		const data = (await res.json()) as { models?: Array<{ name?: string }> };
+		return (data.models || [])
+			.map((m) => (m.name || '').trim())
+			.filter(Boolean)
+			.sort((a, b) => a.localeCompare(b));
+	} catch {
+		return [];
+	}
+}
+
 /** Shared copy for import + Genie Mode when Ollama is missing or unused. */
 export function ollamaSetupHint(host: string): string {
 	const h = host.replace(/\/+$/, '') || 'http://127.0.0.1:11434';

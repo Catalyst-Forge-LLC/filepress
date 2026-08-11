@@ -111,8 +111,12 @@ The engine ships a default Essay look. To restyle a site, add `theme.css` next t
 `filepress.config.ts`. It loads after the default theme, so you can override CSS
 variables and structural classes without forking the app.
 
-In local `pnpm dev`, **Genie Mode** lets you steer tokens, stock backgrounds, and
-versioned theme activations without leaving the browser (dev-only; not in production builds).
+In local `filepress dev` / `pnpm dev`, **Genie Mode** (floating FAB) is a design cockpit:
+steers, Openverse / uploads, live inspire URLs, optional Ollama refine, and
+`lede` / `tagline` / `logo` config patches — versioned under `.filepress-genie/`,
+baked into `theme.css` / `static/` / config on activate. Dev-only; absent from
+`preview` and production builds. See [`docs/GENIE_MODE_SPEC.md`](docs/GENIE_MODE_SPEC.md)
+and [getfilepress.com/genie](https://getfilepress.com/genie).
 
 ```css
 /* theme.css */

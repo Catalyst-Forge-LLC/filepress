@@ -111,25 +111,41 @@ body {
 
 .site-id {
 	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	gap: 0.4rem;
+	align-items: center;
 	min-width: 0;
 }
 
 .site-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.85rem;
 	font-family: var(--font-serif);
 	font-size: 1.5rem;
 	font-weight: 600;
 	letter-spacing: -0.015em;
 	color: var(--ink);
 	text-decoration: none;
+	min-width: 0;
 }
 
 .site-logo {
 	display: block;
+	flex-shrink: 0;
 	height: 4.25rem;
 	width: auto;
+}
+
+/* Wordmark + tagline stack beside the logo (or alone when there is no mark). */
+.site-brand-copy {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.2rem;
+	min-width: 0;
+}
+
+.site-wordmark {
+	line-height: 1.1;
 }
 
 /* The tagline is the site's thesis, carried on the masthead site-wide. */

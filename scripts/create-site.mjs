@@ -151,8 +151,9 @@ if (external) {
 				},
 				devDependencies: {
 					// link: uses the live engine tree (with its workspace node_modules).
-					// For Cloudflare/CI after the engine is on GitHub, switch to:
-					// "getfilepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
+					// Alternatives after publish / push:
+					// "getfilepress": "^0.1.0"
+					// "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
 					getfilepress: `link:${relToEngine}`
 				}
 			},
@@ -199,8 +200,13 @@ override the default Essay theme.
 
 ## Deploy (Cloudflare Pages)
 
-\`link:\` only works on your machine. After the engine is on GitHub under
-Catalyst-Forge-LLC, switch the dependency to a **git pin**:
+\`link:\` only works on your machine. For CI/hosting, switch to npm or a git pin:
+
+\`\`\`json
+"getfilepress": "^0.1.0"
+\`\`\`
+
+or:
 
 \`\`\`json
 "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"

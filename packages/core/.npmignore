@@ -1,0 +1,5 @@
+node_modules
+.vite
+vitest.config.*
+**/*.test.ts
+README.md

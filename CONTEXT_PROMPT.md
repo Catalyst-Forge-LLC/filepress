@@ -39,9 +39,11 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 - `631c0c2` — npm name `getfilepress` + FilePress branding
 - `b56121e` — Downpress → filepress rebrand, MIT LICENSE, latin-only fonts, hljs allowlist, drop sass, publish `files` includes import+Genie
 
-### npm stake
+### npm publish
 
-Placeholder **`getfilepress@0.0.0`** at `Z:\workspace\__tmp\filepress-npm-stake` (no site URL in stake README). User may have published; bare `filepress` is **not** available on npm.
+- Registry stake: **`getfilepress@0.0.0`** (placeholder). Ready to publish **`0.1.0`** after repo is public.
+- Publish shape fixed: root hoists real deps (no `workspace:*` on published manifest); CLI invokes vite/sirv/tsx directly; `prepack`/`postpack` stash nested `node_modules`; postinstall + CLI link `@filepress/*`; smoke via `pnpm pack:smoke`.
+- Bare `filepress` is **not** available on npm.
 
 ### ForgeKit
 
@@ -51,8 +53,8 @@ Placeholder **`getfilepress@0.0.0`** at `Z:\workspace\__tmp\filepress-npm-stake`
 
 ### What’s next (likely)
 
-1. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
-2. Tag when ready for CF git-dep installs (`github:Catalyst-Forge-LLC/filepress#…`)  
+1. Make GitHub repo **public** → tag `v0.1.0` → `npm publish` (`pnpm pack:smoke` first)  
+2. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
 3. M3 Cloudflare Pages + getfilepress.com for `sites/getfilepress`  
 4. Polish product-site copy / assets as needed
 

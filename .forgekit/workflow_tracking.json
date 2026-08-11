@@ -100,7 +100,8 @@
         "2026-08-11: Theme FOUC fixes (critical-theme first paint); ogImage; masthead logo+wordmark+tagline stack; product themes win over Essay chrome.",
         "2026-08-11: Public-prep + rebrand — MIT LICENSE; latin/latin-ext fonts only; hljs language allowlist; drop sass (theme.css only); publish `files` includes import+Genie. Product FilePress; npm+domain `getfilepress` (bare `filepress` blocked on npm — too similar to vitepress). Zip/symlink lesson: Windows zip follows `link:` into engine node_modules.",
         "2026-08-11: Folder + GitHub rename complete: local `filepress`, GitHub Catalyst-Forge-LLC/filepress (was downpress → briefly getfilepress → filepress). Remotes + backup mirror updated. Sibling sites rewired to getfilepress + filepress.config.ts.",
-        "2026-08-11: Product site `sites/getfilepress` — homePage landing, docs pages, Writing posts, press-on-files logo, wider chrome (~50%), `pnpm dev:www` / `build:www` / `deploy:www` (Wrangler Pages project getfilepress). Demo remains fixture. Custom domain / git-connected Pages still M3."
+        "2026-08-11: Product site `sites/getfilepress` — homePage landing, docs pages, Writing posts, press-on-files logo, wider chrome (~50%), `pnpm dev:www` / `build:www` / `deploy:www` (Wrangler Pages project getfilepress). Demo remains fixture. Custom domain / git-connected Pages still M3.",
+        "2026-08-11: npm publish shape fixed for getfilepress@0.1.0 — hoist real deps (no workspace:* on published manifest), CLI runs vite/sirv/tsx directly, prepack/postpack + postinstall/@filepress links, pack:smoke green. Next: public repo → tag → npm publish."
       ],
       "iterations": [
         {

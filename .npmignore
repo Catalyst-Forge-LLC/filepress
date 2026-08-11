@@ -1,0 +1,11 @@
+# Keep the published tarball lean. `files` in package.json is the allowlist;
+# these patterns still exclude junk that would otherwise ship under packages/*.
+**/node_modules/**
+**/.svelte-kit/**
+**/.vite/**
+**/*.test.ts
+**/vitest.config.*
+**/.gitignore
+**/tsconfig.tsbuildinfo
+**/.DS_Store
+**/Thumbs.db

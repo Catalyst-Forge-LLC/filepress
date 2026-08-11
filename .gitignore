@@ -1,4 +1,6 @@
 node_modules/
+.npm-pack-bak/
+.npm-pack-bak.json
 
 # SvelteKit / build output (per-site)
 .svelte-kit/

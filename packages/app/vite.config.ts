@@ -71,6 +71,15 @@ export default defineConfig({
 	preview: fixedPort
 		? { port: fixedPort, strictPort: true }
 		: undefined,
+	// Regex aliases (exact) so npm installs don't need workspace links, and so a
+	// bare `@filepress/core` string alias can't steal `/server` + `/theme`.
+	resolve: {
+		alias: [
+			{ find: /^@filepress\/core\/server$/, replacement: coreServer },
+			{ find: /^@filepress\/core\/theme$/, replacement: coreTheme },
+			{ find: /^@filepress\/core$/, replacement: coreEntry }
+		]
+	},
 	plugins: [
 		criticalThemePlugin(siteTheme, criticalThemeOut),
 		geniePlugin(siteRoot),

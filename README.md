@@ -35,7 +35,7 @@ The site folder only needs:
 - `posts/` — Markdown posts (`/posts/<slug>`)
 - `pages/` — optional static Markdown pages (`about.md` → `/about`)
 - `static/` — favicon, images, etc.
-- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, or a git URL + tag/SHA in CI)
+- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, `"getfilepress": "^0.1.0"` from npm, or a git URL + tag/SHA)
 
 ### Import an existing site
 

@@ -47,7 +47,7 @@ Placeholder **`getfilepress@0.0.0`** at `Z:\workspace\__tmp\filepress-npm-stake`
 
 - **Phase:** `4-feature-iteration` (in_progress)
 - Do **not** advance phases without user OK
-- Source of truth: `.forgekit/workflow_tracking.json`
+- Source of truth: `.forgekit/workflow_tracking.json` (backfilled 2026-08-11 from downpress+filepress chats + git: D14–D16, sessions through product site / deploy:www)
 
 ### What’s next (likely)
 

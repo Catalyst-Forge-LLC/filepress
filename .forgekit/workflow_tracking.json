@@ -2,7 +2,9 @@
   "project": {
     "name": "filepress",
     "created": "2026-07-02",
-    "description": "filepress — file-based Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited in git, compiled to a static prerendered site. Reusable core + content-only sites. Site: getfilepress.com. Formerly Downpress."
+    "description": "FilePress — file-based Markdown blog engine (SvelteKit): posts are Markdown+YAML in git, compiled to a static prerendered site. pnpm workspace published as npm `getfilepress`; CLI bins `filepress`/`getfilepress`; in-repo product site `sites/getfilepress` for getfilepress.com. Formerly Downpress.",
+    "status": "active",
+    "archetype": "product"
   },
   "currentPhase": "4-feature-iteration",
   "phases": {
@@ -27,9 +29,9 @@
       ]
     },
     "2-scaffolding": {
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2026-07-04",
-      "completedAt": null,
+      "completedAt": "2026-07-05",
       "exitCriteriaMet": [
         "App runs with pnpm dev",
         "Real data visible on screen",
@@ -47,7 +49,8 @@
         "Built the content engine (src/lib/content/): gray-matter + unified remark/rehype pipeline; loader handles all GENESIS edge cases (malformed/missing frontmatter, strict YYYY-MM-DD, real-calendar-date check, duplicate-slug detection naming both files, unicode slugs, tag normalization, drafts, future-date hiding). ContentError fails the build loud and file-named.",
         "Routes: index (published, empty state), posts/[slug] (SEO meta + draft banner; entries() builds published + drafts), tags index + tags/[tag], rss.xml, sitemap.xml, robots.txt. Classic theme in app.css (sparse/editorial, light+dark).",
         "Verified in build output + preview: draft builds but is unlisted/absent from feeds (200 at URL); future-dated post excluded entirely (404); missing-title and duplicate-slug both fail the build loudly naming files; pnpm check 0 errors, 0 lint errors.",
-        "Phase 2 exit criteria all met. Deferred to later milestones: M3 CI/Cloudflare deploy, M4 core/site split + scaffold script, M5 polish. Awaiting user confirmation before advancing currentPhase to 3-stabilization."
+        "Phase 2 exit criteria all met. Deferred to later milestones: M3 CI/Cloudflare deploy, M4 core/site split + scaffold script, M5 polish. Awaiting user confirmation before advancing currentPhase to 3-stabilization.",
+        "2026-07-05: User confirmed advancing straight to 4-feature-iteration; Phase 2 marked completed retrospectively (exit criteria already met on 2026-07-04)."
       ]
     },
     "3-stabilization": {
@@ -61,26 +64,91 @@
         "Core workflow completes without infrastructure errors",
         "Error messages are human-readable (not just status codes)"
       ],
-      "notes": []
+      "notes": [
+        "2026-07-05: Skipped as a formal phase — user advanced 2→4. Stabilization concerns (env resolution, server-only loaders, real-data render, human-readable ContentError) were covered during early hardening + M4 DI. Exit criteria left remaining so Phase 3 can be revisited if desired; do not treat as blocking Phase 4 work."
+      ]
     },
     "4-feature-iteration": {
       "status": "in_progress",
       "startedAt": "2026-07-05",
       "completedAt": null,
-      "exitCriteriaMet": [],
-      "exitCriteriaRemaining": ["Core value proposition delivered", "Hero flow works with real data including edge cases", "Features tested beyond happy path"],
+      "exitCriteriaMet": [
+        "Core value proposition delivered",
+        "Hero flow works with real data including edge cases"
+      ],
+      "exitCriteriaRemaining": [
+        "Features tested beyond happy path",
+        "Remaining product gaps: Genie M2 (live inspire/Ollama refine/config patches); M3 Cloudflare Pages + getfilepress.com; public tag for git-dep installs"
+      ],
       "notes": [
         "2026-07-05: User confirmed advancing from 2-scaffolding straight to 4-feature-iteration (Phase 3 stabilization was effectively covered during early hardening: env resolution, server-only loaders, real-data render). Phase 2 spine + feature batch (D11/D12) are done and committed.",
-        "Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@filepress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
         "2026-07-05: M4 core/site split DONE. @filepress/core extracted with client/server barrels + DI (createContent, defineFilepressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring.",
+        "2026-07-05: Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@filepress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
         "2026-07-25: User flagged per-site route/lib duplication vs ideal 'link filepress + bare minimum config' + static deploy. Wrote docs/SITE_PACKAGING_OPTIONS.md comparing A (status quo), B (generated routes), C (one packages/app + content-only sites), D (CLI/package like Astro), E/F rejects. Recommendation: C now, D as distribution end-state. Awaiting decision before migrating.",
         "2026-07-25: User chose C then D. Implemented Option C: packages/app is the only SvelteKit app; sites/* demoted to content-only (config+posts+static); scripts/filepress.mjs sets FILEPRESS_SITE_ROOT and runs app; create-site emits content-only trees; both example-site and demo build to their own sites/<name>/build/. check clean, 31 core tests pass. Option D deferred pending user decisions on distribution (git dep vs npm) and whether external site repos are needed soon.",
         "2026-07-25: Option D done. User confirmed: separate site folders, local link (not npm), org Catalyst-Forge-LLC. Root package renamed to `filepress` with bin; CLI supports cwd mode (no --site) and --site monorepo mode; configs import from `filepress`; create-site --external; sibling ../example-site builds via link:../filepress → build/. Docs: EXTERNAL_SITES.md (link: local, github:Catalyst-Forge-LLC/filepress#tag for CF). Next: push engine repo to that org, then M3 on the site.",
         "2026-07-25: Zen Garden theming: optional site-root theme.css (preferred) or theme.scss loaded after Essay via $site-theme alias; empty stub when absent; sass added for SCSS; docs/THEME.md lists tokens + public classes; demo site ships a sample accent override. Verified CSS/SCSS/stub builds + check clean.",
+        "2026-07-25: Engine pushed to Catalyst-Forge-LLC/downpress (later renamed). Sibling sites may live on personal GitHub; engine stays in org.",
+        "2026-07-27: Draft-tag edge case fixed (draft tags with no published posts). Competitive comparison vs similar blogging platforms discussed (git-native strength; missing polish/search/deploy automation).",
+        "2026-07-30: Masthead identity (logo + tagline); optional config `lede` for index hero; list drafts under pnpm dev with Draft label; retired in-repo example-site — demo is the engine fixture.",
+        "2026-08-02: Static pages (`pages/*.md` → `/[slug]`) + `filepress import` CLI (`@filepress/import`) with optional Ollama theme brief; SITE_IMPORT_SPEC.",
         "2026-08-03: Genie Mode spec locked (docs/GENIE_MODE_SPEC.md, D13). Former working title Assistant Mode. User locked Q1–Q10; Ollama detection + Finetuna suggestion required. Implementation not started — next M0 spike.",
-        "2026-08-03: Genie M0+M1 shipped — Vite plugin apply:serve (/__filepress/genie/*), DEV-only GenieHost/Panel, .filepress-genie versions + baseline/activate, steers, Openverse stock, hero/bg upload, Ollama/Finetuna health hint. Absent from demo production build grep."
+        "2026-08-03: Genie M0+M1 shipped — Vite plugin apply:serve (/__filepress/genie/*), DEV-only GenieHost/Panel, .filepress-genie versions + baseline/activate, steers, Openverse stock, hero/bg upload, Ollama/Finetuna health hint. Absent from demo production build grep.",
+        "2026-08-03: Import theme punch-up from --inspire (blend up to 3); Openverse CC stock for CSS covers (not inspire photos); portraits vs covers; preview port default 27777; prerender allow empty /[slug].",
+        "2026-08-03: Assistant Mode → Genie Mode rename; GENIE_MODE_SPEC locked (D13); M0+M1 implemented (already noted).",
+        "2026-08-10: `homePage` config — `/` can be a static landing, posts index at `/writing`; absolute `/_app` assets; disable CSR in production static builds.",
+        "2026-08-11: Theme FOUC fixes (critical-theme first paint); ogImage; masthead logo+wordmark+tagline stack; product themes win over Essay chrome.",
+        "2026-08-11: Public-prep + rebrand — MIT LICENSE; latin/latin-ext fonts only; hljs language allowlist; drop sass (theme.css only); publish `files` includes import+Genie. Product FilePress; npm+domain `getfilepress` (bare `filepress` blocked on npm — too similar to vitepress). Zip/symlink lesson: Windows zip follows `link:` into engine node_modules.",
+        "2026-08-11: Folder + GitHub rename complete: local `filepress`, GitHub Catalyst-Forge-LLC/filepress (was downpress → briefly getfilepress → filepress). Remotes + backup mirror updated. Sibling sites rewired to getfilepress + filepress.config.ts.",
+        "2026-08-11: Product site `sites/getfilepress` — homePage landing, docs pages, Writing posts, press-on-files logo, wider chrome (~50%), `pnpm dev:www` / `build:www` / `deploy:www` (Wrangler Pages project getfilepress). Demo remains fixture. Custom domain / git-connected Pages still M3."
       ],
-      "iterations": []
+      "iterations": [
+        {
+          "feature": "Option C+D packaging",
+          "status": "complete",
+          "notes": "One packages/app + content-only sites; installable getfilepress CLI; EXTERNAL_SITES.md"
+        },
+        {
+          "feature": "Zen Garden theming",
+          "status": "complete",
+          "notes": "site theme.css; sass later dropped in public-prep"
+        },
+        {
+          "feature": "Site import CLI",
+          "status": "complete",
+          "notes": "discover/extract/scaffold; inspire blend; Openverse stock; optional Ollama"
+        },
+        {
+          "feature": "Genie Mode M0+M1",
+          "status": "complete",
+          "notes": "dev-only panel, versions, steers, stock, upload, activate"
+        },
+        {
+          "feature": "Genie Mode M2",
+          "status": "planned",
+          "notes": "live inspire + Ollama brief + lede/tagline/logo patches"
+        },
+        {
+          "feature": "homePage product landings",
+          "status": "complete",
+          "notes": "config homePage → / static page; Writing at /writing"
+        },
+        {
+          "feature": "FilePress / getfilepress rebrand",
+          "status": "complete",
+          "notes": "MIT, fonts, hljs allowlist, npm getfilepress, GitHub filepress"
+        },
+        {
+          "feature": "Product site sites/getfilepress",
+          "status": "complete",
+          "notes": "Content+theme+logo; deploy:www via Wrangler; CF custom domain pending"
+        },
+        {
+          "feature": "M3 Cloudflare deploy automation",
+          "status": "in_progress",
+          "notes": "deploy:www direct upload ready; git-connected Pages + getfilepress.com domain not finished"
+        }
+      ]
     },
     "5-refactoring": {
       "status": "not_started",
@@ -143,7 +211,10 @@
       "phase": "1-architecture",
       "decision": "Use gray-matter + remark/rehype (data-driven) instead of mdsvex-as-routes for content parsing/rendering.",
       "rationale": "Posts are pure content, not interactive Svelte templates; avoids mdsvex's known limitation where a +layout.svelte can't directly read a child .md file's frontmatter; keeps frontmatter access uniform everywhere (listings, post pages, RSS, sitemap) via one loader function.",
-      "alternatives_considered": ["mdsvex-as-routes", "MDX-flavored starters (e.g. sveltekit-blog-mdx)"]
+      "alternatives_considered": [
+        "mdsvex-as-routes",
+        "MDX-flavored starters (e.g. sveltekit-blog-mdx)"
+      ]
     },
     {
       "id": "D2",
@@ -151,7 +222,9 @@
       "phase": "1-architecture",
       "decision": "Static prerendering via adapter-static, not SSR.",
       "rationale": "No runtime backend needed; output is a plain static folder deployable anywhere. Tag/pagination routes must stay crawlable or be listed explicitly in config.kit.prerender.entries.",
-      "alternatives_considered": ["Default SvelteKit SSR"]
+      "alternatives_considered": [
+        "Default SvelteKit SSR"
+      ]
     },
     {
       "id": "D3",
@@ -159,15 +232,23 @@
       "phase": "1-architecture",
       "decision": "Core/site split (filepress core engine + independent Site repos) is a first-class requirement from the start, not a later refactor.",
       "rationale": "SvelteKit's routing/build system is inherently per-project (hard framework constraint) — every Site must be its own SvelteKit project. Core centralizes content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and scaffolding.",
-      "alternatives_considered": ["Single monolithic project serving multiple blogs via config (not possible under SvelteKit)", "Copy-paste the engine per site"]
+      "alternatives_considered": [
+        "Single monolithic project serving multiple blogs via config (not possible under SvelteKit)",
+        "Copy-paste the engine per site"
+      ]
     },
     {
       "id": "D4",
       "timestamp": "2026-07-02",
       "phase": "1-architecture",
       "decision": "Sites depend on filepress core via a pinned git URL dependency (tag/commit), not a main-floating or npm-published dependency.",
-      "rationale": "Avoids needing to publish/maintain a public npm package while still allowing normal package-manager installs; pinning means a core change never silently changes a site's next build without a deliberate version bump.",
-      "alternatives_considered": ["Publish core to npm under a scoped name (deferred, not needed for v1)", "Floating dependency on main"]
+      "rationale": "Avoids needing to publish/maintain a public npm package while still allowing normal package-manager installs; pinning means a core change never silently changes a site's next build without a deliberate version bump. Superseded 2026-08-11 by publishing npm package getfilepress while retaining git-pin install path for CI.",
+      "alternatives_considered": [
+        "Publish core to npm under a scoped name (deferred, not needed for v1)",
+        "Floating dependency on main"
+      ],
+      "status": "superseded",
+      "superseded_by": "D14"
     },
     {
       "id": "D5",
@@ -175,7 +256,11 @@
       "phase": "1-architecture",
       "decision": "Deploy to Cloudflare Pages, always on a custom domain from day one.",
       "rationale": "CF Pages has native git integration to build adapter-static output on push to main. A custom domain means the site is served at root, so adapter-static needs no base-path/subpath configuration.",
-      "alternatives_considered": ["GitHub Pages (would need base-path config unless on a custom domain)", "Netlify", "Vercel"]
+      "alternatives_considered": [
+        "GitHub Pages (would need base-path config unless on a custom domain)",
+        "Netlify",
+        "Vercel"
+      ]
     },
     {
       "id": "D6",
@@ -183,7 +268,9 @@
       "phase": "1-architecture",
       "decision": "Post content lives in a top-level /posts/ directory, outside src/.",
       "rationale": "Easier to find and edit via the GitHub mobile app's file browser since it is not nested inside app source.",
-      "alternatives_considered": ["src/content/posts/"]
+      "alternatives_considered": [
+        "src/content/posts/"
+      ]
     },
     {
       "id": "D7",
@@ -191,7 +278,9 @@
       "phase": "1-architecture",
       "decision": "Drafts (draft: true) are excluded from index, tag pages, RSS, and sitemap, but still built at their normal /posts/<slug> URL (unlinked) for private preview.",
       "rationale": "Lets the owner preview formatting on a phone before flipping draft: false, without exposing the post in any discoverable listing or feed.",
-      "alternatives_considered": ["Fully exclude drafts from build output entirely"]
+      "alternatives_considered": [
+        "Fully exclude drafts from build output entirely"
+      ]
     },
     {
       "id": "D8",
@@ -199,7 +288,10 @@
       "phase": "1-architecture",
       "decision": "Dates are strict YYYY-MM-DD only; future-dated posts are hidden until their date arrives.",
       "rationale": "One accepted date format keeps sorting unambiguous and lets malformed dates fail loudly (naming the file). Future-dating uses a build-time 'date <= today' check tied to the CI run's date so scheduled posts stay hidden until the next build on/after that date.",
-      "alternatives_considered": ["Accept full ISO datetime strings", "Include future-dated posts immediately"]
+      "alternatives_considered": [
+        "Accept full ISO datetime strings",
+        "Include future-dated posts immediately"
+      ]
     },
     {
       "id": "D9",
@@ -207,15 +299,24 @@
       "phase": "1-architecture",
       "decision": "Visual direction is sparse, sharp/classic, high-end and uncluttered; core supports selectable per-site themes that are all variations on this shared aesthetic.",
       "rationale": "Restrained editorial typography and minimal chrome fit a text-first blog and keep client JS minimal (Lighthouse 95+ goal). Selectable themes give per-site variety without each site diverging into a wholly different design, so most theme code stays in core.",
-      "alternatives_considered": ["Bare-minimum default typography only", "One fixed shared theme with no per-site selection", "Fully independent per-site designs"]
+      "alternatives_considered": [
+        "Bare-minimum default typography only",
+        "One fixed shared theme with no per-site selection",
+        "Fully independent per-site designs"
+      ]
     },
     {
       "id": "D10",
       "timestamp": "2026-07-04",
       "phase": "1-architecture",
       "decision": "Core versioning is informal (pin sites to core commit SHAs as needed); the scaffold command is a local script run from the core repo, not a published CLI.",
-      "rationale": "Fastest path for v1 with a single maintainer and no public distribution; a semver release process and an npx CLI can be added later if multiple sites make change-tracking painful.",
-      "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx filepress create CLI"]
+      "rationale": "Fastest path for v1 with a single maintainer and no public distribution; a semver release process and an npx CLI can be added later if multiple sites make change-tracking painful. Superseded in spirit by Option D published CLI bins on getfilepress (still informal engine versioning / git pins).",
+      "alternatives_considered": [
+        "Semver-tagged core releases from the start",
+        "Published npx filepress create CLI"
+      ],
+      "status": "superseded",
+      "superseded_by": "D14"
     },
     {
       "id": "D11",
@@ -223,7 +324,11 @@
       "phase": "4-feature-iteration",
       "decision": "Default theme is 'Essay' — a quiet, text-first editorial look (Ben Evans / Stratechery family) with self-hosted Newsreader (reading serif) + Inter (UI/meta), a single accent used at three intensities (strong / rule / wash), and warm parchment neutrals with a dark variant.",
       "rationale": "example-site.example is an essay site; the quiet single-column serif look serves reading and keeps client JS ~zero (Lighthouse 95+ goal, D9). Fonts are bundled via @fontsource-variable so there are no third-party font requests. Design is expressed as CSS custom properties so per-site theme variants (D9) stay cheap.",
-      "alternatives_considered": ["Warmer editorial/journal (Traveling Mitch)", "Magazine card grid (Copyblogger)", "System-font stack only (no font files)"]
+      "alternatives_considered": [
+        "Warmer editorial/journal (Traveling Mitch)",
+        "Magazine card grid (Copyblogger)",
+        "System-font stack only (no font files)"
+      ]
     },
     {
       "id": "D12",
@@ -231,7 +336,10 @@
       "phase": "4-feature-iteration",
       "decision": "First feature batch: excerpt post cards, featured latest post + index pagination (/page/[n]), optional per-post author byline, prev/next post links, a config-driven Topics/Explore view, a config-driven external newsletter CTA, and image-only paragraphs becoming <figure>+<figcaption>. Deferred: client-side search, reading-time, manual dark toggle.",
       "rationale": "Distilled from reference blogs the user shared; all are static-friendly (zero or trivial JS) and fit 'keep it simple'. Newsletter is just a link to an external service (Buttondown/Substack) — no backend, consistent with comments being a non-goal.",
-      "alternatives_considered": ["Include client-side search now (needs JS + build index)", "Reading-time + manual theme toggle now"]
+      "alternatives_considered": [
+        "Include client-side search now (needs JS + build index)",
+        "Reading-time + manual theme toggle now"
+      ]
     },
     {
       "id": "D13",
@@ -239,29 +347,101 @@
       "phase": "4-feature-iteration",
       "decision": "Genie Mode (dev-only design cockpit): theme + limited config (lede/tagline/logo + hero background); Ollama with deterministic fallbacks; gitignored .filepress-genie/ versions; activate overwrites working tree; floating drawer; live inspire crawl; Openverse + local image upload; detect Ollama and suggest Finetuna (https://github.com/Catalyst-Forge-LLC/finetuna) for tuned local models. Never ships in preview/production.",
       "rationale": "Gives authors a post-import taste loop without becoming a CMS; keeps Markdown sacred and bake artifacts as plain theme.css/static/config. Finetuna is companion tooling (same org), not a hard dependency.",
-      "alternatives_considered": ["Assistant Mode / Design Mode / Studio naming", "Theme-only mutation", "Deterministic-first without Ollama", "Commit-friendly version store", "Openverse-only images without upload"]
+      "alternatives_considered": [
+        "Assistant Mode / Design Mode / Studio naming",
+        "Theme-only mutation",
+        "Deterministic-first without Ollama",
+        "Commit-friendly version store",
+        "Openverse-only images without upload"
+      ]
+    },
+    {
+      "id": "D14",
+      "timestamp": "2026-08-11",
+      "phase": "4-feature-iteration",
+      "decision": "Product name FilePress; npm package + planned domain getfilepress; GitHub/folder/CLI primary bin filepress (alias getfilepress). Scoped workspace packages @filepress/*; config defineFilepressConfig + filepress.config.ts. Formerly Downpress.",
+      "rationale": "Bare npm name filepress rejected (too similar to vitepress). getfilepress stakes the package/domain while product branding stays FilePress. GitHub repo kept as filepress for short clone paths and github:Catalyst-Forge-LLC/filepress#… pins.",
+      "alternatives_considered": [
+        "Unscoped filepress on npm",
+        "GitHub repo named getfilepress",
+        "Keep Downpress name"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "D15",
+      "timestamp": "2026-08-11",
+      "phase": "4-feature-iteration",
+      "decision": "getfilepress.com product/marketing site lives in-repo at sites/getfilepress with homePage: \"home\" (landing at /, Writing at /writing). sites/demo remains the engine fixture.",
+      "rationale": "Dogfood FilePress for the product site without a sibling-repo split yet; keep demo free of marketing copy so root pnpm check/build stay stable.",
+      "alternatives_considered": [
+        "Sibling repo getfilepress-com",
+        "Promote/replace sites/demo",
+        "Blog-first index at /"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "D16",
+      "timestamp": "2026-08-11",
+      "phase": "4-feature-iteration",
+      "decision": "Public license is MIT (not Apache-2.0) for the FilePress engine.",
+      "rationale": "User already uses both licenses elsewhere; MIT chosen for a small library/CLI with simple contribution surface and common npm ecosystem expectations.",
+      "alternatives_considered": [
+        "Apache-2.0",
+        "Keep private / no LICENSE"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
     {
       "date": "2026-07-04",
       "gotcha": "This Svelte tooling version (Kit 2.69 / Vite 8 / vite-plugin-svelte 7) has NO svelte.config.js — adapter and kit options (adapter, prerender, compilerOptions) are passed directly to the sveltekit() plugin inside vite.config.ts.",
-      "resolution": "Configure adapter-static and prerender.entries in vite.config.ts, not a separate svelte.config.js."
+      "resolution": "Configure adapter-static and prerender.entries in vite.config.ts, not a separate svelte.config.js.",
+      "issue": "This Svelte tooling version (Kit 2.69 / Vite 8 / vite-plugin-svelte 7) has NO svelte.config.js — adapter and kit options (adapter, prerender, compilerOptions) are passed directly to the sveltekit() plugin inside vite.config.ts."
     },
     {
       "date": "2026-07-04",
       "gotcha": "Reading content via Node fs makes the loader server-only. If imported from a universal +page.ts it would be bundled for the client and break.",
-      "resolution": "posts.ts uses $env/dynamic/private + node:fs (server-only by construction); content routes are +page.server.ts. Pure logic is isolated in parse.ts for safe importing/testing. Requires @types/node for svelte-check."
+      "resolution": "posts.ts uses $env/dynamic/private + node:fs (server-only by construction); content routes are +page.server.ts. Pure logic is isolated in parse.ts for safe importing/testing. Requires @types/node for svelte-check.",
+      "issue": "Reading content via Node fs makes the loader server-only. If imported from a universal +page.ts it would be bundled for the client and break."
     },
     {
       "date": "2026-07-04",
       "gotcha": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.).",
-      "resolution": "Scaffold into a fresh temp dir with fully non-interactive flags, then move files to the repo root."
+      "resolution": "Scaffold into a fresh temp dir with fully non-interactive flags, then move files to the repo root.",
+      "issue": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.)."
     },
     {
       "date": "2026-07-05",
       "gotcha": "A prerendered dynamic route with an entries() that returns [] (e.g. /page/[n] on a site small enough to fit on page 1) fails the adapter-static build with 'marked as prerenderable but not prerendered'.",
-      "resolution": "Set kit.prerender.handleUnseenRoutes in vite.config.ts to a function that ignores exactly '/page/[n]' and still throws for any other unseen route, so the build stays strict elsewhere."
+      "resolution": "Set kit.prerender.handleUnseenRoutes in vite.config.ts to a function that ignores exactly '/page/[n]' and still throws for any other unseen route, so the build stays strict elsewhere.",
+      "issue": "A prerendered dynamic route with an entries() that returns [] (e.g. /page/[n] on a site small enough to fit on page 1) fails the adapter-static build with 'marked as prerenderable but not prerendered'."
+    },
+    {
+      "date": "2026-08-11",
+      "gotcha": "On Windows, zipping a site that depends on getfilepress via link:../filepress can follow the junction/symlink and pull the entire engine node_modules into the archive (multi-GB).",
+      "resolution": "Exclude node_modules (and preferably .git) when sharing site zips; document for sibling site authors.",
+      "issue": "On Windows, zipping a site that depends on getfilepress via link:../filepress can follow the junction/symlink and pull the entire engine node_modules into the archive (multi-GB)."
+    },
+    {
+      "date": "2026-08-11",
+      "gotcha": "npm rejects unscoped package name `filepress` as too similar to existing `vitepress`.",
+      "resolution": "Publish as `getfilepress`; keep FilePress product branding and filepress CLI bin.",
+      "issue": "npm rejects unscoped package name `filepress` as too similar to existing `vitepress`."
+    },
+    {
+      "date": "2026-08-11",
+      "gotcha": "Site theme.css can FOUC to Essay defaults before the site override loads; critical-theme virtual module also 500'd in dev when out of sync.",
+      "resolution": "Inject critical site tokens on first paint via vite-plugin-critical-theme writing site/.filepress/critical-theme.generated.ts (gitignored); fix module wiring for dev.",
+      "issue": "Site theme.css can FOUC to Essay defaults before the site override loads; critical-theme virtual module also 500'd in dev when out of sync."
+    },
+    {
+      "date": "2026-08-03",
+      "gotcha": "Default Vite preview/dev ports collide when multiple agents/sites run locally.",
+      "resolution": "Default preview to port 27777; support --port via env for Vite on Windows.",
+      "issue": "Default Vite preview/dev ports collide when multiple agents/sites run locally."
     }
   ],
   "sessions": [
@@ -288,6 +468,34 @@
     {
       "date": "2026-07-05",
       "summary": "Stage 2 (M4 core/site split) DONE, as a pnpm workspace monorepo (user chose monorepo + confirmed flipping currentPhase to 4-feature-iteration). Extracted the whole engine into @filepress/core (packages/core, source-linked Svelte lib): content loader, remark/rehype pipeline (incl. rehype-figure), feed/sitemap/robots builders, format, Essay theme (styles/theme.css + font imports via @filepress/core/theme), and prop-driven components (PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter). Redesigned for DI to remove SvelteKit-only deps ($env/$lib): createContent({contentDir}) factory (server-only), defineFilepressConfig() that validates title/url + fills defaults, and a strict client-barrel (index.ts) vs server-barrel (server.ts) split. Rebuilt the app as sites/example-site (real site; example-post.md; own filepress.config.ts + content.server.ts + thin routes). Wrote scripts/create-site.mjs (templates from example-site, refuses non-empty dir, edge case 18) and used it to generate sites/demo, then restored the original demo posts (drafts + future-dated) into it. Deleted the old root SvelteKit app; root package.json is now a workspace manifest with pnpm -r scripts. Verification: @filepress/core tests = 31 pass (added config.test.ts covering defineFilepressConfig validation, edge case 19); pnpm -r check = 0 errors; example-site and demo each build cleanly and independently to their own build/ (isolation proven). Deferred (until a second repo is actually needed, D4): splitting core into its own git repo with URL+SHA pins + a CI workflow template in the scaffold. Next milestone: M3 (Cloudflare Pages deploy wiring, per site)."
+    },
+    {
+      "date": "2026-07-25",
+      "summary": "Packaging rethink: SITE_PACKAGING_OPTIONS A–F; user chose C then D. Implemented single packages/app + content-only sites + installable CLI (then named downpress). Zen Garden theme.css/scss. Engine on Catalyst-Forge-LLC; sibling sites may use personal GitHub. README trimmed of process chatter."
+    },
+    {
+      "date": "2026-07-27",
+      "summary": "Draft-tag archive edge case fixed. Competitive landscape comparison vs other blogging platforms (strengths: git-native, static, no CMS; gaps: polish, search, automated deploy)."
+    },
+    {
+      "date": "2026-07-30",
+      "summary": "Masthead identity (logo/tagline), optional lede hero, draft listing in dev, retired in-repo example-site — demo is sole fixture site."
+    },
+    {
+      "date": "2026-08-02",
+      "summary": "Static pages + site import CLI with optional Ollama theme (SITE_IMPORT_SPEC)."
+    },
+    {
+      "date": "2026-08-03",
+      "summary": "Import inspire blending, Openverse stock covers, preview port 27777, Genie Mode spec (ex-Assistant Mode) locked with Finetuna tip; Genie M0+M1 shipped (dev-only panel/versions/stock/upload)."
+    },
+    {
+      "date": "2026-08-10",
+      "summary": "homePage landing support (/writing index), absolute /_app assets, disable CSR in production static builds; line-ending cleanup for public readiness."
+    },
+    {
+      "date": "2026-08-11",
+      "summary": "Public-prep + rebrand to FilePress/getfilepress (MIT, latin fonts, hljs allowlist, drop sass). npm stake getfilepress@0.0.0. Zip/symlink bloat lesson. CONTEXT_PROMPT handoff for folder rename. Post-rename session: remotes/mirror/GitHub → Catalyst-Forge-LLC/filepress; sibling sites rewired; product site sites/getfilepress (homePage, docs, Writing, press logo, wider chrome); deploy:www via Wrangler. ForgeKit tracking backfilled this session."
     }
   ]
 }

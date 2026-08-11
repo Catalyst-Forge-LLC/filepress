@@ -101,6 +101,7 @@ writeFileSync(
 /node_modules
 .DS_Store
 Thumbs.db
+.filepress/
 .filepress-genie/
 .filepress-import/crawl-cache/
 `

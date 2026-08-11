@@ -1,6 +1,7 @@
 /*
  * FilePress product site — Essay overrides.
  * Tokens and classes: docs/THEME.md
+ * Layout chrome widened ~50% (ingotvault-style product site).
  */
 :root {
 	--accent: #0f5c4c;
@@ -13,6 +14,9 @@
 	--ink-faint: #6b746e;
 	--rule: #d8d2c6;
 	--rule-strong: #b8b0a2;
+	/* Essay defaults 40 / 46 — +50% */
+	--measure: 60rem;
+	--measure-wide: 69rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +32,11 @@
 		--rule: #2e3531;
 		--rule-strong: #454e48;
 	}
+
+	/* Borderless teal mark reads better when lifted on dark chrome */
+	.site-logo {
+		filter: brightness(1.45) saturate(0.95);
+	}
 }
 
 .home-page .page-header h1 {
@@ -36,11 +45,20 @@
 
 .home-page .hero-lede {
 	font-size: 1.15rem;
-	max-width: 36rem;
+	max-width: 42rem;
 }
 
-/* ~250% of the prior 1.75rem product override; width follows viewBox */
+/* Free-floating mark (no badge plate) — similar masthead treatment to ingotvault */
 .site-logo {
-	height: 4.4rem;
+	height: 5.5rem;
 	width: auto;
+	max-height: none;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+@media (max-width: 40rem) {
+	.site-logo {
+		height: 4.25rem;
+	}
 }

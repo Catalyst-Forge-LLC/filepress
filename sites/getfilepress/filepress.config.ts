@@ -1,0 +1,27 @@
+import { defineFilepressConfig } from 'getfilepress';
+
+export default defineFilepressConfig({
+	title: 'FilePress',
+	description:
+		'File-based Markdown blogs. No admin UI. No database. Edit posts in git, build a static site.',
+	url: 'https://getfilepress.com',
+	author: 'FilePress',
+	tagline: 'Markdown blogs from git',
+	lede: 'Edit posts as files. Push. Ship a static site — no CMS, no database, no runtime server.',
+	homePage: 'home',
+	logo: '/logo.svg',
+	ogImage: '/logo.svg',
+	nav: [
+		{ label: 'Home', href: '/' },
+		{ label: 'Writing', href: '/writing' },
+		{ label: 'Docs', href: '/getting-started' },
+		{ label: 'Import', href: '/import' },
+		{ label: 'Genie', href: '/genie' },
+		{ label: 'About', href: '/about' }
+	],
+	topics: [
+		{ label: 'Getting started', tag: 'getting-started' },
+		{ label: 'Workflow', tag: 'workflow' },
+		{ label: 'Deploy', tag: 'deploy' }
+	]
+});

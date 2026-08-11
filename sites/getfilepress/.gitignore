@@ -1,0 +1,6 @@
+/build
+/node_modules
+.DS_Store
+Thumbs.db
+.filepress-genie/
+.filepress-import/crawl-cache/

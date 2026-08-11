@@ -1,8 +1,11 @@
 # FilePress demo site
 
-In-repo example content for the engine. Run this when developing FilePress itself.
-Real publications live in their own repos and depend on the `getfilepress` package;
-they are not sites under `sites/`.
+In-repo **engine fixture** (frontmatter edge cases, drafts, scheduled posts, theme
+override). Use this when developing FilePress itself. Root `pnpm check` / `pnpm build`
+target this site.
+
+The product / marketing site is [`sites/getfilepress`](../getfilepress) (`pnpm dev:www`).
+Sibling publications live in their own repos and depend on the `getfilepress` package.
 
 ```bash
 # from the engine repo root

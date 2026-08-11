@@ -60,14 +60,15 @@ More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 
 ### In this repo
 
-`sites/demo` is FilePress’s example content (frontmatter, drafts, tags, phone
-workflow, theme override). Real publications live in their own repos and depend
-on this package. From the engine root:
+- `sites/demo` — engine fixture (drafts, scheduled posts, frontmatter cheatsheet). Root `pnpm check` / `pnpm build` target this site.
+- `sites/getfilepress` — product site for getfilepress.com (`homePage` landing + Writing). Sibling publications live in their own repos.
 
 ```bash
 pnpm install
-pnpm dev                 # → demo
+pnpm dev                 # → demo fixture
 pnpm build               # → sites/demo/build/
+pnpm dev:www             # → product site
+pnpm build:www           # → sites/getfilepress/build/
 ```
 
 ## Site configuration
@@ -167,7 +168,8 @@ More at [getfilepress.com](https://getfilepress.com).
 packages/core     shared engine (content pipeline, components, theme)
 packages/app      SvelteKit app (routes + Genie Mode in dev) used by the CLI
 packages/import   site crawl / scaffold CLI (also powers Genie theme helpers)
-sites/            optional in-repo content sites
+sites/demo        engine fixture content
+sites/getfilepress product site (getfilepress.com)
 scripts/          filepress CLI and create-site scaffold
 ```
 

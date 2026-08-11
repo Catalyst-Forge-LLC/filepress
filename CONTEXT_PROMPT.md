@@ -53,8 +53,8 @@ Placeholder **`getfilepress@0.0.0`** at `Z:\workspace\__tmp\filepress-npm-stake`
 
 1. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
 2. Tag when ready for CF git-dep installs (`github:Catalyst-Forge-LLC/filepress#…`)  
-3. M3 Cloudflare Pages on a real site  
-4. Marketing site getfilepress.com later (not ready)
+3. M3 Cloudflare Pages + getfilepress.com for `sites/getfilepress`  
+4. Polish product-site copy / assets as needed
 
 ### Agent prefs (still true)
 
@@ -74,7 +74,8 @@ Placeholder **`getfilepress@0.0.0`** at `Z:\workspace\__tmp\filepress-npm-stake`
 - `@filepress/core` — content pipeline, components, Essay theme  
 - `@filepress/app` — sole SvelteKit app (routes + Genie in **dev only**)  
 - `@filepress/import` — crawl/scaffold CLI; Genie reuses theme/stock helpers  
-- `sites/demo` — in-repo example content only (real pubs are sibling repos)
+- `sites/demo` — engine fixture (drafts / scheduled / cheatsheet)  
+- `sites/getfilepress` — product site (getfilepress.com); real pubs otherwise sibling repos
 
 Docs: `docs/EXTERNAL_SITES.md`, `docs/THEME.md`, `docs/GENIE_MODE_SPEC.md`, `docs/SITE_IMPORT_SPEC.md`.
 
@@ -99,7 +100,8 @@ filepress/                         # repo + folder name
   scripts/filepress.mjs            # CLI → FILEPRESS_SITE_ROOT → @filepress/app
   scripts/create-site.mjs
   packages/core|app|import/
-  sites/demo/                      # content-only; filepress.config.ts
+  sites/demo/                      # engine fixture
+  sites/getfilepress/              # product site (homePage + Writing)
   LICENSE                          # MIT
 ```
 
@@ -139,8 +141,7 @@ D1 gray-matter+remark · D2 adapter-static · D3/D4 core/site + pinned deps · D
 
 - Genie **M2** (live inspire, Ollama refine, config patches for lede/tagline/logo)  
 - Push/tag for `github:Catalyst-Forge-LLC/filepress#…` installs when asked  
-- M3 Cloudflare Pages on a real site  
-- getfilepress.com marketing site  
+- M3 Cloudflare Pages + getfilepress.com (`sites/getfilepress` content ready)  
 - M5 polish (404, reading-time, search, …)
 
 ## Recent session notes (2026-08-11)
@@ -149,6 +150,7 @@ D1 gray-matter+remark · D2 adapter-static · D3/D4 core/site + pinned deps · D
 - Bloat review: architecture is fine; fonts were the main deploy win; Genie kept for local dev  
 - npm: use **`getfilepress`**, not unscoped `filepress`  
 - Rename complete: folder + GitHub `filepress`; remotes + backup mirror updated; sibling sites rewired to `getfilepress` / `filepress.config.ts`  
+- Product site scaffolded at `sites/getfilepress` (`homePage: 'home'`, docs pages, Writing posts, `pnpm dev:www` / `build:www`)  
 
 
 ## Verify commands

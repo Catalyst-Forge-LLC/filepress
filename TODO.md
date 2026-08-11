@@ -43,11 +43,17 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] **Option D:** installable `filepress` bin; sibling sites use `link:../filepress`; scaffold `--external`; docs for git pin `github:Catalyst-Forge-LLC/filepress#…` ([`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md))
 - [x] Push engine to `Catalyst-Forge-LLC/filepress` _(repo renamed; main synced; tag when ready for CF git-dep installs)_
 
+## Product site (getfilepress.com)
+
+- [x] In-repo `sites/getfilepress` with `homePage: 'home'`, docs pages, Writing posts, theme + logo
+- [x] `pnpm dev:www` / `pnpm build:www` scripts
+- [ ] Cloudflare Pages + getfilepress.com custom domain (see M3)
+
 ## M3 — Deployed and automated
 
-- [ ] Cloudflare Pages project wired to the repo (build command + output path depend on packaging choice — see SITE_PACKAGING_OPTIONS §6)
+- [ ] Cloudflare Pages project wired for `sites/getfilepress` (or a sibling extract) — see SITE_PACKAGING_OPTIONS §6
 - [ ] Confirm push-to-`main` → live deploy with no manual step
-- [ ] Custom domain attached; verify site serves at root (no base path)
+- [ ] Custom domain getfilepress.com attached; verify site serves at root (no base path)
 - [ ] `robots.txt` + `sitemap.xml` verified live and cross-referenced
 - [ ] Responsive styling pass on real mobile + desktop
 - [ ] Lighthouse: confirm 95+ performance on a typical post page

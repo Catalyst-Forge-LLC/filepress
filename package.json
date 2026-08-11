@@ -48,8 +48,10 @@
 		"check": "pnpm filepress check --site demo",
 		"build": "pnpm filepress build --site demo",
 		"build:demo": "pnpm filepress build --site demo",
+		"build:www": "pnpm filepress build --site getfilepress",
 		"dev": "pnpm filepress dev --site demo",
 		"dev:demo": "pnpm filepress dev --site demo",
+		"dev:www": "pnpm filepress dev --site getfilepress",
 		"create-site": "node scripts/create-site.mjs",
 		"import": "node scripts/filepress.mjs import"
 	},

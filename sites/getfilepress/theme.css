@@ -1,0 +1,45 @@
+/*
+ * FilePress product site — Essay overrides.
+ * Tokens and classes: docs/THEME.md
+ */
+:root {
+	--accent: #0f5c4c;
+	--accent-strong: #0a4036;
+	--accent-wash: color-mix(in srgb, var(--accent) 8%, transparent);
+	--bg: #f6f4ef;
+	--surface: #fffcf7;
+	--ink: #1a1f1c;
+	--ink-soft: #3d4640;
+	--ink-faint: #6b746e;
+	--rule: #d8d2c6;
+	--rule-strong: #b8b0a2;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--accent: #6dbaa8;
+		--accent-strong: #9ed4c6;
+		--accent-wash: color-mix(in srgb, var(--accent) 12%, transparent);
+		--bg: #121614;
+		--surface: #1a1f1c;
+		--ink: #e8ebe7;
+		--ink-soft: #b4bbb5;
+		--ink-faint: #7a837c;
+		--rule: #2e3531;
+		--rule-strong: #454e48;
+	}
+}
+
+.home-page .page-header h1 {
+	letter-spacing: -0.03em;
+}
+
+.home-page .hero-lede {
+	font-size: 1.15rem;
+	max-width: 36rem;
+}
+
+.site-logo {
+	width: 1.75rem;
+	height: 1.75rem;
+}

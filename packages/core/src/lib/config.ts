@@ -22,9 +22,14 @@ export interface Topic {
 	tag: string;
 }
 
+/** Built-in icons that chrome can render beside a nav/footer label. */
+export type NavIconName = 'github';
+
 export interface NavItem {
 	label: string;
 	href: string;
+	/** Optional icon rendered with the label (e.g. GitHub mark). */
+	icon?: NavIconName;
 }
 
 /** Fully-resolved site configuration (after defaults are applied). */
@@ -52,6 +57,11 @@ export interface SiteConfig {
 	 */
 	homePage: string | null;
 	nav: NavItem[];
+	/**
+	 * Footer link row. Defaults to RSS + Topics when omitted.
+	 * Pass an explicit list (including RSS/Topics if you still want them) to customize.
+	 */
+	footerLinks: NavItem[];
 	topics: Topic[];
 	newsletter: NewsletterConfig | null;
 }
@@ -71,8 +81,31 @@ export interface SiteConfigInput {
 	/** Static page slug to show at `/` (post index then lives at `/writing`). */
 	homePage?: string;
 	nav?: NavItem[];
+	/** Custom footer links; replaces the default RSS + Topics row when set. */
+	footerLinks?: NavItem[];
 	topics?: Topic[];
 	newsletter?: NewsletterConfig | null;
+}
+
+const defaultFooterLinks: NavItem[] = [
+	{ label: 'RSS', href: '/rss.xml' },
+	{ label: 'Topics', href: '/topics' }
+];
+
+function normalizeNavItems(items: NavItem[] | undefined): NavItem[] | null {
+	if (!items?.length) return null;
+	return items.map((item) => {
+		const label = (item.label ?? '').trim();
+		const href = (item.href ?? '').trim();
+		if (!label || !href) {
+			throw new Error('filepress.config: nav/footerLinks entries need non-empty label and href.');
+		}
+		const icon = item.icon;
+		if (icon != null && icon !== 'github') {
+			throw new Error(`filepress.config: unsupported icon "${String(icon)}" (supported: github).`);
+		}
+		return icon ? { label, href, icon } : { label, href };
+	});
 }
 
 /** Path to page 1 of the chronological post index. */
@@ -131,7 +164,8 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 				? Math.floor(input.postsPerPage as number)
 				: 10,
 		homePage,
-		nav: input.nav && input.nav.length ? input.nav : defaultNav,
+		nav: normalizeNavItems(input.nav) ?? defaultNav,
+		footerLinks: normalizeNavItems(input.footerLinks) ?? [...defaultFooterLinks],
 		topics: input.topics ?? [],
 		newsletter: input.newsletter ?? null
 	};

@@ -12,11 +12,51 @@ describe('defineFilepressConfig', () => {
 			{ label: 'Posts', href: '/' },
 			{ label: 'Topics', href: '/topics' }
 		]);
+		expect(cfg.footerLinks).toEqual([
+			{ label: 'RSS', href: '/rss.xml' },
+			{ label: 'Topics', href: '/topics' }
+		]);
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
 		expect(cfg.logo).toBeNull();
 		expect(cfg.ogImage).toBeNull();
 		expect(cfg.lede).toBeNull();
+	});
+
+	it('keeps custom footerLinks and nav icons', () => {
+		const cfg = defineFilepressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			nav: [{ label: 'GitHub', href: 'https://github.com/acme/x', icon: 'github' }],
+			footerLinks: [
+				{ label: 'RSS', href: '/rss.xml' },
+				{ label: 'Source', href: 'https://github.com/acme/x', icon: 'github' }
+			]
+		});
+		expect(cfg.nav).toEqual([
+			{ label: 'GitHub', href: 'https://github.com/acme/x', icon: 'github' }
+		]);
+		expect(cfg.footerLinks).toEqual([
+			{ label: 'RSS', href: '/rss.xml' },
+			{ label: 'Source', href: 'https://github.com/acme/x', icon: 'github' }
+		]);
+	});
+
+	it('rejects empty nav entries and unknown icons', () => {
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				nav: [{ label: '', href: '/x' }]
+			})
+		).toThrow(/non-empty label and href/);
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				nav: [{ label: 'X', href: '/', icon: 'gitlab' as 'github' }]
+			})
+		).toThrow(/unsupported icon/);
 	});
 
 	it('defaults nav to Home + /writing when homePage is set', () => {

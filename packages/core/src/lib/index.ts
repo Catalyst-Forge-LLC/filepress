@@ -19,7 +19,8 @@ export type {
 	SiteConfigInput,
 	NewsletterConfig,
 	Topic,
-	NavItem
+	NavItem,
+	NavIconName
 } from './config';
 
 export { formatDate } from './format';

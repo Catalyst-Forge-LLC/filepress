@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SiteConfig } from '../config';
+	import NavIcon from './NavIcon.svelte';
 
 	let { site }: { site: SiteConfig } = $props();
 </script>
@@ -21,7 +22,19 @@
 		</div>
 		<nav class="site-nav" aria-label="Primary">
 			{#each site.nav as item (item.href)}
-				<a href={item.href}>{item.label}</a>
+				<a
+					href={item.href}
+					class:has-icon={Boolean(item.icon)}
+					class:nav-github={item.icon === 'github'}
+					{...(item.icon === 'github'
+						? { target: '_blank', rel: 'noopener noreferrer' }
+						: {})}
+				>
+					{#if item.icon}
+						<NavIcon name={item.icon} />
+					{/if}
+					<span class="nav-label">{item.label}</span>
+				</a>
 			{/each}
 		</nav>
 	</div>

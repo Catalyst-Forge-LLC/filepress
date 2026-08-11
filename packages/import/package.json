@@ -1,6 +1,6 @@
 {
 	"name": "@filepress/import",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"private": true,
 	"type": "module",
 	"description": "Crawl an existing site and scaffold a filepress content-only sibling (optional Ollama restyle).",

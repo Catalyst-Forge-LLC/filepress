@@ -39,7 +39,8 @@
 	max-width: 36rem;
 }
 
+/* ~250% of the prior 1.75rem product override; width follows viewBox */
 .site-logo {
-	width: 1.75rem;
-	height: 1.75rem;
+	height: 4.4rem;
+	width: auto;
 }

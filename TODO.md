@@ -62,7 +62,6 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 - [x] Extract content loader, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components into `@filepress/core` (`packages/core`, source-linked Svelte library)
 - [x] Rebuild sites as SvelteKit apps depending on core via `workspace:*` (thin per-site routes; routes stay per-project by SvelteKit constraint)
-- [x] Promote **example-site.example** to a real site (`sites/example-site`, own `posts/` + `filepress.config.ts`)
 - [x] `defineFilepressConfig()` helper consumed by each site's `filepress.config.ts` (site root)
 - [x] Local scaffold script (`node scripts/create-site.mjs <name>`): wires a new site to core, starter `filepress.config`, starter post; refuses a non-empty dir (edge case 18)
 - [x] Prove isolation: `example-site` and `demo` build independently to their own `build/` (verified)
@@ -94,7 +93,7 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 ### Robustness & Code Quality
 
 - [x] Extract pure parse/validate logic to `parse.ts`; add Vitest unit tests for slugify, tag normalization, date validation, missing fields, and duplicate detection _(20 tests, `pnpm test`)_
-- [x] Make content directory (`FILEPRESS_CONTENT_DIR`) and site identity (`PUBLIC_SITE_*`) env-configurable — the seam for the M4 core/site split; verified by running as example-site.example
+- [x] Make content directory (`FILEPRESS_CONTENT_DIR`) and site identity (`PUBLIC_SITE_*`) env-configurable — the seam for the M4 core/site split;
 - [ ] Add a couple of integration tests over the fs loader (fixtures dir → published/draft/future filtering, dedupe error)
 
 ### Documentation

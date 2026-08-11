@@ -9,7 +9,8 @@ import { spawnSync } from 'node:child_process';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const work = mkdtempSync(join(tmpdir(), 'getfilepress-pack-smoke-'));
-const tgzName = 'getfilepress-0.1.0.tgz';
+const pkgVersion = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')).version;
+const tgzName = `getfilepress-${pkgVersion}.tgz`;
 
 function run(cmd, args, cwd, { shell } = {}) {
 	// Avoid shell:true with absolute paths that contain spaces (e.g. Program Files\node.exe).

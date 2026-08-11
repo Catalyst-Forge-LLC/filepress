@@ -52,8 +52,9 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 ## npm / distribution
 
 - [x] Publish shape: hoist runtime deps, no `workspace:*` on published manifest, clean tarball (`prepack`/`postpack`), CLI without `pnpm --filter`, `pnpm pack:smoke`
-- [ ] Make GitHub repo public
-- [ ] Tag `v0.1.0` and `npm publish` (`getfilepress@0.1.0`)
+- [ ] Make GitHub repo public (if still private)
+- [x] `getfilepress@0.1.0` on npm (good tarball; version predated bump)
+- [ ] Publish `getfilepress@0.1.1` + keep git tag `v0.1.1` on the bump commit
 
 ## M3 — Deployed and automated
 

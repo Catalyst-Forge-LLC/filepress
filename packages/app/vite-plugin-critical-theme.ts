@@ -8,17 +8,18 @@ import type { Plugin } from 'vite';
 export function extractCriticalTheme(css: string): string {
 	const chunks: string[] = [];
 
-	for (const m of css.matchAll(/:root\s*\{[^}]*\}/g)) {
+	// Prefer `:root:root` (higher specificity site tokens) when present.
+	for (const m of css.matchAll(/:root(?::root)?\s*\{[^}]*\}/g)) {
 		chunks.push(m[0]);
 	}
 
 	for (const m of css.matchAll(
-		/@media\s*\([^)]*prefers-color-scheme[^)]*\)\s*\{\s*:root\s*\{[^}]*\}\s*\}/g
+		/@media\s*\([^)]*prefers-color-scheme[^)]*\)\s*\{\s*:root(?::root)?\s*\{[^}]*\}\s*\}/g
 	)) {
 		chunks.push(m[0]);
 	}
 
-	for (const m of css.matchAll(/(?:^|\n)body\s*\{[^}]*\}/g)) {
+	for (const m of css.matchAll(/(?:^|\n)(?:html\s+)?body\s*\{[^}]*\}/g)) {
 		chunks.push(m[0].trim());
 	}
 

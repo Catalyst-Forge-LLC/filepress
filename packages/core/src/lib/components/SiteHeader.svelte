@@ -14,7 +14,9 @@
 					{site.title}
 				{/if}
 			</a>
-			<p class="site-tagline">{site.tagline}</p>
+			{#if site.tagline}
+				<p class="site-tagline">{site.tagline}</p>
+			{/if}
 		</div>
 		<nav class="site-nav" aria-label="Primary">
 			{#each site.nav as item (item.href)}

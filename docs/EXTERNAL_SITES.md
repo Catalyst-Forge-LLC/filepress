@@ -1,8 +1,8 @@
 # Running a site against this engine
 
-A site is a separate folder (or repo) that depends on filepress and only keeps
-config + content (+ optional `theme.css`). The build output is a static `build/`
-directory.
+A site is a separate folder (or repo) that depends on **getfilepress** (the FilePress
+engine) and only keeps config + content (+ optional `theme.css`). The build output
+is a static `build/` directory.
 
 The engine can live in one GitHub org/account and each site in another — the
 site only needs a dependency pin on this package.
@@ -13,7 +13,7 @@ Sibling folders:
 
 ```
 workspace/
-  filepress/     ← this repo
+  filepress/     ← this repo (folder/repo name)
   my-blog/       ← content-only site
 ```
 
@@ -28,7 +28,7 @@ Site `package.json`:
     "check": "filepress check"
   },
   "devDependencies": {
-    "filepress": "link:../filepress"
+    "getfilepress": "link:../filepress"
   }
 }
 ```
@@ -45,7 +45,7 @@ pnpm build    # → ./build/
 
 ```ts
 // filepress.config.ts
-import { defineFilepressConfig } from 'filepress';
+import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
   title: 'My Site',
@@ -69,7 +69,7 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 `link:` only works on your machine. For builds in the cloud, pin a tag or commit:
 
 ```json
-"filepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
+"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
 ```
 
 | Setting | Value |

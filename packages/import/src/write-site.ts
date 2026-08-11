@@ -307,7 +307,7 @@ ${body}
 
 	writeFileSync(
 		join(out, 'filepress.config.ts'),
-		`import { defineFilepressConfig } from 'filepress';
+		`import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
 	title: ${yamlQuote(title)},

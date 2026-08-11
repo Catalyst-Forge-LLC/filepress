@@ -1,9 +1,9 @@
 {
-	"name": "filepress",
+	"name": "getfilepress",
 	"version": "0.1.0",
 	"private": false,
 	"type": "module",
-	"description": "File-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",
+	"description": "FilePress — file-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",
 	"license": "MIT",
 	"homepage": "https://getfilepress.com",
 	"repository": {
@@ -14,7 +14,8 @@
 		"url": "https://github.com/Catalyst-Forge-LLC/filepress/issues"
 	},
 	"bin": {
-		"filepress": "./scripts/filepress.mjs"
+		"filepress": "./scripts/filepress.mjs",
+		"getfilepress": "./scripts/filepress.mjs"
 	},
 	"exports": {
 		".": {

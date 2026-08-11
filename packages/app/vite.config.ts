@@ -76,10 +76,10 @@ export default defineConfig({
 		geniePlugin(siteRoot),
 		sveltekit({
 			alias: {
-				// Site configs (monorepo or linked) import from `filepress`.
-				filepress: coreEntry,
-				'filepress/server': coreServer,
-				'filepress/theme': coreTheme,
+				// Site configs (monorepo or linked) import from `getfilepress`.
+				getfilepress: coreEntry,
+				'getfilepress/server': coreServer,
+				'getfilepress/theme': coreTheme,
 				'$site-config': siteConfig,
 				// Loaded after the core Essay theme so site rules win the cascade.
 				'$site-theme': siteTheme,

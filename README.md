@@ -1,10 +1,14 @@
-# filepress
+# FilePress
 
 > File-based Markdown blogs. No admin UI. No database. Just git.
 
 A file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter — edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (e.g. Cloudflare Pages).
 
-**Site:** [https://getfilepress.com](https://getfilepress.com)
+| | |
+| --- | --- |
+| **Site** | [https://getfilepress.com](https://getfilepress.com) |
+| **npm** | [`getfilepress`](https://www.npmjs.com/package/getfilepress) |
+| **CLI** | `filepress` (also `getfilepress`) |
 
 ## Requirements
 
@@ -31,11 +35,11 @@ The site folder only needs:
 - `posts/` — Markdown posts (`/posts/<slug>`)
 - `pages/` — optional static Markdown pages (`about.md` → `/about`)
 - `static/` — favicon, images, etc.
-- `package.json` — depends on this engine (`link:../filepress` locally, or a git URL + tag/SHA in CI)
+- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, or a git URL + tag/SHA in CI)
 
 ### Import an existing site
 
-Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling filepress site, and optionally ask a local Ollama model for a token theme:
+Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling FilePress site, and optionally ask a local Ollama model for a token theme:
 
 ```bash
 pnpm install
@@ -56,7 +60,7 @@ More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 
 ### In this repo
 
-`sites/demo` is filepress’s example content (frontmatter, drafts, tags, phone
+`sites/demo` is FilePress’s example content (frontmatter, drafts, tags, phone
 workflow, theme override). Real publications live in their own repos and depend
 on this package. From the engine root:
 
@@ -69,7 +73,7 @@ pnpm build               # → sites/demo/build/
 ## Site configuration
 
 ```ts
-import { defineFilepressConfig } from 'filepress';
+import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
   title: 'My Site',

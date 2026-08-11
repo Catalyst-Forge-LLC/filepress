@@ -1,11 +1,11 @@
-import { defineFilepressConfig } from 'filepress';
+import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
-	title: 'filepress',
+	title: 'FilePress',
 	description:
-		'Example content for the filepress engine: Markdown posts, drafts, tags, and phone-friendly editing.',
-	url: 'https://filepress.example.com',
-	author: 'filepress',
+		'Example content for FilePress: Markdown posts, drafts, tags, and phone-friendly editing.',
+	url: 'https://getfilepress.com',
+	author: 'FilePress',
 	nav: [
 		{ label: 'Posts', href: '/' },
 		{ label: 'About', href: '/about' },

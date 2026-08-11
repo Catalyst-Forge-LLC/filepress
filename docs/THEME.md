@@ -13,7 +13,7 @@ If the file is empty/absent of rules, the default Essay look is unchanged.
 
 Load order:
 
-1. Engine Essay theme (`filepress` / `@filepress/core/theme`)
+1. Engine Essay theme (`getfilepress` / `@filepress/core/theme`)
 2. Your `theme.css`
 
 So your rules and `:root` variables override the defaults via the cascade.

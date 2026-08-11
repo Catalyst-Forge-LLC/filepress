@@ -8,7 +8,7 @@ _Paste into a new chat to resume. Single most important document for session con
 
 filepress is a git-native Markdown blog engine. Every post is a plain `.md` file with YAML frontmatter, committed to a GitHub repo and edited from anywhere (GitHub mobile app, web editor, any text editor) — **no admin UI, no database, no server runtime**. A SvelteKit `adapter-static` build compiles the Markdown into a fast, fully prerendered site that auto-deploys on push.
 
-Structurally it is a **pnpm workspace** that is also the installable `filepress` CLI package: `@filepress/core` + `@filepress/app` (sole SvelteKit app) + optional in-repo `sites/*`. Sibling sites link via `link:../filepress` and run `filepress build` (cwd = site). See `docs/EXTERNAL_SITES.md` / Option C+D in `docs/SITE_PACKAGING_OPTIONS.md`.
+Structurally it is a **pnpm workspace** published as npm package **`getfilepress`** (product name **FilePress**), with CLI bin `filepress`: `@filepress/core` + `@filepress/app` (sole SvelteKit app) + optional in-repo `sites/*`. Sibling sites depend via `"getfilepress": "link:../filepress"` and run `filepress build` (cwd = site). Site: getfilepress.com. See `docs/EXTERNAL_SITES.md` / Option C+D in `docs/SITE_PACKAGING_OPTIONS.md`.
 
 **Hero flow:** author/edit a `.md` file under a site's `posts/` → push to `main` → CI builds and deploys → live site reflects the change with no manual step.
 
@@ -39,7 +39,7 @@ filepress/
     src/lib/content.server.ts    # createContent({ contentDir: getContentDir() })
     src/routes/…                 # index, posts, tags, topics, feeds, pagination
   sites/<name>/                  # CONTENT ONLY (example-site, demo, …)
-    filepress.config.ts          # identity (import from 'filepress')
+    filepress.config.ts          # identity (import from 'getfilepress')
     theme.css                    # optional Zen Garden override (see docs/THEME.md)
     posts/                       # Markdown
     static/                      # favicon, images

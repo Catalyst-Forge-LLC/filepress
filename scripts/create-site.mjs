@@ -8,7 +8,7 @@
 // External sibling repo:
 //   node scripts/create-site.mjs example-site --external ../example-site \
 //     --title "…" --url https://…
-//   → writes package.json with "filepress": "file:../filepress"
+//   → writes package.json with "getfilepress": "link:<rel-to-engine>"
 //
 // Refuses a non-empty target (edge case 18), unless --force is passed (still
 // refuses to overwrite filepress.config.ts / package.json if present).
@@ -78,8 +78,8 @@ if (existsSync(defaultFavicon)) {
 }
 
 const configImport = external
-	? `import { defineFilepressConfig } from 'filepress';`
-	: `import { defineFilepressConfig } from 'filepress';`;
+	? `import { defineFilepressConfig } from 'getfilepress';`
+	: `import { defineFilepressConfig } from 'getfilepress';`;
 
 writeFileSync(
 	join(target, 'filepress.config.ts'),
@@ -151,8 +151,8 @@ if (external) {
 				devDependencies: {
 					// link: uses the live engine tree (with its workspace node_modules).
 					// For Cloudflare/CI after the engine is on GitHub, switch to:
-					// "filepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
-					filepress: `link:${relToEngine}`
+					// "getfilepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
+					getfilepress: `link:${relToEngine}`
 				}
 			},
 			null,
@@ -202,7 +202,7 @@ override the default Essay theme.
 Catalyst-Forge-LLC, switch the dependency to a **git pin**:
 
 \`\`\`json
-"filepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
+"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
 \`\`\`
 
 | Setting | Value |

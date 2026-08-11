@@ -1,11 +1,11 @@
-# filepress demo site
+# FilePress demo site
 
-In-repo example content for the engine. Run this when developing filepress itself.
-Real publications (What Over How, etc.) live in their own repos and depend on
-this package; they are not sites under `sites/`.
+In-repo example content for the engine. Run this when developing FilePress itself.
+Real publications live in their own repos and depend on the `getfilepress` package;
+they are not sites under `sites/`.
 
 ```bash
-# from the filepress repo root
+# from the engine repo root
 pnpm install
 pnpm filepress dev --site demo
 pnpm filepress build --site demo   # → sites/demo/build/

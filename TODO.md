@@ -41,7 +41,7 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 - [x] **Option C** ([`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md)): `packages/app` owns all routes; `sites/*` are content-only; `scripts/filepress.mjs --site` builds to `sites/<name>/build/`
 - [x] **Option D:** installable `filepress` bin; sibling sites use `link:../filepress`; scaffold `--external`; docs for git pin `github:Catalyst-Forge-LLC/filepress#…` ([`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md))
-- [x] Push engine to `Catalyst-Forge-LLC/filepress` _(main pushed; tag when ready for CF git-dep installs)_
+- [x] Push engine to `Catalyst-Forge-LLC/filepress` _(repo renamed; main synced; tag when ready for CF git-dep installs)_
 
 ## M3 — Deployed and automated
 

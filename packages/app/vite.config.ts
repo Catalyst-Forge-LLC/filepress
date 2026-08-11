@@ -4,7 +4,10 @@ import { defineConfig } from 'vite';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { criticalThemePlugin } from './vite-plugin-critical-theme.ts';
+import {
+	criticalThemePlugin,
+	writeCriticalThemeModule
+} from './vite-plugin-critical-theme.ts';
 import { geniePlugin } from './vite-plugin-genie.ts';
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
@@ -44,6 +47,10 @@ function resolveSiteTheme(): string {
 }
 
 const siteTheme = resolveSiteTheme();
+const downpressCache = join(siteRoot, '.downpress');
+if (!existsSync(downpressCache)) mkdirSync(downpressCache, { recursive: true });
+const criticalThemeOut = join(downpressCache, 'critical-theme.generated.ts');
+writeCriticalThemeModule(siteTheme, criticalThemeOut);
 
 const coreEntry = join(appRoot, '../core/src/lib/index.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
@@ -67,7 +74,7 @@ export default defineConfig({
 		? { port: fixedPort, strictPort: true }
 		: undefined,
 	plugins: [
-		criticalThemePlugin(siteTheme),
+		criticalThemePlugin(siteTheme, criticalThemeOut),
 		geniePlugin(siteRoot),
 		sveltekit({
 			alias: {
@@ -77,7 +84,9 @@ export default defineConfig({
 				'downpress/theme': coreTheme,
 				'$site-config': siteConfig,
 				// Loaded after the core Essay theme so site rules win the cascade.
-				'$site-theme': siteTheme
+				'$site-theme': siteTheme,
+				// Per-site critical tokens (written under site/.downpress/).
+				'$critical-theme': criticalThemeOut
 			},
 
 			// Absolute `/_app/...` asset URLs — more reliable on CDN/custom domains

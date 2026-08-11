@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Essay + site theme from one module (avoids Essay flash before site overrides).
 	import '$lib/theme-entry';
-	import criticalTheme from 'virtual:downpress-critical-theme';
+	import criticalTheme from '$critical-theme';
 	import { SiteHeader, SiteFooter } from '@downpress/core';
 	import config from '$site-config';
 	import GenieHost from '$lib/genie/GenieHost.svelte';

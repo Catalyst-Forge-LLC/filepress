@@ -41,7 +41,7 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 
 ### npm publish
 
-- npm: **`getfilepress@0.1.0`** published (installable shape). Prefer **`0.1.1`** so npm version matches git tag `v0.1.1`.
+- npm latest: **`getfilepress@0.1.1`** (also `0.1.0` + stake `0.0.0`). Git tag **`v0.1.1`** → `fecbd27`.
 - Publish shape: root hoists real deps (no `workspace:*`); CLI invokes vite/sirv/tsx; `prepack`/`postpack`; postinstall + CLI link `@filepress/*`; `pnpm pack:smoke`.
 - Bare `filepress` is **not** available on npm.
 
@@ -53,10 +53,9 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 
 ### What’s next (likely)
 
-1. Align release: bump was to `0.1.1` — retag `v0.1.1` on that commit → `npm publish` → prefer pins on `^0.1.1` / `#v0.1.1`  
-
-2. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
-3. M3 Cloudflare Pages + getfilepress.com for `sites/getfilepress`  
+1. Genie **M2** (live inspire + Ollama brief + lede/tagline/logo) — M0+M1 done  
+2. M3 Cloudflare Pages + getfilepress.com for `sites/getfilepress`  
+3. Prefer site pins on `getfilepress@^0.1.1` or `github:…#v0.1.1`  
 4. Polish product-site copy / assets as needed
 
 ### Agent prefs (still true)

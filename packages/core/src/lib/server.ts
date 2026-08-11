@@ -1,4 +1,4 @@
-// Server-only public API for @downpress/core. These modules touch the
+// Server-only public API for @filepress/core. These modules touch the
 // filesystem (content loader) and must only be imported from server code
 // (`+page.server.ts`, `+server.ts`, or a `*.server.ts` lib module).
 

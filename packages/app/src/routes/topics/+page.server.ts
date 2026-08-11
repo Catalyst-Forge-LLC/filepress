@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import type { Topic } from '@downpress/core';
+import type { Topic } from '@filepress/core';
 import { content } from '$lib/content.server';
 import config from '$site-config';
 

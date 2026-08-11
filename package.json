@@ -1,11 +1,20 @@
 {
-	"name": "downpress",
-	"private": true,
+	"name": "filepress",
 	"version": "0.1.0",
+	"private": false,
 	"type": "module",
-	"description": "Git-native Markdown blog engine. Link this package from a content-only site (config + posts), then run `downpress build`.",
+	"description": "File-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",
+	"license": "MIT",
+	"homepage": "https://getfilepress.com",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Catalyst-Forge-LLC/filepress.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Catalyst-Forge-LLC/filepress/issues"
+	},
 	"bin": {
-		"downpress": "./scripts/downpress.mjs"
+		"filepress": "./scripts/filepress.mjs"
 	},
 	"exports": {
 		".": {
@@ -23,26 +32,30 @@
 		"./package.json": "./package.json"
 	},
 	"files": [
-		"scripts/downpress.mjs",
+		"scripts/filepress.mjs",
+		"scripts/create-site.mjs",
 		"packages/core",
 		"packages/app",
+		"packages/import",
 		"pnpm-workspace.yaml",
-		"README.md"
+		"README.md",
+		"LICENSE"
 	],
 	"scripts": {
-		"downpress": "node scripts/downpress.mjs",
-		"test": "pnpm --filter @downpress/core test && pnpm --filter @downpress/import test",
-		"check": "pnpm downpress check --site demo",
-		"build": "pnpm downpress build --site demo",
-		"build:demo": "pnpm downpress build --site demo",
-		"dev": "pnpm downpress dev --site demo",
-		"dev:demo": "pnpm downpress dev --site demo",
+		"filepress": "node scripts/filepress.mjs",
+		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test",
+		"check": "pnpm filepress check --site demo",
+		"build": "pnpm filepress build --site demo",
+		"build:demo": "pnpm filepress build --site demo",
+		"dev": "pnpm filepress dev --site demo",
+		"dev:demo": "pnpm filepress dev --site demo",
 		"create-site": "node scripts/create-site.mjs",
-		"import": "node scripts/downpress.mjs import"
+		"import": "node scripts/filepress.mjs import"
 	},
 	"dependencies": {
-		"@downpress/app": "workspace:*",
-		"@downpress/core": "workspace:*"
+		"@filepress/app": "workspace:*",
+		"@filepress/core": "workspace:*",
+		"@filepress/import": "workspace:*"
 	},
 	"engines": {
 		"node": ">=20"

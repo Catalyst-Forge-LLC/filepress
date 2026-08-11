@@ -1,4 +1,4 @@
-/** Mirrors @downpress/import DesignBrief — kept local so the panel never pulls Node import code. */
+/** Mirrors @filepress/import DesignBrief — kept local so the panel never pulls Node import code. */
 export type DesignBrief = {
 	mood: string;
 	do: string[];

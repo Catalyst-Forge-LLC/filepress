@@ -1,10 +1,10 @@
 /**
- * Downpress site configuration — the single per-site config surface.
+ * filepress site configuration — the single per-site config surface.
  *
- * A site declares its identity in `downpress.config.ts` at the site root via
- * `defineDownpressConfig({...})`. Core never reads environment variables for
+ * A site declares its identity in `filepress.config.ts` at the site root via
+ * `defineFilepressConfig({...})`. Core never reads environment variables for
  * identity; the site owns that (and may read env in its own config file). This
- * keeps `@downpress/core` app-agnostic and importable from both client and
+ * keeps `@filepress/core` app-agnostic and importable from both client and
  * server code.
  */
 export interface NewsletterConfig {
@@ -85,23 +85,23 @@ export function postsIndexPath(site: Pick<SiteConfig, 'homePage'>): string {
  * required field is missing (edge case 19) so a misconfigured site never builds
  * a broken feed or canonical URL silently.
  */
-export function defineDownpressConfig(input: SiteConfigInput): SiteConfig {
+export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 	if (!input || typeof input !== 'object') {
-		throw new Error('defineDownpressConfig: expected a config object.');
+		throw new Error('defineFilepressConfig: expected a config object.');
 	}
 	const title = (input.title ?? '').trim();
-	if (!title) throw new Error('downpress.config: `title` is required.');
+	if (!title) throw new Error('filepress.config: `title` is required.');
 	const url = (input.url ?? '').trim();
-	if (!url) throw new Error('downpress.config: `url` is required.');
+	if (!url) throw new Error('filepress.config: `url` is required.');
 	if (!/^https?:\/\//.test(url)) {
-		throw new Error(`downpress.config: \`url\` must start with http(s):// (got "${url}").`);
+		throw new Error(`filepress.config: \`url\` must start with http(s):// (got "${url}").`);
 	}
 
 	const description = (input.description ?? '').trim();
 	const homePage = (input.homePage ?? '').trim() || null;
 	if (homePage && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(homePage)) {
 		throw new Error(
-			`downpress.config: \`homePage\` must be a simple slug (got "${homePage}").`
+			`filepress.config: \`homePage\` must be a simple slug (got "${homePage}").`
 		);
 	}
 

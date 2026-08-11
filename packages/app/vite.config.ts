@@ -14,12 +14,12 @@ const appRoot = dirname(fileURLToPath(import.meta.url));
 const defaultSiteRoot = resolve(appRoot, '../../sites/demo');
 
 function resolveSiteRoot(): string {
-	const raw = process.env.DOWNPRESS_SITE_ROOT?.trim();
+	const raw = process.env.FILEPRESS_SITE_ROOT?.trim();
 	return raw ? resolve(raw) : defaultSiteRoot;
 }
 
 const siteRoot = resolveSiteRoot();
-const siteConfig = join(siteRoot, 'downpress.config.ts');
+const siteConfig = join(siteRoot, 'filepress.config.ts');
 const siteStatic = join(siteRoot, 'static');
 const siteBuild = join(siteRoot, 'build');
 const fallbackStatic = join(appRoot, 'static');
@@ -30,35 +30,33 @@ const assetsDir = existsSync(siteStatic) ? siteStatic : fallbackStatic;
 if (!existsSync(fallbackStatic)) mkdirSync(fallbackStatic, { recursive: true });
 
 if (!existsSync(siteConfig)) {
-	throw new Error(`No downpress.config.ts at site root: ${siteConfig}`);
+	throw new Error(`No filepress.config.ts at site root: ${siteConfig}`);
 }
 
 /**
  * Prefer site-root theme.css so Genie activate can overwrite a real file Vite watches.
- * Fall back to theme.scss, else create an empty theme.css (not the app stub path).
+ * Create an empty theme.css when absent (not the app stub path).
  */
 function resolveSiteTheme(): string {
 	const css = join(siteRoot, 'theme.css');
 	if (existsSync(css)) return css;
-	const scss = join(siteRoot, 'theme.scss');
-	if (existsSync(scss)) return scss;
-	writeFileSync(css, '/* Downpress site theme — edit freely or use Genie Mode in dev */\n');
+	writeFileSync(css, '/* filepress site theme — edit freely or use Genie Mode in dev */\n');
 	return css;
 }
 
 const siteTheme = resolveSiteTheme();
-const downpressCache = join(siteRoot, '.downpress');
-if (!existsSync(downpressCache)) mkdirSync(downpressCache, { recursive: true });
-const criticalThemeOut = join(downpressCache, 'critical-theme.generated.ts');
+const filepressCache = join(siteRoot, '.filepress');
+if (!existsSync(filepressCache)) mkdirSync(filepressCache, { recursive: true });
+const criticalThemeOut = join(filepressCache, 'critical-theme.generated.ts');
 writeCriticalThemeModule(siteTheme, criticalThemeOut);
 
 const coreEntry = join(appRoot, '../core/src/lib/index.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
 const coreTheme = join(appRoot, '../core/src/lib/theme.ts');
 
-/** Optional fixed port from `downpress dev|preview --port` (via DOWNPRESS_PORT). */
+/** Optional fixed port from `filepress dev|preview --port` (via FILEPRESS_PORT). */
 function resolvePort(): number | undefined {
-	const raw = process.env.DOWNPRESS_PORT?.trim();
+	const raw = process.env.FILEPRESS_PORT?.trim();
 	if (!raw) return undefined;
 	const n = Number(raw);
 	return Number.isInteger(n) && n > 0 && n <= 65535 ? n : undefined;
@@ -78,14 +76,14 @@ export default defineConfig({
 		geniePlugin(siteRoot),
 		sveltekit({
 			alias: {
-				// Site configs (monorepo or linked) import from `downpress`.
-				downpress: coreEntry,
-				'downpress/server': coreServer,
-				'downpress/theme': coreTheme,
+				// Site configs (monorepo or linked) import from `filepress`.
+				filepress: coreEntry,
+				'filepress/server': coreServer,
+				'filepress/theme': coreTheme,
 				'$site-config': siteConfig,
 				// Loaded after the core Essay theme so site rules win the cascade.
 				'$site-theme': siteTheme,
-				// Per-site critical tokens (written under site/.downpress/).
+				// Per-site critical tokens (written under site/.filepress/).
 				'$critical-theme': criticalThemeOut
 			},
 

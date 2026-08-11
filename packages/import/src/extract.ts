@@ -64,7 +64,7 @@ function extractImages(root: Element, pageUrl: string, origin: string): string[]
 }
 
 /**
- * Rewrite same-origin article/listing links to Downpress routes before HTML→MD
+ * Rewrite same-origin article/listing links to filepress routes before HTML→MD
  * so prerender does not crawl dead `/writing/…` paths.
  */
 function rewriteInternalLinks(root: Element, pageUrl: string, origin: string): void {
@@ -363,7 +363,7 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 		source: { url: origin, generator },
 		identity: {
 			title,
-			description: description || `${title} — imported into Downpress.`,
+			description: description || `${title} — imported into filepress.`,
 			author,
 			canonicalUrl: origin.replace(/\/+$/, '')
 		},

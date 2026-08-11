@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PostCard } from '@downpress/core';
+	import { PostCard } from '@filepress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();

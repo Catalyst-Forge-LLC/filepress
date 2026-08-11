@@ -1,19 +1,19 @@
-# @downpress/app
+# @filepress/app
 
-The only SvelteKit application in the Downpress monorepo. All routes, layouts, and
+The only SvelteKit application in the filepress monorepo. All routes, layouts, and
 Kit wiring live here. Content sites under [`../../sites`](../../sites) provide:
 
-- `downpress.config.ts` — identity
+- `filepress.config.ts` — identity
 - `posts/` — Markdown
 - `static/` — favicon, images (optional)
 
 ## Run against a site
 
-From the repo root (do not run vite directly without `DOWNPRESS_SITE_ROOT`):
+From the repo root (do not run vite directly without `FILEPRESS_SITE_ROOT`):
 
 ```bash
-pnpm downpress dev --site demo
-pnpm downpress build --site demo
+pnpm filepress dev --site demo
+pnpm filepress build --site demo
 ```
 
 Build output is written to `sites/<name>/build/`.

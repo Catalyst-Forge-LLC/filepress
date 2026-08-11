@@ -1,26 +1,26 @@
-# Spec: `downpress import` — migrate a site with Ollama-assisted restyle
+# Spec: `filepress import` — migrate a site with Ollama-assisted restyle
 
 **Status:** v1 implemented (pages + content import + optional Ollama token theme)  
 **Date:** 2026-08-02 (updated 2026-08-03)  
-**Command:** `downpress import`
+**Command:** `filepress import`
 
 ### Defaults locked for v1
 
 | Question | Decision |
 | --- | --- |
 | Static pages routing | Top-level `/[slug]` from `pages/*.md`; reserved: posts, tags, topics, page, feeds |
-| URL parity | Clean break to `/posts/<slug>`; remaps listed in `.downpress-import/import-report.md` |
+| URL parity | Clean break to `/posts/<slug>`; remaps listed in `.filepress-import/import-report.md` |
 | Home | Posts index; source home bio → config `lede`; long About stays a page |
 | Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards, wider measure). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
-| Chrome images | Source site: portrait + wordmark logo only. CSS covers (background/header) from **Openverse** Creative Commons stock (not `--inspire` photos). `--fetch-images` downloads into `static/images/`, wires `theme.css`, writes `.downpress-import/IMAGE_ATTRIBUTION.md`. |
-| Framing | Downpress product feature (`@downpress/import`) |
+| Chrome images | Source site: portrait + wordmark logo only. CSS covers (background/header) from **Openverse** Creative Commons stock (not `--inspire` photos). `--fetch-images` downloads into `static/images/`, wires `theme.css`, writes `.filepress-import/IMAGE_ATTRIBUTION.md`. |
+| Framing | filepress product feature (`@filepress/import`) |
 
 This document fleshes out an interactive CLI that:
 
 1. Asks a few questions (source site, inspiration sites, identity).
 2. Walks the source site and extracts content + structure.
 3. Samples inspiration sites (and optionally screenshots) for visual direction.
-4. Uses a local Ollama model (`gemma4:12b`, vision-capable) to propose a design brief and a Downpress theme.
+4. Uses a local Ollama model (`gemma4:12b`, vision-capable) to propose a design brief and a filepress theme.
 5. Scaffolds a **sibling content-only site** (reusing today’s `create-site --external` path) with posts, static pages, assets, config, and `theme.css`.
 
 Reference case studied while drafting:
@@ -34,30 +34,30 @@ Reference case studied while drafting:
 
 ## 1. Why this is interesting
 
-Downpress already has:
+filepress already has:
 
 - Content-only site scaffold (`scripts/create-site.mjs --external`)
-- Essay theme + Zen Garden override (`theme.css` / `theme.scss`)
+- Essay theme + Zen Garden override (`theme.css`)
 - Config surface for title, nav, topics, newsletter, lede
-- Installable CLI (`downpress` bin)
+- Installable CLI (`filepress` bin)
 
 What’s missing for this story:
 
 - **Static Markdown pages** (`/about`, `/contact`) — called out as a future escape hatch in `docs/SITE_PACKAGING_OPTIONS.md`, not shipped
-- An **import / migrate** path that turns an existing site into a Downpress tree
+- An **import / migrate** path that turns an existing site into a filepress tree
 - Any **LLM / Ollama** integration
 
-The product pitch: “Point Downpress at your old site + 1–3 sites you like → walk away with a sibling repo you can `pnpm install && pnpm downpress dev`.”
+The product pitch: “Point filepress at your old site + 1–3 sites you like → walk away with a sibling repo you can `pnpm install && pnpm filepress dev`.”
 
-**After import:** the planned local [Genie Mode](./GENIE_MODE_SPEC.md) continues the taste loop in `pnpm downpress dev` (steer backgrounds, fonts, colors, inspire URLs, version toggles, uploads)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay Genie-free. Both import and Genie should detect Ollama and may suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) for a tuned local model.
+**After import:** the planned local [Genie Mode](./GENIE_MODE_SPEC.md) continues the taste loop in `pnpm filepress dev` (steer backgrounds, fonts, colors, inspire URLs, version toggles, uploads)—reusing DesignBrief / `themeCssFromBrief` / Openverse / inspire pipelines. Preview and production builds stay Genie-free. Both import and Genie should detect Ollama and may suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) for a tuned local model.
 
 ---
 
-## 2. Feasibility: example.com → Downpress
+## 2. Feasibility: example.com → filepress
 
 ### Verdict: **high for content; medium for “awesome” without engine work**
 
-[example.com](https://example.com/) is a small, well-structured **Astro → static HTML** site on Vercel. It is *not* a scrape nightmare. It is also already a polished editorial personal site (Fraunces + Sen, cream/gold palette) — more “migrate into Downpress + restyle” than “rescue from 2012 WordPress.”
+[example.com](https://example.com/) is a small, well-structured **Astro → static HTML** site on Vercel. It is *not* a scrape nightmare. It is also already a polished editorial personal site (Fraunces + Sen, cream/gold palette) — more “migrate into filepress + restyle” than “rescue from 2012 WordPress.”
 
 ### What’s easy
 
@@ -69,16 +69,16 @@ The product pitch: “Point Downpress at your old site + 1–3 sites you like �
 | Posts | Semantic `<article class="article">`, title, subtitle, tags, dated meta |
 | Feeds | RSS has title, link, description, `pubDate` — enough for frontmatter + excerpt |
 | Assets | Favicons + (likely) headshot on home; fonts from Google Fonts today |
-| Tone | Personal CPTO / board / AI-native essays — maps cleanly to Downpress “Essay” IA |
+| Tone | Personal CPTO / board / AI-native essays — maps cleanly to filepress “Essay” IA |
 
 ### Friction (important)
 
-1. **Static pages are first-class on the source site** (About, Contact, Writing index copy). Downpress today is **posts + generated archives** only. Nav can point at `/about`, but there is no `pages/*.md` route yet. **Import without pages support produces a broken sibling site.**
-2. **Home is a bio landing**, not a post index. Downpress index is the post listing (+ optional lede). Import must decide: bio as `pages/home` / special layout, lede-only, or posts-first with About holding the long bio.
-3. **URL shape:** source posts live under `/writing/<slug>/`; Downpress uses `/posts/<slug>`. Need redirects plan or config for post base path (open question).
+1. **Static pages are first-class on the source site** (About, Contact, Writing index copy). filepress today is **posts + generated archives** only. Nav can point at `/about`, but there is no `pages/*.md` route yet. **Import without pages support produces a broken sibling site.**
+2. **Home is a bio landing**, not a post index. filepress index is the post listing (+ optional lede). Import must decide: bio as `pages/home` / special layout, lede-only, or posts-first with About holding the long bio.
+3. **URL shape:** source posts live under `/writing/<slug>/`; filepress uses `/posts/<slug>`. Need redirects plan or config for post base path (open question).
 4. **Source is HTML, not Markdown.** Body extraction needs HTML→MD (Turndown / similar) with cleanup; LLM should *not* own the whole conversion for long essays (risk of rewrite/hallucination).
 5. **“Essays” nav label vs `/writing` path** — SPA-ish naming; scraper must follow real hrefs / sitemap, not assume `/essays`.
-6. **Inspiration site mismatch:** [catalystforge.com](https://www.catalystforge.com/) is a multi-section marketing landing (hero, services, process, CTAs). Blindly cloning that layout onto a personal essay site will fight Downpress’s Essay chrome. Vision/LLM should extract **tokens + typography + motion + density**, not try to reproduce CF’s section inventory.
+6. **Inspiration site mismatch:** [catalystforge.com](https://www.catalystforge.com/) is a multi-section marketing landing (hero, services, process, CTAs). Blindly cloning that layout onto a personal essay site will fight filepress’s Essay chrome. Vision/LLM should extract **tokens + typography + motion + density**, not try to reproduce CF’s section inventory.
 
 ### Difficulty estimate (for this reference pair)
 
@@ -100,10 +100,10 @@ The product pitch: “Point Downpress at your old site + 1–3 sites you like �
 
 ### Goals (v1)
 
-- Interactive wizard that produces a **sibling content-only site** next to the Downpress engine (same shape as today’s `--external` scaffold).
+- Interactive wizard that produces a **sibling content-only site** next to the filepress engine (same shape as today’s `--external` scaffold).
 - Import **published posts** (title, date, tags, description/excerpt, body Markdown, local images).
 - Import **static pages** into `pages/*.md` (engine support required).
-- Generate `downpress.config.ts` (title, url, author, nav, topics from tags, lede/tagline).
+- Generate `filepress.config.ts` (title, url, author, nav, topics from tags, lede/tagline).
 - Generate a **first-pass `theme.css`** from a structured design brief (tokens + a few structural overrides), not a pixel clone.
 - Local-first: **Ollama** at `http://localhost:11434`, default model `gemma4:12b`.
 - Fail loud: crawl errors, missing Ollama, invalid model JSON, empty site → clear messages (no silent half-sites).
@@ -126,12 +126,12 @@ The product pitch: “Point Downpress at your old site + 1–3 sites you like �
 ### Command
 
 ```bash
-# From the Downpress engine repo (or anywhere if PATH has the bin):
-pnpm downpress import
+# From the filepress engine repo (or anywhere if PATH has the bin):
+pnpm filepress import
 # or:
-downpress import --source https://example.com --inspire https://www.catalystforge.com
+filepress import --source https://example.com --inspire https://www.catalystforge.com
 # Optional: download suggested hero/header/background/logo into static/images/
-downpress import --source https://example.com --inspire https://app.execfoundry.com/start \
+filepress import --source https://example.com --inspire https://app.execfoundry.com/start \
   --inspire https://www.catalystforge.com --fetch-images --no-llm
 ```
 
@@ -143,7 +143,7 @@ downpress import --source https://example.com --inspire https://app.execfoundry.
 4. **Site title / author / canonical URL** — prefilled from `<title>` / meta / RSS
 5. **What to import** — posts, pages, assets (checkboxes; defaults all on)
 6. **Home behavior** — `posts-index` | `bio-as-lede` | `page-as-home` (if we add home page support)
-7. **Post URL prefix** — keep Downpress `/posts` vs future alias (v1: `/posts` + note redirects)
+7. **Post URL prefix** — keep filepress `/posts` vs future alias (v1: `/posts` + note redirects)
 8. **Ollama** — host (default localhost), model (default `gemma4:12b`), allow offline/no-LLM theme skip
 9. **Write mode** — `dry-run` (report only) → confirm → write files
 
@@ -153,8 +153,8 @@ Flags mirror every prompt for non-interactive use.
 
 ```text
 ../example-site/                     # or user-chosen path
-  package.json                   # downpress: link:../downpress (or github: pin)
-  downpress.config.ts
+  package.json                   # filepress: link:../filepress (or github: pin)
+  filepress.config.ts
   theme.css                      # generated first pass
   posts/
     2026-06-15-from-scaling-labor-to-scaling-trust.md
@@ -165,7 +165,7 @@ Flags mirror every prompt for non-interactive use.
   static/
     images/…                     # downloaded, rewritten links
     favicon-64.png
-  .downpress-import/
+  .filepress-import/
     design-brief.json
     import-report.md
     crawl-cache/                 # optional, gitignored
@@ -174,7 +174,7 @@ Flags mirror every prompt for non-interactive use.
 After write:
 
 ```bash
-cd ../example-site && pnpm install && pnpm downpress dev
+cd ../example-site && pnpm install && pnpm filepress dev
 ```
 
 ---
@@ -224,7 +224,7 @@ type SiteIR = {
   identity: { title: string; description: string; author: string };
   posts: Array<{ slug: string; title: string; date: string; tags: string[]; description?: string; markdown: string; images: string[] }>;
   pages: Array<{ slug: string; title: string; markdown: string }>;
-  nav: Array<{ label: string; href: string }>; // mapped into Downpress routes
+  nav: Array<{ label: string; href: string }>; // mapped into filepress routes
   topics: Array<{ label: string; tag: string }>;
 };
 ```
@@ -238,7 +238,7 @@ Inputs:
 - Compressed SiteIR identity + IA (not full essay bodies)
 - Inspiration page text summaries (headings, nav, palette guesses from CSS)
 - Optional **screenshots** (source home + writing; inspiration home) for vision model
-- Downpress public theme contract (`docs/THEME.md` tokens + classes) — **injected by code into the prompt**
+- filepress public theme contract (`docs/THEME.md` tokens + classes) — **injected by code into the prompt**
 
 Output (JSON schema enforced; retry once on parse failure):
 
@@ -279,8 +279,8 @@ Recommend **A for v1**, B as experiment flag `--theme-llm`.
 
 1. Call existing scaffold logic (`create-site --external`).
 2. Write posts/pages/static/theme/config.
-3. Write `.downpress-import/import-report.md` (what was imported, skipped, URL mapping, manual follow-ups).
-4. Optionally run `pnpm downpress build` in the sibling and report success/fail.
+3. Write `.filepress-import/import-report.md` (what was imported, skipped, URL mapping, manual follow-ups).
+4. Optionally run `pnpm filepress build` in the sibling and report success/fail.
 
 ---
 
@@ -327,7 +327,7 @@ Screenshot capture is optional but high leverage for “make it feel like CF, no
 
 - Routes, sitemap, nav helpers, tests, docs.
 
-### M2 — `downpress import` content path
+### M2 — `filepress import` content path
 
 - Wizard + discover/extract/write; dry-run; no LLM required.
 
@@ -345,9 +345,9 @@ Screenshot capture is optional but high leverage for “make it feel like CF, no
 
 ### Product / scope
 
-1. **Is this a general product feature or a Catalyst Forge “site rescue” tool that happens to live in Downpress?** Affects naming, docs tone, and how weird source sites we promise to support.
-2. **Must the friend keep URL parity** (`/writing/...`, `/tags/...`) or is a clean break to Downpress URLs OK with a redirect map for Cloudflare?
-3. **Home page model:** posts-first (Downpress default), bio landing, or configurable `homePage`?
+1. **Is this a general product feature or a Catalyst Forge “site rescue” tool that happens to live in filepress?** Affects naming, docs tone, and how weird source sites we promise to support.
+2. **Must the friend keep URL parity** (`/writing/...`, `/tags/...`) or is a clean break to filepress URLs OK with a redirect map for Cloudflare?
+3. **Home page model:** posts-first (filepress default), bio landing, or configurable `homePage`?
 4. **How “awesome” is success?** Ship a tasteful restyle + working content, or chase CF-level marketing motion on a personal site?
 
 ### Engine
@@ -361,19 +361,19 @@ Screenshot capture is optional but high leverage for “make it feel like CF, no
 8. **Respect `robots.txt` Disallow?** (Default yes for courtesy; source site may allow all.)
 9. **Max pages / max bytes** defaults?
 10. **Off-origin images** (CDN portraits): download, hotlink, or skip?
-11. **Tag pages:** recreate via Downpress tags only (yes for v1)?
+11. **Tag pages:** recreate via filepress tags only (yes for v1)?
 
 ### LLM / design
 
 12. **Inspiration sites: scrape text+CSS only, or always screenshot for vision?**
 13. **May we fetch inspiration HTML at all?** (ToS / ethics — CF is ours; third-party inspiration may need “user attests they have rights / public pages only.”)
-14. **Font strategy:** keep Downpress self-hosted Essay fonts, download inspiration fonts (licensing!), or only adjust size/weight/tracking?
+14. **Font strategy:** keep filepress self-hosted Essay fonts, download inspiration fonts (licensing!), or only adjust size/weight/tracking?
 15. **Theme pass A vs B** for v1?
 16. **Human approval gate:** always show brief + sample CSS in terminal/pager before write?
 
 ### CLI / packaging
 
-17. **Where does import code live?** `scripts/import/` in engine vs `@downpress/import` package?
+17. **Where does import code live?** `scripts/import/` in engine vs `@filepress/import` package?
 18. **Sibling default location:** always `../<slug>` next to engine, or next to cwd?
 19. **Node APIs:** keep CLI as plain `.mjs` or move import pipeline to TypeScript in `packages/`?
 20. **CI:** offline fixtures only — agree we never call live Ollama or the public internet in default tests?
@@ -381,7 +381,7 @@ Screenshot capture is optional but high leverage for “make it feel like CF, no
 ### Reference-site specific
 
 21. **example-site already looks intentional** — is the friend unhappy with visual design, with the Astro/Vercel workflow, or with maintenance? (If workflow-only, import+theme can be lighter.)
-22. **Contact page:** static content only, or expect a form endpoint? (Downpress won’t host form backends; link to Formspree/etc.)
+22. **Contact page:** static content only, or expect a form endpoint? (filepress won’t host form backends; link to Formspree/etc.)
 23. **Newsletter / podcast links** on source — map into `newsletter` config or leave as page prose?
 
 ---
@@ -408,7 +408,7 @@ For a dry run against https://example.com/ with inspiration https://www.catalyst
 2. **About** and **Contact** land as pages (once M1 ships).
 3. Config nav roughly: Home / About / Writing(or Posts) / Contact; topics from the three tags.
 4. `theme.css` changes accent/background/type density enough that a side-by-side screenshot is visibly different from stock Essay — without copying CF marketing sections.
-5. `pnpm downpress build` in the sibling exits 0.
+5. `pnpm filepress build` in the sibling exits 0.
 6. Import report lists URL remaps and manual TODOs (redirects, contact form, photo crop).
 
 ---

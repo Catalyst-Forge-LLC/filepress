@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Newsletter, absoluteUrl, formatDate, ogImageUrl } from '@downpress/core';
+	import { Newsletter, absoluteUrl, formatDate, ogImageUrl } from '@filepress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();

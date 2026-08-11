@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import type { DesignBrief, GenieActive, GenieVersionMeta } from './types.ts';
 
-const GENIE_DIR = '.downpress-genie';
+const GENIE_DIR = '.filepress-genie';
 
 export function genieRoot(siteRoot: string): string {
 	return join(siteRoot, GENIE_DIR);
@@ -140,8 +140,8 @@ export function activateVersion(siteRoot: string, versionId: string): GenieActiv
 
 	const attr = join(dir, 'attribution.md');
 	if (existsSync(attr)) {
-		mkdirSync(join(siteRoot, '.downpress-import'), { recursive: true });
-		copyFileSync(attr, join(siteRoot, '.downpress-import', 'IMAGE_ATTRIBUTION.md'));
+		mkdirSync(join(siteRoot, '.filepress-import'), { recursive: true });
+		copyFileSync(attr, join(siteRoot, '.filepress-import', 'IMAGE_ATTRIBUTION.md'));
 	}
 
 	const active: GenieActive = {

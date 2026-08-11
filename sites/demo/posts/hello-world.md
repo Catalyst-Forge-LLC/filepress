@@ -1,11 +1,11 @@
 ---
 title: "Hello, world"
 date: 2026-06-20
-description: The first post on a git-native Markdown blog — what Downpress is and why it exists.
-tags: [notes, downpress]
+description: The first post on a git-native Markdown blog — what filepress is and why it exists.
+tags: [notes, filepress]
 ---
 
-Welcome to **Downpress**. Every post here is a plain Markdown file with a little
+Welcome to **filepress**. Every post here is a plain Markdown file with a little
 YAML frontmatter at the top, committed straight to a Git repository. There's no
 database, no admin login, and no CMS — just files.
 

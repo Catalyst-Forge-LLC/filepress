@@ -1,6 +1,6 @@
 ---
 title: About
-description: What Downpress is and how this demo site fits.
+description: What filepress is and how this demo site fits.
 order: 1
 ---
 

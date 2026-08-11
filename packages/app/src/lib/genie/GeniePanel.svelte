@@ -30,7 +30,7 @@
 	let accent = $state('#1e4d6b');
 
 	async function api(path: string, init?: RequestInit) {
-		const res = await fetch(`/__downpress/genie${path}`, {
+		const res = await fetch(`/__filepress/genie${path}`, {
 			...init,
 			headers: {
 				'content-type': 'application/json',

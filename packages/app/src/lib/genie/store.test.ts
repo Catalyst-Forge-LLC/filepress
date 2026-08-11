@@ -12,7 +12,7 @@ import {
 
 describe('genie store', () => {
 	it('snapshots baseline, writes a version, and activates into working tree', () => {
-		const root = mkdtempSync(join(tmpdir(), 'downpress-genie-'));
+		const root = mkdtempSync(join(tmpdir(), 'filepress-genie-'));
 		mkdirSync(join(root, 'static', 'images'), { recursive: true });
 		writeFileSync(join(root, 'theme.css'), ':root { --accent: #111111; }\n');
 
@@ -40,7 +40,7 @@ describe('genie store', () => {
 		activateVersion(root, meta.id);
 		expect(getActive(root)?.versionId).toBe(meta.id);
 		expect(readFileSync(join(root, 'theme.css'), 'utf8')).toContain('#2244ff');
-		expect(existsSync(join(root, '.downpress-genie', 'versions', meta.id, 'theme.css'))).toBe(
+		expect(existsSync(join(root, '.filepress-genie', 'versions', meta.id, 'theme.css'))).toBe(
 			true
 		);
 	});

@@ -1,4 +1,4 @@
-# Downpress — Feature Backlog
+# filepress — Feature Backlog
 
 _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reorganize by brand pillars later (Phase 6). `[x]` = done, `[ ]` = planned._
 
@@ -39,9 +39,9 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ## Architecture — site packaging
 
-- [x] **Option C** ([`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md)): `packages/app` owns all routes; `sites/*` are content-only; `scripts/downpress.mjs --site` builds to `sites/<name>/build/`
-- [x] **Option D:** installable `downpress` bin; sibling sites use `link:../downpress`; scaffold `--external`; docs for git pin `github:Catalyst-Forge-LLC/downpress#…` ([`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md))
-- [x] Push engine to `Catalyst-Forge-LLC/downpress` _(main pushed; tag when ready for CF git-dep installs)_
+- [x] **Option C** ([`docs/SITE_PACKAGING_OPTIONS.md`](docs/SITE_PACKAGING_OPTIONS.md)): `packages/app` owns all routes; `sites/*` are content-only; `scripts/filepress.mjs --site` builds to `sites/<name>/build/`
+- [x] **Option D:** installable `filepress` bin; sibling sites use `link:../filepress`; scaffold `--external`; docs for git pin `github:Catalyst-Forge-LLC/filepress#…` ([`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md))
+- [x] Push engine to `Catalyst-Forge-LLC/filepress` _(main pushed; tag when ready for CF git-dep installs)_
 
 ## M3 — Deployed and automated
 
@@ -54,19 +54,19 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 
 ## M4 — Core/site split & scaffolding ✅ (2026-07-05, pnpm workspace monorepo)
 
-- [x] Extract content loader, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components into `@downpress/core` (`packages/core`, source-linked Svelte library)
+- [x] Extract content loader, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components into `@filepress/core` (`packages/core`, source-linked Svelte library)
 - [x] Rebuild sites as SvelteKit apps depending on core via `workspace:*` (thin per-site routes; routes stay per-project by SvelteKit constraint)
-- [x] Promote **example-site.example** to a real site (`sites/example-site`, own `posts/` + `downpress.config.ts`)
-- [x] `defineDownpressConfig()` helper consumed by each site's `downpress.config.ts` (site root)
-- [x] Local scaffold script (`node scripts/create-site.mjs <name>`): wires a new site to core, starter `downpress.config`, starter post; refuses a non-empty dir (edge case 18)
+- [x] Promote **example-site.example** to a real site (`sites/example-site`, own `posts/` + `filepress.config.ts`)
+- [x] `defineFilepressConfig()` helper consumed by each site's `filepress.config.ts` (site root)
+- [x] Local scaffold script (`node scripts/create-site.mjs <name>`): wires a new site to core, starter `filepress.config`, starter post; refuses a non-empty dir (edge case 18)
 - [x] Prove isolation: `example-site` and `demo` build independently to their own `build/` (verified)
-- [x] Site config validation: `defineDownpressConfig` fails loudly on missing `title`/`url` (edge case 19, unit-tested)
+- [x] Site config validation: `defineFilepressConfig` fails loudly on missing `title`/`url` (edge case 19, unit-tested)
 - [ ] _(deferred to when a second repo is actually needed)_ Split core into its own repo + pin sites via git URL+SHA (D4); add a CI workflow template to the scaffold
 
 ## Site import + static pages (2026-08)
 
 - [x] Static pages: `pages/*.md` → `/[slug]` (reserved slug guard, sitemap, demo About)
-- [x] `downpress import` CLI (`@downpress/import`): discover → extract → sibling scaffold
+- [x] `filepress import` CLI (`@filepress/import`): discover → extract → sibling scaffold
 - [x] Optional Ollama design brief → token `theme.css` (pass A); `--no-llm` fallback
 - [ ] Vision screenshots in brief prompt (Playwright); richer home-as-page mode
 - [ ] Cloudflare `_redirects` emitter for old `/writing/*` paths
@@ -88,7 +88,7 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 ### Robustness & Code Quality
 
 - [x] Extract pure parse/validate logic to `parse.ts`; add Vitest unit tests for slugify, tag normalization, date validation, missing fields, and duplicate detection _(20 tests, `pnpm test`)_
-- [x] Make content directory (`DOWNPRESS_CONTENT_DIR`) and site identity (`PUBLIC_SITE_*`) env-configurable — the seam for the M4 core/site split; verified by running as example-site.example
+- [x] Make content directory (`FILEPRESS_CONTENT_DIR`) and site identity (`PUBLIC_SITE_*`) env-configurable — the seam for the M4 core/site split; verified by running as example-site.example
 - [ ] Add a couple of integration tests over the fs loader (fixtures dir → published/draft/future filtering, dedupe error)
 
 ### Documentation

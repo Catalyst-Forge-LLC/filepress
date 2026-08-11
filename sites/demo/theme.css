@@ -1,6 +1,6 @@
 /*
  * Demo site override — proves the Zen Garden hook.
- * Real sites: add theme.css (or theme.scss) next to downpress.config.ts.
+ * Real sites: add theme.css (or theme.scss) next to filepress.config.ts.
  * See docs/THEME.md for tokens and public class names.
  */
 :root {

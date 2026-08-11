@@ -1,7 +1,7 @@
 import type { DesignBrief } from './ir.ts';
 
 const OPENVERSE = 'https://api.openverse.org/v1/images/';
-const UA = 'DownpressImport/0.1 (+https://github.com/Catalyst-Forge-LLC/downpress)';
+const UA = 'filepressImport/0.1 (+https://github.com/Catalyst-Forge-LLC/filepress)';
 
 export type StockHit = {
 	url: string;

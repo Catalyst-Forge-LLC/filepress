@@ -1,14 +1,14 @@
-# Build Spec: Downpress — Git-Native Markdown Blog (SvelteKit)
+# Build Spec: filepress — Git-Native Markdown Blog (SvelteKit)
 
 https://claude.ai/share/1bc9859e-dca2-48ca-a69a-b1550e6fcabd
 
 ## 0. Summary
 
-**Downpress** is a personal blog where every post is a Markdown file with YAML frontmatter, stored in a GitHub repo. Editing happens directly in the repo (GitHub mobile app, GitHub web editor, or any text editor) — there is no custom admin UI or database. A SvelteKit static site build compiles the Markdown into a fast, prerendered HTML site, which auto-deploys on every push.
+**filepress** is a personal blog where every post is a Markdown file with YAML frontmatter, stored in a GitHub repo. Editing happens directly in the repo (GitHub mobile app, GitHub web editor, or any text editor) — there is no custom admin UI or database. A SvelteKit static site build compiles the Markdown into a fast, prerendered HTML site, which auto-deploys on every push.
 
 The problem this solves: existing blogging platforms (Wordpress, Ghost, Medium, etc.) bring accounts, databases, plugin ecosystems, and hosting complexity for something that should be a folder of text files. The current workaround — nothing formalized yet — is "figure it out each time via ad hoc tutorials." This spec exists so the actual build is a one-shot, complete implementation instead of a half-finished tutorial project.
 
-**Naming note for the builder:** the project is called Downpress. An unrelated, unmaintained npm package and GitHub org from ~2014 previously used this name for a similar concept (a "simple, fast, lightweight static website generator") — that project's site and GitHub org are now dead (site unreachable, GitHub org page 404s, ~56 weekly npm downloads that are almost certainly automated mirror/scanner traffic, no activity in 12 years). This project is an independent implementation with no relationship to that one. Since there's no intent to publish to the public npm registry, the name collision there is a non-issue; if that ever changes, publish under a scoped package name (e.g. `@yourusername/downpress`) rather than contesting the unscoped name.
+**Naming note for the builder:** the project is called filepress. An unrelated, unmaintained npm package and GitHub org from ~2014 previously used this name for a similar concept (a "simple, fast, lightweight static website generator") — that project's site and GitHub org are now dead (site unreachable, GitHub org page 404s, ~56 weekly npm downloads that are almost certainly automated mirror/scanner traffic, no activity in 12 years). This project is an independent implementation with no relationship to that one. Since there's no intent to publish to the public npm registry, the name collision there is a non-issue; if that ever changes, publish under a scoped package name (e.g. `@yourusername/filepress`) rather than contesting the unscoped name.
 
 ---
 
@@ -70,12 +70,12 @@ Two viable approaches exist; pick one and be consistent:
 - Auto-deploy on push requires CI (GitHub Actions) wired to a static host, or a host with native git integration (Cloudflare Pages / Vercel / Netlify watching the repo). This is a deployment/config detail, not a core build feature, but the spec's acceptance criteria assume "push to `main` → live site updates" as the working definition of "done."
 
 ### 2.6 Multi-site architecture: core engine vs. individual sites
-This project is not a single blog — it's a reusable engine (**Downpress core**) that multiple independent site repos build on top of. This has real implications for how the project must be structured; get this wrong early and every site will need painful rework later.
+This project is not a single blog — it's a reusable engine (**filepress core**) that multiple independent site repos build on top of. This has real implications for how the project must be structured; get this wrong early and every site will need painful rework later.
 
 - **SvelteKit's routing/build system is inherently per-project.** There is no way for a single shared SvelteKit installation to serve two unrelated `svelte.config.js` projects at once — each site (Site A, Site B, ...) must be its own SvelteKit project with its own `svelte.config.js`, its own `package.json`, and its own build output. This is a hard constraint of the framework, not a design choice.
-- **What *can* be centralized in Downpress core:** the content loader (frontmatter parsing, markdown-to-HTML pipeline, slug derivation, validation and edge-case handling), the RSS/sitemap/robots.txt generators, shared layout/theme components, and any shared SvelteKit config helpers (e.g., a preconfigured `defineDownpressConfig()` that a site's `svelte.config.js` imports and extends). Site-specific code should be minimal: content, a small config file (site title, URL, theme choice), and thin wiring that pulls in core.
-- **Dependency mechanism, since core won't be published to npm:** a site's `package.json` can depend on the Downpress core repo directly via a git URL (e.g. `"downpress-core": "github:youruser/downpress#main"` or pinned to a tag/commit) or a local `file:` path for local development. This avoids needing to publish/maintain a public npm package while still letting `npm install` pull in the shared engine. Pinning to a tag or commit (rather than always tracking `main`) is recommended once the core stabilizes, so that a change to core doesn't silently break every site's next build — an explicit version bump should be required to pull in core updates.
-- **Scaffolding a new site is a first-class feature of the core repo**, not a manual copy-paste process (see Functional Requirements 4.8). Running a scaffold command from the Downpress repo should produce a new, ready-to-deploy site folder/repo with the git dependency on core already wired in, a starter config file, an empty content directory, and CI already configured.
+- **What *can* be centralized in filepress core:** the content loader (frontmatter parsing, markdown-to-HTML pipeline, slug derivation, validation and edge-case handling), the RSS/sitemap/robots.txt generators, shared layout/theme components, and any shared SvelteKit config helpers (e.g., a preconfigured `defineFilepressConfig()` that a site's `svelte.config.js` imports and extends). Site-specific code should be minimal: content, a small config file (site title, URL, theme choice), and thin wiring that pulls in core.
+- **Dependency mechanism, since core won't be published to npm:** a site's `package.json` can depend on the filepress core repo directly via a git URL (e.g. `"filepress-core": "github:youruser/filepress#main"` or pinned to a tag/commit) or a local `file:` path for local development. This avoids needing to publish/maintain a public npm package while still letting `npm install` pull in the shared engine. Pinning to a tag or commit (rather than always tracking `main`) is recommended once the core stabilizes, so that a change to core doesn't silently break every site's next build — an explicit version bump should be required to pull in core updates.
+- **Scaffolding a new site is a first-class feature of the core repo**, not a manual copy-paste process (see Functional Requirements 4.8). Running a scaffold command from the filepress repo should produce a new, ready-to-deploy site folder/repo with the git dependency on core already wired in, a starter config file, an empty content directory, and CI already configured.
 - **Each site's build is fully independent.** Running the build inside Site A's folder only touches Site A's output; Site B is untouched. There is no shared build step or shared output directory across sites.
 
 ---
@@ -96,9 +96,9 @@ This project is not a single blog — it's a reusable engine (**Downpress core**
 - **Tag archive**: list of posts filtered by a given tag.
 - **Post page**: full rendered content of a single post.
 - **Draft**: a post with `draft: true` — excluded from the listing, tag pages, RSS, and sitemap, but still buildable/viewable directly by URL for preview purposes (v1 optional — see open questions).
-- **Downpress core**: the shared engine repo — content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and the scaffolding tool. Not itself a deployable website.
-- **Site**: an independent repo (e.g. Site A, Site B) representing one deployable blog. Contains its own content directory, a `downpress.config.js` (or equivalent) with site-specific settings (title, URL, theme choice), a thin SvelteKit project wired to depend on Downpress core, and its own CI/deploy configuration. Builds and deploys entirely independently of any other site.
-- **Scaffold**: the output of running the "create a new site" command from Downpress core — a ready-to-use Site folder/repo with the core dependency, starter config, empty content directory, and CI already wired in.
+- **filepress core**: the shared engine repo — content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and the scaffolding tool. Not itself a deployable website.
+- **Site**: an independent repo (e.g. Site A, Site B) representing one deployable blog. Contains its own content directory, a `filepress.config.js` (or equivalent) with site-specific settings (title, URL, theme choice), a thin SvelteKit project wired to depend on filepress core, and its own CI/deploy configuration. Builds and deploys entirely independently of any other site.
+- **Scaffold**: the output of running the "create a new site" command from filepress core — a ready-to-use Site folder/repo with the core dependency, starter config, empty content directory, and CI already wired in.
 
 ---
 
@@ -142,11 +142,11 @@ This project is not a single blog — it's a reusable engine (**Downpress core**
 7.3. A CI workflow (e.g., GitHub Actions) builds and deploys the static output on every push to `main`, with no manual deploy step required.
 
 ### 4.8 Core/site architecture & scaffolding
-8.1. Downpress core is structured so that content loading, markdown compilation, feed/sitemap generation, and shared layout/theme components can be consumed by a separate Site repo as a dependency — not copy-pasted per site.
-8.2. Downpress core exposes a scaffold command (e.g. `npx downpress create <site-name>`, or a documented script run from the core repo) that generates a new, independent Site folder containing: a minimal SvelteKit project wired to depend on Downpress core, an empty content directory, a starter `downpress.config.js` with placeholder site title/URL, and a working CI deploy workflow file.
+8.1. filepress core is structured so that content loading, markdown compilation, feed/sitemap generation, and shared layout/theme components can be consumed by a separate Site repo as a dependency — not copy-pasted per site.
+8.2. filepress core exposes a scaffold command (e.g. `npx filepress create <site-name>`, or a documented script run from the core repo) that generates a new, independent Site folder containing: a minimal SvelteKit project wired to depend on filepress core, an empty content directory, a starter `filepress.config.js` with placeholder site title/URL, and a working CI deploy workflow file.
 8.3. A freshly scaffolded site must build and deploy successfully with zero content (see edge case 4.4) — "create a site, push it, get a live (if empty) blog" must work with no manual patching required after scaffolding.
 8.4. Each Site's build command only builds that site; running a build in Site A's folder must not read, write, or otherwise affect Site B's folder or output, even if both are checked out as sibling directories on the same machine.
-8.5. A Site's dependency on Downpress core is version-pinned (e.g. to a git tag or commit) by default at scaffold time, not floating against core's `main` branch, so that ongoing changes to core don't silently change a site's next build without an explicit, deliberate update.
+8.5. A Site's dependency on filepress core is version-pinned (e.g. to a git tag or commit) by default at scaffold time, not floating against core's `main` branch, so that ongoing changes to core don't silently change a site's next build without an explicit, deliberate update.
 8.6. Site-specific configuration (site title, base URL, theme/color choice, nav links, etc.) lives in one config file per site, separate from content, so a builder or future-you can find "the settings for this specific site" in one place.
 
 ---
@@ -182,10 +182,10 @@ This is the section most naive tutorial-based implementations skip. Be exhaustiv
 13. **Tag name inconsistency** (e.g., `SvelteKit` vs `sveltekit` used as separate tags across posts). Decide and document a normalization rule (e.g., always lowercase, trim) applied consistently when grouping tags.
 14. **Concurrent/rapid commits from mobile** (e.g., saving a half-finished post, then fixing it in a follow-up commit) — not a build concern per se, but confirms why CI must always build from the latest `main` state rather than any cached intermediate state.
 15. **Renaming or deleting a post file** — the old URL simply stops being generated (404 on next deploy). Confirm this is acceptable (personal blog, no redirect system in v1) rather than assumed.
-16. **Core update breaks a site** — a change pushed to Downpress core (e.g. a bug fix, a breaking API change to the content loader) must not automatically propagate to every site's next build, given version pinning (see 8.5). Confirm the update flow: how does a site holder deliberately pull in a newer core version, and what happens if that update introduces a build error — is there a clear rollback path (revert the pinned version)?
+16. **Core update breaks a site** — a change pushed to filepress core (e.g. a bug fix, a breaking API change to the content loader) must not automatically propagate to every site's next build, given version pinning (see 8.5). Confirm the update flow: how does a site holder deliberately pull in a newer core version, and what happens if that update introduces a build error — is there a clear rollback path (revert the pinned version)?
 17. **Two sites with colliding local dependency setups** — if using a `file:` path dependency for local development, confirm this doesn't leak into what actually gets committed/deployed (a site's committed `package.json` should reference the pinned git dependency, not a local filesystem path that won't exist in CI).
 18. **Scaffolding into an existing non-empty directory** — the scaffold command must refuse or clearly warn rather than silently overwrite files if run somewhere content already exists.
-19. **Site config missing or malformed** (e.g. no site title/URL set in `downpress.config.js` after scaffolding but before the placeholder values are edited) — build should either use sensible fallbacks or fail with a clear message naming the missing config field, not silently deploy a site titled "undefined" with a broken RSS feed URL.
+19. **Site config missing or malformed** (e.g. no site title/URL set in `filepress.config.js` after scaffolding but before the placeholder values are edited) — build should either use sensible fallbacks or fail with a clear message naming the missing config field, not silently deploy a site titled "undefined" with a broken RSS feed URL.
 
 ---
 
@@ -215,8 +215,8 @@ This is the section most naive tutorial-based implementations skip. Be exhaustiv
 - Basic responsive styling — readable on both mobile (since you'll sometimes preview from your phone) and desktop.
 
 **M4 — Core/site split & scaffolding**
-- Refactor M1–M3's single project into the Downpress core / Site architecture described in Section 2.6: extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme components into the core repo.
-- Rebuild the original site as "Site A," now depending on Downpress core via a pinned git dependency, to prove the split actually works end-to-end (not just in theory).
+- Refactor M1–M3's single project into the filepress core / Site architecture described in Section 2.6: extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme components into the core repo.
+- Rebuild the original site as "Site A," now depending on filepress core via a pinned git dependency, to prove the split actually works end-to-end (not just in theory).
 - Build the scaffold command (4.8): running it produces a new, empty, deployable Site B from scratch.
 - Confirm isolation: building Site A and Site B independently, in either order, on the same machine, produces two independent outputs with no cross-contamination (edge case 16–19, acceptance criteria below).
 
@@ -225,7 +225,7 @@ This is the section most naive tutorial-based implementations skip. Be exhaustiv
 - Draft-preview-by-direct-URL if decided in open questions.
 - 404 page.
 - Reading time estimate, "previous/next post" links, or other nice-to-haves — explicitly out of scope for v1 unless requested.
-- Tooling for bumping a Site's pinned core version deliberately (e.g. a documented `npm update downpress-core` step plus a changelog in core to know what changed).
+- Tooling for bumping a Site's pinned core version deliberately (e.g. a documented `npm update filepress-core` step plus a changelog in core to know what changed).
 
 ---
 
@@ -240,10 +240,10 @@ This is the section most naive tutorial-based implementations skip. Be exhaustiv
 - Given a fresh commit pushed to `main` (e.g., via the GitHub mobile app) that adds a new valid post, when CI runs, then the live site reflects the new post without any manual deployment step.
 - Given a post title containing an apostrophe typed as a smart quote by a mobile keyboard, when the site is built, then the build either succeeds with the character rendered correctly, or fails with a clear, specific error pointing at that file — not a generic crash.
 - Given the built site, when measured with Lighthouse on a typical post page, then the performance score is 95 or above.
-- Given the Downpress core repo's scaffold command run with a new site name, when it completes, then a new folder/repo exists containing a working SvelteKit project, an empty content directory, a starter config file, and a CI deploy workflow — and running that site's build command with zero content immediately succeeds and produces a valid (if empty) static site.
+- Given the filepress core repo's scaffold command run with a new site name, when it completes, then a new folder/repo exists containing a working SvelteKit project, an empty content directory, a starter config file, and a CI deploy workflow — and running that site's build command with zero content immediately succeeds and produces a valid (if empty) static site.
 - Given two independently scaffolded sites (Site A and Site B) checked out as sibling folders, when Site A's build is run, then Site B's folder and any prior Site B build output are completely untouched.
-- Given a Site whose `package.json` pins Downpress core to a specific tag/commit, when Downpress core is updated on its `main` branch, then that Site's next build (without a deliberate dependency bump) is unaffected by the core change.
-- Given a Site's `downpress.config.js` is missing a required field (e.g. site title), when that Site is built, then the build fails with a clear error naming the missing field, or falls back to a documented sensible default — not a silent "undefined" appearing on the live site.
+- Given a Site whose `package.json` pins filepress core to a specific tag/commit, when filepress core is updated on its `main` branch, then that Site's next build (without a deliberate dependency bump) is unaffected by the core change.
+- Given a Site's `filepress.config.js` is missing a required field (e.g. site title), when that Site is built, then the build fails with a clear error naming the missing field, or falls back to a documented sensible default — not a silent "undefined" appearing on the live site.
 
 ---
 
@@ -257,9 +257,9 @@ This is the section most naive tutorial-based implementations skip. Be exhaustiv
 6. **Styling ambition**: bare-minimum readable typography (fastest to ship), or a specific visual direction (e.g., a particular font pairing, dark mode, a design reference site)?
 7. **Comments/interactivity**: confirmed out of scope for v1 — correct? (Static site with no backend means no native comments system; if wanted later, it'd be a third-party embed like Giscus, using GitHub Discussions — notably fitting the "already have GitHub" theme, but explicitly not in v1 unless flagged here.)
 8. **Custom domain**: is this going on a custom domain from day one, or the default subdomain of whichever host is chosen? Affects `adapter-static` base-path config (relevant mainly for GitHub Pages).
-9. **Theme sharing across sites**: should all sites share one visual theme by default (only content differs), or should Downpress core support multiple selectable themes/layouts per site from the start? Affects how much lives in core vs. per-site.
-10. **Core versioning scheme**: informal (pin to commit SHAs as needed) or a real semver-tagged release process for Downpress core from the start? Informal is faster to start; real tags make "what changed" easier to track once there are several sites depending on core.
-11. **Where does the scaffold command live and run from**: a script inside the Downpress core repo you run locally (`node scripts/create-site.js my-new-blog`), or a proper CLI published for convenience (`npx downpress create ...`, which would need an npm publish decision separate from the core package itself)?
+9. **Theme sharing across sites**: should all sites share one visual theme by default (only content differs), or should filepress core support multiple selectable themes/layouts per site from the start? Affects how much lives in core vs. per-site.
+10. **Core versioning scheme**: informal (pin to commit SHAs as needed) or a real semver-tagged release process for filepress core from the start? Informal is faster to start; real tags make "what changed" easier to track once there are several sites depending on core.
+11. **Where does the scaffold command live and run from**: a script inside the filepress core repo you run locally (`node scripts/create-site.js my-new-blog`), or a proper CLI published for convenience (`npx filepress create ...`, which would need an npm publish decision separate from the core package itself)?
 
 ---
 

@@ -1,6 +1,6 @@
 <!-- forgekit-template-mode: shell -->
 
-# Downpress — Phase 1 architecture brief
+# filepress — Phase 1 architecture brief
 
 _Structured capture of planning and architecture before code scaffolding. Goal: Phase 2 (or a new agent/session) can start from this file + `.forgekit/workflow_tracking.json` without re-reading the whole Phase 1 chat._
 
@@ -14,7 +14,7 @@ _Structured capture of planning and architecture before code scaffolding. Goal: 
 
 **What we are building:** A personal blog where every post is a Markdown file with YAML frontmatter, stored and edited directly in a GitHub repo (GitHub mobile app, GitHub web editor, or any text editor) — no custom admin UI, no database. A SvelteKit static-site build compiles the Markdown into a fast, prerendered HTML site that auto-deploys on every push to `main`.
 
-Structurally, this is not one blog but a reusable engine (**Downpress core**) plus one or more independently deployable **Sites** built on top of it, so a second blog can be spun up later without re-doing the engine work.
+Structurally, this is not one blog but a reusable engine (**filepress core**) plus one or more independently deployable **Sites** built on top of it, so a second blog can be spun up later without re-doing the engine work.
 
 **What "done" looks like for v1:** Push a valid Markdown post to `main` via the GitHub mobile app → within a few minutes the live site shows the new post on the index, its own page, and any tag archive pages, with a working RSS feed and sitemap — no manual deploy step. See full acceptance criteria in `GENESIS.md` §8.
 
@@ -26,7 +26,7 @@ Structurally, this is not one blog but a reusable engine (**Downpress core**) pl
 
 **Hero flow (v1):** Edit or create a `.md` file with YAML frontmatter in the content directory → commit/push to `main` → CI builds and deploys → live site reflects the change with no manual step.
 
-**Secondary workflows for v1:** Browsing the post index, browsing a tag archive, subscribing via RSS, and (later, per M4) scaffolding a brand-new independent Site from Downpress core.
+**Secondary workflows for v1:** Browsing the post index, browsing a tag archive, subscribing via RSS, and (later, per M4) scaffolding a brand-new independent Site from filepress core.
 
 ---
 
@@ -52,7 +52,7 @@ _Proposed by GENESIS.md; not yet explicitly confirmed by user sign-off (see §9 
 | Styling | Sparse, sharp/classic, high-end — not busy or cluttered | confirmed | Restrained editorial typography; minimal chrome; generous whitespace. Per-site themes are variations on this shared core aesthetic (see D9). |
 | Deploy / CI | Cloudflare Pages, on a custom domain | confirmed | CF Pages native git integration builds `adapter-static` output on push to `main`; custom domain means no base-path config. |
 | Package manager | pnpm | confirmed | Per user's global convention. |
-| Site dependency mechanism | Git URL dependency on Downpress core (`github:user/downpress-core#tag-or-commit`), pinned by default, not floating on `main` | proposed | Avoids needing to publish to npm; an explicit version bump is required to pull in core updates. |
+| Site dependency mechanism | Git URL dependency on filepress core (`github:user/filepress-core#tag-or-commit`), pinned by default, not floating on `main` | proposed | Avoids needing to publish to npm; an explicit version bump is required to pull in core updates. |
 
 ---
 
@@ -61,7 +61,7 @@ _Proposed by GENESIS.md; not yet explicitly confirmed by user sign-off (see §9 
 **Core entities:**
 - **Post** — one Markdown file + YAML frontmatter. Fields: `title` (string, required), `date` (ISO date, required), `slug` (string, optional — derived from filename if absent), `description`/`excerpt` (string, optional), `tags` (string array, optional), `draft` (boolean, optional, default `false`), `updated` (ISO date, optional). Body = Markdown content after frontmatter, compiled to HTML at build time.
 - **Tag** — derived, not authored directly: the set of unique tag strings across all non-draft posts; each gets an archive page.
-- **Site config** (`downpress.config.js` or equivalent) — one per Site: title, base URL, theme choice, nav links.
+- **Site config** (`filepress.config.js` or equivalent) — one per Site: title, base URL, theme choice, nav links.
 
 **Relationships:** A Post has zero or more Tags (many-to-many, derived). A Site has many Posts (its own content directory only) and exactly one config.
 
@@ -98,10 +98,10 @@ Rationale: no runtime backend is needed or wanted; output is a plain folder of s
 Alternatives considered: default SvelteKit SSR (rejected — unnecessary server process for a content-only site with no per-request dynamic data).
 
 **D3. Core/site split is a first-class requirement, not a later refactor.**
-Rationale: SvelteKit's routing/build system is inherently per-project (hard framework constraint, not a design preference) — every Site must be its own SvelteKit project. Downpress core centralizes the content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and the scaffolding tool; Sites stay thin (content + one config file + wiring).
+Rationale: SvelteKit's routing/build system is inherently per-project (hard framework constraint, not a design preference) — every Site must be its own SvelteKit project. filepress core centralizes the content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and the scaffolding tool; Sites stay thin (content + one config file + wiring).
 Alternatives considered: single monolithic project handling multiple blogs via config (rejected — not possible under SvelteKit's per-project routing/build model); copy-pasting the engine per site (rejected — explicitly called out as painful rework the spec wants to avoid).
 
-**D4. Sites depend on Downpress core via a pinned git dependency, not `main`-floating or npm.**
+**D4. Sites depend on filepress core via a pinned git dependency, not `main`-floating or npm.**
 Rationale: avoids needing to publish/maintain a public npm package while still allowing `npm install`/`pnpm install` to pull the shared engine; pinning to a tag/commit means a core change never silently changes a site's next build — an explicit version bump is required.
 Alternatives considered: publish core to npm under a scoped name (deferred — not needed for v1, no intent to publish publicly yet); floating dependency on `main` (rejected — defeats the "explicit, deliberate update" requirement in edge case 16).
 
@@ -148,7 +148,7 @@ Milestones from `GENESIS.md` §7 (full detail there):
 1. **M1 — Minimum usable version:** SvelteKit + `adapter-static` scaffold; content loader (gray-matter, remark/rehype); index page (non-draft posts, date-descending); individual post page; build fails loudly on missing `title`/`date` or malformed frontmatter; `pnpm run build` + `pnpm run preview` work locally. Core/site split not required yet.
 2. **M2 — Publishing-ready:** Tag archive pages; RSS/Atom feed + `sitemap.xml`; drafts excluded from listing/feed/sitemap; duplicate-slug detection; remaining frontmatter edge cases (smart quotes, invisible whitespace, Unicode/emoji slugs, tag-name normalization); image convention documented; SEO meta tags.
 3. **M3 — Deployed and automated:** CI builds and deploys on push to `main`; `robots.txt` + sitemap wired together; basic responsive styling.
-4. **M4 — Core/site split & scaffolding:** Extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme components into Downpress core; rebuild the original site as "Site A" depending on core via pinned git dependency; build the scaffold command; prove isolation building Site A and Site B independently.
+4. **M4 — Core/site split & scaffolding:** Extract content loader, markdown pipeline, feed/sitemap generators, and shared layout/theme components into filepress core; rebuild the original site as "Site A" depending on core via pinned git dependency; build the scaffold command; prove isolation building Site A and Site B independently.
 5. **M5 — Polish (optional):** Pagination, draft-preview-by-direct-URL (if decided in §9), 404 page, reading time / prev-next links, tooling for bumping a Site's pinned core version.
 
 ---

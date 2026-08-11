@@ -90,7 +90,7 @@ export function ensureBaselineIfNeeded(siteRoot: string) {
 
 export async function health(siteRoot: string) {
 	const host = process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434';
-	const model = process.env.DOWNPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b';
+	const model = process.env.FILEPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b';
 	const up = await ollamaAvailable(host);
 	ensureBaselineIfNeeded(siteRoot);
 	return {
@@ -102,7 +102,7 @@ export async function health(siteRoot: string) {
 			model,
 			available: up,
 			hint: up
-				? `Ollama is reachable. For a GPU-tuned named variant, try Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna — then set DOWNPRESS_OLLAMA_MODEL.`
+				? `Ollama is reachable. For a GPU-tuned named variant, try Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna — then set FILEPRESS_OLLAMA_MODEL.`
 				: ollamaSetupHint(host)
 		},
 		active: getActive(siteRoot),

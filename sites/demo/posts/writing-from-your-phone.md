@@ -3,7 +3,7 @@ title: "Writing from your phone"
 date: 2026-06-28
 updated: 2026-07-01
 description: The whole editing workflow is just the GitHub mobile app and a text box.
-tags: [workflow, downpress]
+tags: [workflow, filepress]
 ---
 
 The editing surface for this blog is deliberately boring: a text box in the

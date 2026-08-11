@@ -31,22 +31,22 @@ function sendJson(res: ServerResponse, status: number, data: unknown) {
  */
 export function geniePlugin(siteRoot: string): Plugin {
 	return {
-		name: 'downpress-genie',
+		name: 'filepress-genie',
 		apply: 'serve',
 		configureServer(server) {
 			server.middlewares.use(async (req, res, next) => {
 				const url = req.url || '';
-				if (!url.startsWith('/__downpress/genie')) return next();
+				if (!url.startsWith('/__filepress/genie')) return next();
 
 				const path = url.split('?')[0];
 				const method = (req.method || 'GET').toUpperCase();
 
 				try {
-					if (method === 'GET' && path === '/__downpress/genie/health') {
+					if (method === 'GET' && path === '/__filepress/genie/health') {
 						return sendJson(res, 200, await health(siteRoot));
 					}
 
-					if (method === 'GET' && path === '/__downpress/genie/versions') {
+					if (method === 'GET' && path === '/__filepress/genie/versions') {
 						const h = await health(siteRoot);
 						return sendJson(res, 200, {
 							active: h.active,
@@ -55,12 +55,12 @@ export function geniePlugin(siteRoot: string): Plugin {
 						});
 					}
 
-					if (method === 'POST' && path === '/__downpress/genie/steer') {
+					if (method === 'POST' && path === '/__filepress/genie/steer') {
 						const body = JSON.parse(await readBody(req));
 						return sendJson(res, 200, applySteer(siteRoot, body));
 					}
 
-					if (method === 'POST' && path === '/__downpress/genie/stock') {
+					if (method === 'POST' && path === '/__filepress/genie/stock') {
 						const body = JSON.parse(await readBody(req));
 						if (!body.query || typeof body.query !== 'string') {
 							return sendJson(res, 400, { error: '`query` string required' });
@@ -68,7 +68,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 						return sendJson(res, 200, await fetchStockCover(siteRoot, body));
 					}
 
-					if (method === 'POST' && path === '/__downpress/genie/upload') {
+					if (method === 'POST' && path === '/__filepress/genie/upload') {
 						const body = JSON.parse(await readBody(req));
 						if (!body.dataBase64 || !body.role) {
 							return sendJson(res, 400, {
@@ -87,7 +87,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 						);
 					}
 
-					if (method === 'POST' && path === '/__downpress/genie/activate') {
+					if (method === 'POST' && path === '/__filepress/genie/activate') {
 						const body = JSON.parse(await readBody(req));
 						if (!body.versionId) {
 							return sendJson(res, 400, { error: '`versionId` required' });
@@ -97,7 +97,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 						});
 					}
 
-					if (method === 'POST' && path === '/__downpress/genie/delete') {
+					if (method === 'POST' && path === '/__filepress/genie/delete') {
 						const body = JSON.parse(await readBody(req));
 						deleteVersion(siteRoot, body.versionId);
 						return sendJson(res, 200, { ok: true });

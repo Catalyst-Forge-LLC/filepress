@@ -20,7 +20,7 @@ export function ollamaSetupHint(host: string): string {
 		`Ollama not reachable at ${h}.`,
 		`Install from https://ollama.com then pull a model (e.g. ollama pull gemma4:12b).`,
 		`For a GPU-tuned named variant, use Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`,
-		`Then set DOWNPRESS_OLLAMA_MODEL to that name (and OLLAMA_HOST if remote).`
+		`Then set FILEPRESS_OLLAMA_MODEL to that name (and OLLAMA_HOST if remote).`
 	].join(' ');
 }
 
@@ -33,7 +33,7 @@ export async function generateDesignBrief(opts: {
 	seed: DesignBrief;
 }): Promise<DesignBrief> {
 	const host = opts.host.replace(/\/+$/, '');
-	const prompt = `You are a design director restyling a personal Markdown blog (Downpress Essay chrome).
+	const prompt = `You are a design director restyling a personal Markdown blog (filepress Essay chrome).
 The seed brief below was extracted from inspiration site CSS/fonts. Refine it — keep the punch.
 Return ONLY JSON (no fences) with this shape:
 {

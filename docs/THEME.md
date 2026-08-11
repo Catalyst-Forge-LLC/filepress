@@ -1,21 +1,20 @@
-# Theming a Downpress site
+# Theming a filepress site
 
-Downpress ships a default **Essay** theme (fonts + layout CSS in the engine).
+filepress ships a default **Essay** theme (fonts + layout CSS in the engine).
 Sites can override it the CSS Zen Garden way: keep the HTML, drop in a stylesheet.
 
 ## Adding an override
 
-At the **site root** (next to `downpress.config.ts`), add either:
+At the **site root** (next to `filepress.config.ts`), add:
 
-- `theme.css` — preferred; plain CSS (nesting OK)
-- `theme.scss` — optional; compiled at build time if present
+- `theme.css` — plain CSS (nesting OK). Created empty on first `filepress dev` if missing.
 
-If both exist, **`theme.css` wins**. If neither exists, the default Essay look is unchanged.
+If the file is empty/absent of rules, the default Essay look is unchanged.
 
 Load order:
 
-1. Engine Essay theme (`downpress` / `@downpress/core/theme`)
-2. Your `theme.css` / `theme.scss`
+1. Engine Essay theme (`filepress` / `@filepress/core/theme`)
+2. Your `theme.css`
 
 So your rules and `:root` variables override the defaults via the cascade.
 

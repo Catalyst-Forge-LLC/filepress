@@ -1,4 +1,4 @@
-# Agent guardrails — Downpress
+# Agent guardrails — filepress
 
 This repo uses **ForgeKit** lifecycle tracking. Source of truth: `.forgekit/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
 

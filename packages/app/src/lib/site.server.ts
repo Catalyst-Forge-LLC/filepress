@@ -6,11 +6,11 @@ const appRoot = dirname(fileURLToPath(new URL('../..', import.meta.url)));
 const defaultSiteRoot = resolve(appRoot, '../../sites/demo');
 
 /**
- * Resolve the active site root from DOWNPRESS_SITE_ROOT (set by scripts/downpress.mjs).
+ * Resolve the active site root from FILEPRESS_SITE_ROOT (set by scripts/filepress.mjs).
  * Falls back to sites/demo so `svelte-kit sync` / prepare can run without a site flag.
  */
 export function getSiteRoot(): string {
-	const raw = process.env.DOWNPRESS_SITE_ROOT?.trim();
+	const raw = process.env.FILEPRESS_SITE_ROOT?.trim();
 	const root = raw
 		? isAbsolute(raw)
 			? raw
@@ -22,9 +22,9 @@ export function getSiteRoot(): string {
 	return root;
 }
 
-/** Absolute path to the site's posts/ directory (or DOWNPRESS_CONTENT_DIR override). */
+/** Absolute path to the site's posts/ directory (or FILEPRESS_CONTENT_DIR override). */
 export function getContentDir(): string {
-	const override = process.env.DOWNPRESS_CONTENT_DIR?.trim();
+	const override = process.env.FILEPRESS_CONTENT_DIR?.trim();
 	if (override) {
 		return isAbsolute(override) ? override : resolve(getSiteRoot(), override);
 	}
@@ -36,9 +36,9 @@ export function getPagesDir(): string {
 	return join(getSiteRoot(), 'pages');
 }
 
-/** Absolute path to downpress.config.ts at the site root. */
+/** Absolute path to filepress.config.ts at the site root. */
 export function getSiteConfigPath(): string {
-	return join(getSiteRoot(), 'downpress.config.ts');
+	return join(getSiteRoot(), 'filepress.config.ts');
 }
 
 /** Absolute path to the site's static/ assets (may not exist yet). */

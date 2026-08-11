@@ -1,4 +1,4 @@
-/** Intermediate representation for a crawled site → Downpress write. */
+/** Intermediate representation for a crawled site → filepress write. */
 
 export type SiteIRPost = {
 	slug: string;
@@ -34,7 +34,7 @@ export type SiteIR = {
 	pages: SiteIRPage[];
 	nav: Array<{ label: string; href: string }>;
 	topics: Array<{ label: string; tag: string }>;
-	/** Suggested lede for the Downpress index (from home bio), or null. */
+	/** Suggested lede for the filepress index (from home bio), or null. */
 	lede: string | null;
 	/** Notes for the import report (URL remaps, skips). */
 	notes: string[];

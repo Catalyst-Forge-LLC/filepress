@@ -1,8 +1,8 @@
 {
   "project": {
-    "name": "Downpress",
+    "name": "filepress",
     "created": "2026-07-02",
-    "description": "Git-native Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited directly in a GitHub repo (e.g. via the GitHub mobile app), compiled to a static prerendered site with auto-deploy on push. Structured as a reusable core engine plus independently deployable, scaffoldable sites."
+    "description": "filepress — file-based Markdown blog engine (SvelteKit): posts are Markdown+YAML files edited in git, compiled to a static prerendered site. Reusable core + content-only sites. Site: getfilepress.com. Formerly Downpress."
   },
   "currentPhase": "4-feature-iteration",
   "phases": {
@@ -71,14 +71,14 @@
       "exitCriteriaRemaining": ["Core value proposition delivered", "Hero flow works with real data including edge cases", "Features tested beyond happy path"],
       "notes": [
         "2026-07-05: User confirmed advancing from 2-scaffolding straight to 4-feature-iteration (Phase 3 stabilization was effectively covered during early hardening: env resolution, server-only loaders, real-data render). Phase 2 spine + feature batch (D11/D12) are done and committed.",
-        "Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@downpress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
-        "2026-07-05: M4 core/site split DONE. @downpress/core extracted with client/server barrels + DI (createContent, defineDownpressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring.",
-        "2026-07-25: User flagged per-site route/lib duplication vs ideal 'link Downpress + bare minimum config' + static deploy. Wrote docs/SITE_PACKAGING_OPTIONS.md comparing A (status quo), B (generated routes), C (one packages/app + content-only sites), D (CLI/package like Astro), E/F rejects. Recommendation: C now, D as distribution end-state. Awaiting decision before migrating.",
-        "2026-07-25: User chose C then D. Implemented Option C: packages/app is the only SvelteKit app; sites/* demoted to content-only (config+posts+static); scripts/downpress.mjs sets DOWNPRESS_SITE_ROOT and runs app; create-site emits content-only trees; both example-site and demo build to their own sites/<name>/build/. check clean, 31 core tests pass. Option D deferred pending user decisions on distribution (git dep vs npm) and whether external site repos are needed soon.",
-        "2026-07-25: Option D done. User confirmed: separate site folders, local link (not npm), org Catalyst-Forge-LLC. Root package renamed to `downpress` with bin; CLI supports cwd mode (no --site) and --site monorepo mode; configs import from `downpress`; create-site --external; sibling ../example-site builds via link:../downpress → build/. Docs: EXTERNAL_SITES.md (link: local, github:Catalyst-Forge-LLC/downpress#tag for CF). Next: push engine repo to that org, then M3 on the site.",
+        "Now building the M4 core/site split as a pnpm workspace monorepo (user choice): packages/core = source-linked Svelte library (@filepress/core) consumed by SvelteKit site apps under sites/. Routes stay per-site (SvelteKit constraint); core provides the content API, markdown pipeline, feed/sitemap builders, config helper, theme, and shared components.",
+        "2026-07-05: M4 core/site split DONE. @filepress/core extracted with client/server barrels + DI (createContent, defineFilepressConfig); sites/example-site (real) and sites/demo (scaffolded via scripts/create-site.mjs) build independently. 31 core tests pass; pnpm -r check clean. Deferred to a real second repo: own-repo split + git URL+SHA pins + CI template (D4). Next: M3 Cloudflare Pages deploy wiring.",
+        "2026-07-25: User flagged per-site route/lib duplication vs ideal 'link filepress + bare minimum config' + static deploy. Wrote docs/SITE_PACKAGING_OPTIONS.md comparing A (status quo), B (generated routes), C (one packages/app + content-only sites), D (CLI/package like Astro), E/F rejects. Recommendation: C now, D as distribution end-state. Awaiting decision before migrating.",
+        "2026-07-25: User chose C then D. Implemented Option C: packages/app is the only SvelteKit app; sites/* demoted to content-only (config+posts+static); scripts/filepress.mjs sets FILEPRESS_SITE_ROOT and runs app; create-site emits content-only trees; both example-site and demo build to their own sites/<name>/build/. check clean, 31 core tests pass. Option D deferred pending user decisions on distribution (git dep vs npm) and whether external site repos are needed soon.",
+        "2026-07-25: Option D done. User confirmed: separate site folders, local link (not npm), org Catalyst-Forge-LLC. Root package renamed to `filepress` with bin; CLI supports cwd mode (no --site) and --site monorepo mode; configs import from `filepress`; create-site --external; sibling ../example-site builds via link:../filepress → build/. Docs: EXTERNAL_SITES.md (link: local, github:Catalyst-Forge-LLC/filepress#tag for CF). Next: push engine repo to that org, then M3 on the site.",
         "2026-07-25: Zen Garden theming: optional site-root theme.css (preferred) or theme.scss loaded after Essay via $site-theme alias; empty stub when absent; sass added for SCSS; docs/THEME.md lists tokens + public classes; demo site ships a sample accent override. Verified CSS/SCSS/stub builds + check clean.",
         "2026-08-03: Genie Mode spec locked (docs/GENIE_MODE_SPEC.md, D13). Former working title Assistant Mode. User locked Q1–Q10; Ollama detection + Finetuna suggestion required. Implementation not started — next M0 spike.",
-        "2026-08-03: Genie M0+M1 shipped — Vite plugin apply:serve (/__downpress/genie/*), DEV-only GenieHost/Panel, .downpress-genie versions + baseline/activate, steers, Openverse stock, hero/bg upload, Ollama/Finetuna health hint. Absent from demo production build grep."
+        "2026-08-03: Genie M0+M1 shipped — Vite plugin apply:serve (/__filepress/genie/*), DEV-only GenieHost/Panel, .filepress-genie versions + baseline/activate, steers, Openverse stock, hero/bg upload, Ollama/Finetuna health hint. Absent from demo production build grep."
       ],
       "iterations": []
     },
@@ -157,7 +157,7 @@
       "id": "D3",
       "timestamp": "2026-07-02",
       "phase": "1-architecture",
-      "decision": "Core/site split (Downpress core engine + independent Site repos) is a first-class requirement from the start, not a later refactor.",
+      "decision": "Core/site split (filepress core engine + independent Site repos) is a first-class requirement from the start, not a later refactor.",
       "rationale": "SvelteKit's routing/build system is inherently per-project (hard framework constraint) — every Site must be its own SvelteKit project. Core centralizes content loader, markdown pipeline, feed/sitemap generators, shared layout/theme components, and scaffolding.",
       "alternatives_considered": ["Single monolithic project serving multiple blogs via config (not possible under SvelteKit)", "Copy-paste the engine per site"]
     },
@@ -165,7 +165,7 @@
       "id": "D4",
       "timestamp": "2026-07-02",
       "phase": "1-architecture",
-      "decision": "Sites depend on Downpress core via a pinned git URL dependency (tag/commit), not a main-floating or npm-published dependency.",
+      "decision": "Sites depend on filepress core via a pinned git URL dependency (tag/commit), not a main-floating or npm-published dependency.",
       "rationale": "Avoids needing to publish/maintain a public npm package while still allowing normal package-manager installs; pinning means a core change never silently changes a site's next build without a deliberate version bump.",
       "alternatives_considered": ["Publish core to npm under a scoped name (deferred, not needed for v1)", "Floating dependency on main"]
     },
@@ -215,7 +215,7 @@
       "phase": "1-architecture",
       "decision": "Core versioning is informal (pin sites to core commit SHAs as needed); the scaffold command is a local script run from the core repo, not a published CLI.",
       "rationale": "Fastest path for v1 with a single maintainer and no public distribution; a semver release process and an npx CLI can be added later if multiple sites make change-tracking painful.",
-      "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx downpress create CLI"]
+      "alternatives_considered": ["Semver-tagged core releases from the start", "Published npx filepress create CLI"]
     },
     {
       "id": "D11",
@@ -237,7 +237,7 @@
       "id": "D13",
       "timestamp": "2026-08-03",
       "phase": "4-feature-iteration",
-      "decision": "Genie Mode (dev-only design cockpit): theme + limited config (lede/tagline/logo + hero background); Ollama with deterministic fallbacks; gitignored .downpress-genie/ versions; activate overwrites working tree; floating drawer; live inspire crawl; Openverse + local image upload; detect Ollama and suggest Finetuna (https://github.com/Catalyst-Forge-LLC/finetuna) for tuned local models. Never ships in preview/production.",
+      "decision": "Genie Mode (dev-only design cockpit): theme + limited config (lede/tagline/logo + hero background); Ollama with deterministic fallbacks; gitignored .filepress-genie/ versions; activate overwrites working tree; floating drawer; live inspire crawl; Openverse + local image upload; detect Ollama and suggest Finetuna (https://github.com/Catalyst-Forge-LLC/finetuna) for tuned local models. Never ships in preview/production.",
       "rationale": "Gives authors a post-import taste loop without becoming a CMS; keeps Markdown sacred and bake artifacts as plain theme.css/static/config. Finetuna is companion tooling (same org), not a hard dependency.",
       "alternatives_considered": ["Assistant Mode / Design Mode / Studio naming", "Theme-only mutation", "Deterministic-first without Ollama", "Commit-friendly version store", "Openverse-only images without upload"]
     }
@@ -267,7 +267,7 @@
   "sessions": [
     {
       "date": "2026-07-02",
-      "summary": "Ran ForgeKit greenfield kickoff for Downpress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
+      "summary": "Ran ForgeKit greenfield kickoff for filepress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
     },
     {
       "date": "2026-07-04",
@@ -279,7 +279,7 @@
     },
     {
       "date": "2026-07-04",
-      "summary": "Early hardening + first real site. Extracted pure parse/validate logic into src/lib/content/parse.ts; added Vitest (20 unit tests: slugify, tag normalization, strict/impossible dates, missing fields, dedupe) + @types/node. Reworked content loading to read the filesystem from DOWNPRESS_CONTENT_DIR (default posts/) instead of import.meta.glob, and made site identity env-driven (PUBLIC_SITE_*); content routes moved to +page.server.ts (loader is now server-only) — this is the seam the M4 core/site split will use. Validated end to end by building and running the engine locally as example-site.example against ../example-site/artifacts (added frontmatter to that article in place); article, tags, RSS, sitemap all correct. pnpm check + test clean. The .env and site content are gitignored/external — only engine hardening was committed. currentPhase left at 2-scaffolding pending confirmation to formally enter Phase 3."
+      "summary": "Early hardening + first real site. Extracted pure parse/validate logic into src/lib/content/parse.ts; added Vitest (20 unit tests: slugify, tag normalization, strict/impossible dates, missing fields, dedupe) + @types/node. Reworked content loading to read the filesystem from FILEPRESS_CONTENT_DIR (default posts/) instead of import.meta.glob, and made site identity env-driven (PUBLIC_SITE_*); content routes moved to +page.server.ts (loader is now server-only) — this is the seam the M4 core/site split will use. Validated end to end by building and running the engine locally as example-site.example against ../example-site/artifacts (added frontmatter to that article in place); article, tags, RSS, sitemap all correct. pnpm check + test clean. The .env and site content are gitignored/external — only engine hardening was committed. currentPhase left at 2-scaffolding pending confirmation to formally enter Phase 3."
     },
     {
       "date": "2026-07-05",
@@ -287,7 +287,7 @@
     },
     {
       "date": "2026-07-05",
-      "summary": "Stage 2 (M4 core/site split) DONE, as a pnpm workspace monorepo (user chose monorepo + confirmed flipping currentPhase to 4-feature-iteration). Extracted the whole engine into @downpress/core (packages/core, source-linked Svelte lib): content loader, remark/rehype pipeline (incl. rehype-figure), feed/sitemap/robots builders, format, Essay theme (styles/theme.css + font imports via @downpress/core/theme), and prop-driven components (PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter). Redesigned for DI to remove SvelteKit-only deps ($env/$lib): createContent({contentDir}) factory (server-only), defineDownpressConfig() that validates title/url + fills defaults, and a strict client-barrel (index.ts) vs server-barrel (server.ts) split. Rebuilt the app as sites/example-site (real site; example-post.md; own downpress.config.ts + content.server.ts + thin routes). Wrote scripts/create-site.mjs (templates from example-site, refuses non-empty dir, edge case 18) and used it to generate sites/demo, then restored the original demo posts (drafts + future-dated) into it. Deleted the old root SvelteKit app; root package.json is now a workspace manifest with pnpm -r scripts. Verification: @downpress/core tests = 31 pass (added config.test.ts covering defineDownpressConfig validation, edge case 19); pnpm -r check = 0 errors; example-site and demo each build cleanly and independently to their own build/ (isolation proven). Deferred (until a second repo is actually needed, D4): splitting core into its own git repo with URL+SHA pins + a CI workflow template in the scaffold. Next milestone: M3 (Cloudflare Pages deploy wiring, per site)."
+      "summary": "Stage 2 (M4 core/site split) DONE, as a pnpm workspace monorepo (user chose monorepo + confirmed flipping currentPhase to 4-feature-iteration). Extracted the whole engine into @filepress/core (packages/core, source-linked Svelte lib): content loader, remark/rehype pipeline (incl. rehype-figure), feed/sitemap/robots builders, format, Essay theme (styles/theme.css + font imports via @filepress/core/theme), and prop-driven components (PostCard, PostIndex, Newsletter, SiteHeader, SiteFooter). Redesigned for DI to remove SvelteKit-only deps ($env/$lib): createContent({contentDir}) factory (server-only), defineFilepressConfig() that validates title/url + fills defaults, and a strict client-barrel (index.ts) vs server-barrel (server.ts) split. Rebuilt the app as sites/example-site (real site; example-post.md; own filepress.config.ts + content.server.ts + thin routes). Wrote scripts/create-site.mjs (templates from example-site, refuses non-empty dir, edge case 18) and used it to generate sites/demo, then restored the original demo posts (drafts + future-dated) into it. Deleted the old root SvelteKit app; root package.json is now a workspace manifest with pnpm -r scripts. Verification: @filepress/core tests = 31 pass (added config.test.ts covering defineFilepressConfig validation, edge case 19); pnpm -r check = 0 errors; example-site and demo each build cleanly and independently to their own build/ (isolation proven). Deferred (until a second repo is actually needed, D4): splitting core into its own git repo with URL+SHA pins + a CI workflow template in the scaffold. Next milestone: M3 (Cloudflare Pages deploy wiring, per site)."
     }
   ]
 }

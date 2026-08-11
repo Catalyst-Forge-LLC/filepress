@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { buildSitemapXml } from '@downpress/core/server';
+import { buildSitemapXml } from '@filepress/core/server';
 import { content } from '$lib/content.server';
 import { pages } from '$lib/pages.server';
 import config from '$site-config';

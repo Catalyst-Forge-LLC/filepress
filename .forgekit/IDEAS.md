@@ -1,4 +1,4 @@
-# Downpress — Raw Ideas
+# filepress — Raw Ideas
 
 _Dump ideas here as they come up. Process them into `TODO.md` later (Phase 6 or whenever the list grows). `[x]` once accounted for. For things that are broken now, use a BUGS file instead._
 

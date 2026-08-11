@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { formatDate } from '@downpress/core';
+	import { formatDate } from '@filepress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();

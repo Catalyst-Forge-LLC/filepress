@@ -1,6 +1,10 @@
-# Downpress
+# filepress
 
-A git-native Markdown blog engine. Posts are plain `.md` files with YAML frontmatter — edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (e.g. Cloudflare Pages).
+> File-based Markdown blogs. No admin UI. No database. Just git.
+
+A file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter — edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (e.g. Cloudflare Pages).
+
+**Site:** [https://getfilepress.com](https://getfilepress.com)
 
 ## Requirements
 
@@ -17,25 +21,25 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 
 cd ../my-blog
 pnpm install
-pnpm dev      # local preview
+pnpm dev      # local preview (Genie Mode FAB in the corner)
 pnpm build    # → build/
 ```
 
 The site folder only needs:
 
-- `downpress.config.ts` — title, URL, and other site settings
+- `filepress.config.ts` — title, URL, and other site settings
 - `posts/` — Markdown posts (`/posts/<slug>`)
 - `pages/` — optional static Markdown pages (`about.md` → `/about`)
 - `static/` — favicon, images, etc.
-- `package.json` — depends on this engine (`link:../downpress` locally, or a git URL + tag/SHA in CI)
+- `package.json` — depends on this engine (`link:../filepress` locally, or a git URL + tag/SHA in CI)
 
 ### Import an existing site
 
-Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling Downpress site, and optionally ask a local Ollama model for a token theme:
+Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling filepress site, and optionally ask a local Ollama model for a token theme:
 
 ```bash
 pnpm install
-pnpm downpress import --source https://example.com \
+pnpm filepress import --source https://example.com \
   --inspire https://www.catalystforge.com \
   --inspire https://app.execfoundry.com/start \
   --yes
@@ -43,7 +47,7 @@ pnpm downpress import --source https://example.com \
 # up to 3 --inspire URLs; signals are blended (first biases structure, later ones tint accent/fonts)
 
 # dry-run first (no write):
-pnpm downpress import --source https://example.com --dry-run --no-llm
+pnpm filepress import --source https://example.com --dry-run --no-llm
 ```
 
 See [`docs/SITE_IMPORT_SPEC.md`](docs/SITE_IMPORT_SPEC.md).
@@ -52,7 +56,7 @@ More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
 
 ### In this repo
 
-`sites/demo` is the engine's example content (frontmatter, drafts, tags, phone
+`sites/demo` is filepress’s example content (frontmatter, drafts, tags, phone
 workflow, theme override). Real publications live in their own repos and depend
 on this package. From the engine root:
 
@@ -65,9 +69,9 @@ pnpm build               # → sites/demo/build/
 ## Site configuration
 
 ```ts
-import { defineDownpressConfig } from 'downpress';
+import { defineFilepressConfig } from 'filepress';
 
-export default defineDownpressConfig({
+export default defineFilepressConfig({
   title: 'My Site',
   description: 'A short site description.',
   url: 'https://my.site', // required; canonical origin, no trailing slash
@@ -86,9 +90,12 @@ export default defineDownpressConfig({
 
 ## Theming
 
-The engine ships a default Essay look. To restyle a site, add `theme.css` (or
-`theme.scss`) next to `downpress.config.ts`. It loads after the default theme, so
-you can override CSS variables and structural classes without forking the app.
+The engine ships a default Essay look. To restyle a site, add `theme.css` next to
+`filepress.config.ts`. It loads after the default theme, so you can override CSS
+variables and structural classes without forking the app.
+
+In local `pnpm dev`, **Genie Mode** lets you steer tokens, stock backgrounds, and
+versioned theme activations without leaving the browser (dev-only; not in production builds).
 
 ```css
 /* theme.css */
@@ -148,15 +155,22 @@ Build output is a static folder. For a site that depends on this engine:
 
 Point the site's dependency at a pinned commit or tag of this repo (not a floating branch) so upgrades are intentional. If this engine repo is private, the host's build needs permission to clone it.
 
+More at [getfilepress.com](https://getfilepress.com).
+
 ## Repository layout
 
 ```
 packages/core     shared engine (content pipeline, components, theme)
-packages/app      SvelteKit app (routes) used by the CLI
+packages/app      SvelteKit app (routes + Genie Mode in dev) used by the CLI
+packages/import   site crawl / scaffold CLI (also powers Genie theme helpers)
 sites/            optional in-repo content sites
-scripts/          downpress CLI and create-site scaffold
+scripts/          filepress CLI and create-site scaffold
 ```
 
 ```bash
 pnpm test    # engine unit tests
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

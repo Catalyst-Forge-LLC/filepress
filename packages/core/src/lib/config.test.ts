@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { defineDownpressConfig, absoluteUrl, ogImageUrl } from './config';
+import { defineFilepressConfig, absoluteUrl, ogImageUrl } from './config';
 
-describe('defineDownpressConfig', () => {
+describe('defineFilepressConfig', () => {
 	it('applies defaults for optional fields', () => {
-		const cfg = defineDownpressConfig({ title: 'My Site', url: 'https://my.site' });
+		const cfg = defineFilepressConfig({ title: 'My Site', url: 'https://my.site' });
 		expect(cfg.author).toBe('My Site'); // falls back to title
 		expect(cfg.tagline).toBe('My Site'); // falls back to description -> title
 		expect(cfg.postsPerPage).toBe(10);
@@ -20,7 +20,7 @@ describe('defineDownpressConfig', () => {
 	});
 
 	it('defaults nav to Home + /writing when homePage is set', () => {
-		const cfg = defineDownpressConfig({
+		const cfg = defineFilepressConfig({
 			title: 'My Site',
 			url: 'https://my.site',
 			homePage: 'about'
@@ -34,31 +34,31 @@ describe('defineDownpressConfig', () => {
 	});
 
 	it('keeps a trimmed lede and nulls a blank one', () => {
-		const withLede = defineDownpressConfig({
+		const withLede = defineFilepressConfig({
 			title: 'X',
 			url: 'https://x.example.com',
 			lede: ' Essays on things. '
 		});
 		expect(withLede.lede).toBe('Essays on things.');
-		const blank = defineDownpressConfig({ title: 'X', url: 'https://x.example.com', lede: '  ' });
+		const blank = defineFilepressConfig({ title: 'X', url: 'https://x.example.com', lede: '  ' });
 		expect(blank.lede).toBeNull();
 	});
 
 	it('keeps a trimmed logo path and nulls a blank one', () => {
-		const withLogo = defineDownpressConfig({
+		const withLogo = defineFilepressConfig({
 			title: 'X',
 			url: 'https://x.example.com',
 			logo: ' /logo.png '
 		});
 		expect(withLogo.logo).toBe('/logo.png');
 		expect(withLogo.ogImage).toBe('/logo.png');
-		const blank = defineDownpressConfig({ title: 'X', url: 'https://x.example.com', logo: '  ' });
+		const blank = defineFilepressConfig({ title: 'X', url: 'https://x.example.com', logo: '  ' });
 		expect(blank.logo).toBeNull();
 		expect(blank.ogImage).toBeNull();
 	});
 
 	it('lets ogImage override logo for social cards', () => {
-		const cfg = defineDownpressConfig({
+		const cfg = defineFilepressConfig({
 			title: 'X',
 			url: 'https://x.example.com',
 			logo: '/logo.png',
@@ -69,7 +69,7 @@ describe('defineDownpressConfig', () => {
 	});
 
 	it('strips a trailing slash from url and prefers description for tagline', () => {
-		const cfg = defineDownpressConfig({
+		const cfg = defineFilepressConfig({
 			title: 'X',
 			url: 'https://x.example.com/',
 			description: 'Desc here'
@@ -79,14 +79,14 @@ describe('defineDownpressConfig', () => {
 	});
 
 	it('fails loudly when a required field is missing (edge case 19)', () => {
-		expect(() => defineDownpressConfig({ url: 'https://x.example.com' } as never)).toThrow(
+		expect(() => defineFilepressConfig({ url: 'https://x.example.com' } as never)).toThrow(
 			/`title` is required/
 		);
-		expect(() => defineDownpressConfig({ title: 'X' } as never)).toThrow(/`url` is required/);
+		expect(() => defineFilepressConfig({ title: 'X' } as never)).toThrow(/`url` is required/);
 	});
 
 	it('rejects a url without an http(s) scheme', () => {
-		expect(() => defineDownpressConfig({ title: 'X', url: 'x.example.com' })).toThrow(
+		expect(() => defineFilepressConfig({ title: 'X', url: 'x.example.com' })).toThrow(
 			/must start with http/
 		);
 	});

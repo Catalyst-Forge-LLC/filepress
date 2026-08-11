@@ -5,8 +5,8 @@
 	 */
 	const enabled =
 		import.meta.env.DEV ||
-		import.meta.env.DOWNPRESS_GENIE === '1' ||
-		import.meta.env.DOWNPRESS_GENIE === 'true';
+		import.meta.env.FILEPRESS_GENIE === '1' ||
+		import.meta.env.FILEPRESS_GENIE === 'true';
 </script>
 
 {#if enabled}

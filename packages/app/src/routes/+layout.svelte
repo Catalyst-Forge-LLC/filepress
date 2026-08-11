@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '$lib/theme-entry';
 	import criticalTheme from '$critical-theme';
-	import { SiteHeader, SiteFooter } from '@downpress/core';
+	import { SiteHeader, SiteFooter } from '@filepress/core';
 	import config from '$site-config';
 	import GenieHost from '$lib/genie/GenieHost.svelte';
 
@@ -11,7 +11,7 @@
 
 <svelte:head>
 	{#if criticalTheme}
-		{@html `<style data-downpress-critical>${criticalTheme}</style>`}
+		{@html `<style data-filepress-critical>${criticalTheme}</style>`}
 	{/if}
 	<link rel="icon" href="/favicon.svg" />
 	<link rel="alternate" type="application/rss+xml" title={config.title} href="/rss.xml" />

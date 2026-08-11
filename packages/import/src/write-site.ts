@@ -40,7 +40,7 @@ const DEFAULT_FAVICON = resolve(
 );
 
 function ensureScaffold(out: string, opts: ImportOptions, title: string, url: string) {
-	const configPath = join(out, 'downpress.config.ts');
+	const configPath = join(out, 'filepress.config.ts');
 	const needsScaffold = !existsSync(configPath) || !existsSync(join(out, 'package.json'));
 	if (!needsScaffold) {
 		mkdirSync(join(out, 'posts'), { recursive: true });
@@ -157,7 +157,7 @@ Replace files under \`static/images/\` anytime; theme.css references cover paths
 Not fetched. Re-run with \`--fetch-images\` to download suggested hero/header/background/logo into \`static/images/\`, or drop your own files there and set paths in \`theme.css\` / \`logo\` in config.
 `;
 
-	return `# Downpress import report
+	return `# filepress import report
 
 Source: ${ir.source.url}
 Generator guess: ${ir.source.generator ?? 'unknown'}
@@ -178,7 +178,7 @@ Generated: ${new Date().toISOString()}
 
 ## URL remaps
 
-Posts move to \`/posts/<slug>\` (Downpress default). If you need old paths (e.g. \`/writing/…\`), add Cloudflare Pages redirects.
+Posts move to \`/posts/<slug>\` (filepress default). If you need old paths (e.g. \`/writing/…\`), add Cloudflare Pages redirects.
 
 ${ir.posts.map((p) => `- \`${p.sourceUrl}\` → \`/posts/${p.slug}\``).join('\n')}
 
@@ -198,7 +198,7 @@ ${imageSection}
 \`\`\`bash
 cd ${opts.out}
 pnpm install
-pnpm downpress dev
+pnpm filepress dev
 \`\`\`
 `;
 }
@@ -216,9 +216,9 @@ export async function writeSite(
 				`Refusing non-empty directory ${out} (pass --force to overwrite generated files carefully)`
 			);
 		}
-		if (opts.force && existsSync(join(out, 'downpress.config.ts'))) {
+		if (opts.force && existsSync(join(out, 'filepress.config.ts'))) {
 			// wipe content dirs we own; keep .git
-			for (const d of ['posts', 'pages', 'static', '.downpress-import']) {
+			for (const d of ['posts', 'pages', 'static', '.filepress-import']) {
 				rmSync(join(out, d), { recursive: true, force: true });
 			}
 		}
@@ -306,10 +306,10 @@ ${body}
 	const logoLine = logo ? `\n\tlogo: ${yamlQuote(logo)},` : '';
 
 	writeFileSync(
-		join(out, 'downpress.config.ts'),
-		`import { defineDownpressConfig } from 'downpress';
+		join(out, 'filepress.config.ts'),
+		`import { defineFilepressConfig } from 'filepress';
 
-export default defineDownpressConfig({
+export default defineFilepressConfig({
 	title: ${yamlQuote(title)},
 	description: ${yamlQuote(ir.identity.description)},
 	url: ${yamlQuote(url)},
@@ -326,7 +326,7 @@ ${topicsLit}
 
 	writeFileSync(join(out, 'theme.css'), themeCssFromBrief(activeBrief ?? undefined));
 
-	const metaDir = join(out, '.downpress-import');
+	const metaDir = join(out, '.filepress-import');
 	mkdirSync(metaDir, { recursive: true });
 	writeFileSync(join(metaDir, 'site-ir.json'), JSON.stringify(ir, null, 2));
 	if (activeBrief)
@@ -343,7 +343,7 @@ ${topicsLit}
 /node_modules
 .DS_Store
 Thumbs.db
-.downpress-import/crawl-cache/
+.filepress-import/crawl-cache/
 `
 	);
 

@@ -10,7 +10,7 @@ export interface ContentApi {
 	getPublishedPosts(): PostMeta[];
 	/**
 	 * What the index / tags / topics show. Same as published in production;
-	 * includes drafts under `pnpm dev` (or `DOWNPRESS_SHOW_DRAFTS=1`).
+	 * includes drafts under `pnpm dev` (or `FILEPRESS_SHOW_DRAFTS=1`).
 	 */
 	getListedPosts(): PostMeta[];
 	listsDrafts(): boolean;
@@ -28,17 +28,17 @@ export interface ContentApi {
 
 export interface CreateContentOptions {
 	contentDir: string;
-	/** Override draft listing. Default: on in Vite DEV, or when DOWNPRESS_SHOW_DRAFTS is 1/true. */
+	/** Override draft listing. Default: on in Vite DEV, or when FILEPRESS_SHOW_DRAFTS is 1/true. */
 	listDrafts?: boolean;
 }
 
 /**
  * Whether listings should include `draft: true` posts. Production builds stay
- * closed unless DOWNPRESS_SHOW_DRAFTS forces them open (rare; mainly for checks).
+ * closed unless FILEPRESS_SHOW_DRAFTS forces them open (rare; mainly for checks).
  */
 export function resolveListDrafts(override?: boolean): boolean {
 	if (override !== undefined) return override;
-	const env = process.env.DOWNPRESS_SHOW_DRAFTS?.trim();
+	const env = process.env.FILEPRESS_SHOW_DRAFTS?.trim();
 	if (env === '1' || env === 'true') return true;
 	if (env === '0' || env === 'false') return false;
 	return Boolean(import.meta.env.DEV);

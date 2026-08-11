@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * downpress import — crawl a site, extract content, scaffold a sibling Downpress site.
+ * filepress import — crawl a site, extract content, scaffold a sibling filepress site.
  *
  * Usage:
- *   pnpm --filter @downpress/import import -- --source https://example.com
- *   downpress import --source https://example.com --inspire https://www.catalystforge.com
+ *   pnpm --filter @filepress/import import -- --source https://example.com
+ *   filepress import --source https://example.com --inspire https://www.catalystforge.com
  */
 import { createInterface } from 'node:readline/promises';
 import { isAbsolute, resolve } from 'node:path';
@@ -42,7 +42,7 @@ function resolveUserPath(p: string): string {
 }
 
 function fail(msg: string): never {
-	console.error(`downpress import: ${msg}`);
+	console.error(`filepress import: ${msg}`);
 	process.exit(1);
 }
 
@@ -67,7 +67,7 @@ function parseArgs(argv: string[]) {
 		_: [],
 		inspire: [],
 		ollama: process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434',
-		model: process.env.DOWNPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b',
+		model: process.env.FILEPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b',
 		noLlm: false,
 		dryRun: false,
 		force: false,
@@ -111,7 +111,7 @@ async function prompt(rl: ReturnType<typeof createInterface>, q: string, def?: s
 async function main() {
 	const args = parseArgs(process.argv.slice(2));
 	if (args._.includes('help')) {
-		console.log(`Usage: downpress import --source <url> [options]
+		console.log(`Usage: filepress import --source <url> [options]
 
 Options:
   --source <url>       Site to import (required)
@@ -335,7 +335,7 @@ Options:
 
 		console.log(`import: writing ${out} …`);
 		const { reportPath } = await writeSite(ir, opts, brief);
-		console.log(`import: done.\n  report: ${reportPath}\n  next: cd ${out} && pnpm install && pnpm downpress dev`);
+		console.log(`import: done.\n  report: ${reportPath}\n  next: cd ${out} && pnpm install && pnpm filepress dev`);
 	} finally {
 		rl?.close();
 	}

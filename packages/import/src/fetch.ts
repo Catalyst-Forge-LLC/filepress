@@ -1,4 +1,4 @@
-const DEFAULT_UA = 'DownpressImport/0.1 (+https://github.com/Catalyst-Forge-LLC/downpress)';
+const DEFAULT_UA = 'filepressImport/0.1 (+https://github.com/Catalyst-Forge-LLC/filepress)';
 
 export async function fetchText(
 	url: string,

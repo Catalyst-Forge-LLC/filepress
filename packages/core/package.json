@@ -1,9 +1,9 @@
 {
-	"name": "@downpress/core",
+	"name": "@filepress/core",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"description": "Reusable engine for Downpress sites: content loader, Markdown pipeline, feed/sitemap builders, config helper, Essay theme, and shared Svelte components.",
+	"description": "Reusable engine for filepress sites: content loader, Markdown pipeline, feed/sitemap builders, config helper, Essay theme, and shared Svelte components.",
 	"svelte": "./src/lib/index.ts",
 	"types": "./src/lib/index.ts",
 	"exports": {
@@ -29,6 +29,7 @@
 		"@fontsource-variable/inter": "^5.2.8",
 		"@fontsource-variable/newsreader": "^5.2.10",
 		"gray-matter": "^4.0.3",
+		"highlight.js": "^11.11.1",
 		"rehype-autolink-headings": "^7.1.0",
 		"rehype-highlight": "^7.0.2",
 		"rehype-raw": "^7.0.0",

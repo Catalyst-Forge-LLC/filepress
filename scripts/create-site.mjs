@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Scaffold a content-only Downpress site.
+// Scaffold a content-only filepress site.
 //
 // Monorepo (default):
 //   node scripts/create-site.mjs my-site --title "My Site" --url https://my.site
@@ -8,10 +8,10 @@
 // External sibling repo:
 //   node scripts/create-site.mjs example-site --external ../example-site \
 //     --title "…" --url https://…
-//   → writes package.json with "downpress": "file:../downpress"
+//   → writes package.json with "filepress": "file:../filepress"
 //
 // Refuses a non-empty target (edge case 18), unless --force is passed (still
-// refuses to overwrite downpress.config.ts / package.json if present).
+// refuses to overwrite filepress.config.ts / package.json if present).
 
 import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -57,8 +57,8 @@ if (existsSync(target)) {
 	if (entries.length > 0 && !args.force) {
 		fail(`refusing to overwrite non-empty directory: ${target} (pass --force to merge carefully)`);
 	}
-	if (existsSync(join(target, 'downpress.config.ts'))) {
-		fail(`downpress.config.ts already exists in ${target}`);
+	if (existsSync(join(target, 'filepress.config.ts'))) {
+		fail(`filepress.config.ts already exists in ${target}`);
 	}
 	if (external && existsSync(join(target, 'package.json'))) {
 		fail(`package.json already exists in ${target}`);
@@ -78,16 +78,16 @@ if (existsSync(defaultFavicon)) {
 }
 
 const configImport = external
-	? `import { defineDownpressConfig } from 'downpress';`
-	: `import { defineDownpressConfig } from 'downpress';`;
+	? `import { defineFilepressConfig } from 'filepress';`
+	: `import { defineFilepressConfig } from 'filepress';`;
 
 writeFileSync(
-	join(target, 'downpress.config.ts'),
+	join(target, 'filepress.config.ts'),
 	`${configImport}
 
-export default defineDownpressConfig({
+export default defineFilepressConfig({
 	title: ${JSON.stringify(title)},
-	description: 'A Downpress site.',
+	description: 'A filepress site.',
 	url: ${JSON.stringify(url)},
 	author: ${JSON.stringify(title)},
 	topics: []
@@ -101,8 +101,8 @@ writeFileSync(
 /node_modules
 .DS_Store
 Thumbs.db
-.downpress-genie/
-.downpress-import/crawl-cache/
+.filepress-genie/
+.filepress-import/crawl-cache/
 `
 );
 
@@ -143,16 +143,16 @@ if (external) {
 				version: '0.0.1',
 				type: 'module',
 				scripts: {
-					dev: 'downpress dev',
-					build: 'downpress build',
-					preview: 'downpress preview',
-					check: 'downpress check'
+					dev: 'filepress dev',
+					build: 'filepress build',
+					preview: 'filepress preview',
+					check: 'filepress check'
 				},
 				devDependencies: {
 					// link: uses the live engine tree (with its workspace node_modules).
 					// For Cloudflare/CI after the engine is on GitHub, switch to:
-					// "downpress": "github:Catalyst-Forge-LLC/downpress#<tag-or-sha>"
-					downpress: `link:${relToEngine}`
+					// "filepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
+					filepress: `link:${relToEngine}`
 				}
 			},
 			null,
@@ -172,7 +172,7 @@ if (external) {
 		"noEmit": true,
 		"allowImportingTsExtensions": true
 	},
-	"include": ["downpress.config.ts"]
+	"include": ["filepress.config.ts"]
 }
 `
 	);
@@ -181,7 +181,7 @@ if (external) {
 		join(target, 'README.md'),
 		`# ${title}
 
-Content-only Downpress site. Local engine via \`link:${relToEngine}\`.
+Content-only filepress site. Local engine via \`link:${relToEngine}\`.
 
 \`\`\`bash
 # once in the engine repo
@@ -193,7 +193,7 @@ pnpm dev
 pnpm build    # → build/
 \`\`\`
 
-Optional: add \`theme.css\` (or \`theme.scss\`) next to \`downpress.config.ts\` to
+Optional: add \`theme.css\` next to \`filepress.config.ts\` to
 override the default Essay theme.
 
 ## Deploy (Cloudflare Pages)
@@ -202,7 +202,7 @@ override the default Essay theme.
 Catalyst-Forge-LLC, switch the dependency to a **git pin**:
 
 \`\`\`json
-"downpress": "github:Catalyst-Forge-LLC/downpress#v0.1.0"
+"filepress": "github:Catalyst-Forge-LLC/filepress#v0.1.0"
 \`\`\`
 
 | Setting | Value |
@@ -229,7 +229,7 @@ Catalyst-Forge-LLC, switch the dependency to a **git pin**:
 		"noEmit": true,
 		"allowImportingTsExtensions": true
 	},
-	"include": ["downpress.config.ts"]
+	"include": ["filepress.config.ts"]
 }
 `
 	);
@@ -238,16 +238,16 @@ Catalyst-Forge-LLC, switch the dependency to a **git pin**:
 		join(target, 'README.md'),
 		`# ${title}
 
-Content-only Downpress site (monorepo). Edit [\`downpress.config.ts\`](downpress.config.ts)
+Content-only filepress site (monorepo). Edit [\`filepress.config.ts\`](filepress.config.ts)
 and [\`posts/\`](posts/). Optional [\`theme.css\`](theme.css) overrides the Essay theme.
 
 \`\`\`bash
-pnpm downpress dev --site ${name}
-pnpm downpress build --site ${name}   # → build/
+pnpm filepress dev --site ${name}
+pnpm filepress build --site ${name}   # → build/
 \`\`\`
 `
 	);
 
 	console.log(`Created sites/${name} (content-only)`);
-	console.log(`Next: pnpm downpress dev --site ${name}`);
+	console.log(`Next: pnpm filepress dev --site ${name}`);
 }

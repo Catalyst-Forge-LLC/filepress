@@ -1,8 +1,8 @@
 ---
 title: "Frontmatter cheatsheet"
 date: 2026-07-04
-description: The fields a Downpress post understands, and what the build does with each one.
-tags: [downpress, notes]
+description: The fields a filepress post understands, and what the build does with each one.
+tags: [filepress, notes]
 ---
 
 Every post is a Markdown file under `posts/` with a YAML block at the top.
@@ -36,4 +36,4 @@ slug: my-post
 the title attribute is the caption.
 
 This site (`sites/demo`) is the engine's own example content. Your publication
-should be a separate folder or repo that depends on Downpress.
+should be a separate folder or repo that depends on filepress.

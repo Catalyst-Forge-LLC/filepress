@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { buildRssXml } from '@downpress/core/server';
+import { buildRssXml } from '@filepress/core/server';
 import { content } from '$lib/content.server';
 import config from '$site-config';
 

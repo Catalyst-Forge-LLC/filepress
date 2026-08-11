@@ -28,7 +28,19 @@
 		};
 	};
 
+	type TabId = 'refine' | 'look' | 'images' | 'inspire' | 'config' | 'history';
+
+	const TABS: Array<{ id: TabId; label: string; hint: string }> = [
+		{ id: 'refine', label: 'Refine', hint: 'Ask Ollama' },
+		{ id: 'look', label: 'Look', hint: 'Quick steers' },
+		{ id: 'images', label: 'Images', hint: 'Stock / upload' },
+		{ id: 'inspire', label: 'Inspire', hint: 'From URLs' },
+		{ id: 'config', label: 'Config', hint: 'Lede / logo' },
+		{ id: 'history', label: 'History', hint: 'Versions' }
+	];
+
 	let open = $state(false);
+	let tab = $state<TabId>('refine');
 	let loading = $state(false);
 	let error = $state('');
 	let health = $state<Health | null>(null);
@@ -74,6 +86,7 @@
 
 	async function openPanel() {
 		open = true;
+		tab = 'refine';
 		await refresh();
 	}
 
@@ -83,7 +96,6 @@
 		try {
 			await api('/steer', { method: 'POST', body: JSON.stringify({ brief, label }) });
 			await refresh();
-			// Theme alias is a real file — full reload picks up CSS reliably.
 			location.reload();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
@@ -155,7 +167,10 @@
 			await api('/inspire', {
 				method: 'POST',
 				body: JSON.stringify({
-					urls: inspireUrls.split(/\n+/).map((s) => s.trim()).filter(Boolean),
+					urls: inspireUrls
+						.split(/\n+/)
+						.map((s) => s.trim())
+						.filter(Boolean),
 					useLlm,
 					model: selectedModel || undefined
 				})
@@ -213,7 +228,10 @@
 {:else}
 	<aside class="genie-panel" aria-label="Genie Mode">
 		<header class="genie-head">
-			<strong>Genie</strong>
+			<div>
+				<strong>Genie</strong>
+				<p class="genie-tagline">Try a look → activate → commit baked files</p>
+			</div>
 			<button type="button" class="genie-x" onclick={() => (open = false)}>Close</button>
 		</header>
 
@@ -222,201 +240,279 @@
 		{/if}
 
 		{#if health}
-			<section class="genie-sec">
-				<h3>Status</h3>
-				<p class="genie-muted">
-					Ollama: {health.ollama.available ? 'up' : 'down'} · default {health.ollama.model}
-				</p>
-				{#if health.ollama.available && health.ollama.models?.length}
-					<label class="genie-row">
-						Model
-						<select bind:value={selectedModel} disabled={loading}>
-							{#each health.ollama.models as m (m)}
-								<option value={m}>{m}</option>
-							{/each}
-						</select>
-					</label>
-				{/if}
-				<p class="genie-hint">{health.ollama.hint}</p>
-			</section>
+			<div class="genie-shell">
+				<nav class="genie-tabs" aria-label="Genie sections">
+					{#each TABS as t (t.id)}
+						<button
+							type="button"
+							class="genie-tab"
+							class:active={tab === t.id}
+							onclick={() => (tab = t.id)}
+							title={t.hint}
+						>
+							<span class="genie-tab-label">{t.label}</span>
+							<span class="genie-tab-hint">{t.hint}</span>
+						</button>
+					{/each}
+				</nav>
 
-			<section class="genie-sec">
-				<h3>Steers</h3>
-				<label class="genie-row">
-					Accent
-					<input type="color" bind:value={accent} disabled={loading} />
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() =>
-							steer(
-								{ tokens: { accent, accentStrong: accent } },
-								`Accent ${accent}`
-							)}
-					>
-						Apply
-					</button>
-				</label>
-				<div class="genie-chips">
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() =>
-							steer(
-								{ paletteMode: 'dark', hero: 'bold', atmosphere: 'noise', elevatedCards: true, navStyle: 'uppercase-tracked', density: 'balanced' },
-								'Dark punchy'
-							)}
-					>
-						Dark punchy
-					</button>
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() =>
-							steer(
-								{
-									paletteMode: 'light',
-									hero: 'editorial',
-									atmosphere: 'none',
-									elevatedCards: false,
-									navStyle: 'soft',
-									density: 'sparse'
-								},
-								'Light editorial'
-							)}
-					>
-						Light editorial
-					</button>
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() => steer({ density: 'dense' }, 'Denser')}
-					>
-						Denser
-					</button>
-					<button
-						type="button"
-						disabled={loading}
-						onclick={() => steer({ hero: 'bold' }, 'Bold hero')}
-					>
-						Bold hero
-					</button>
-				</div>
-			</section>
+				<div class="genie-body">
+					{#if tab === 'refine'}
+						<section class="genie-sec">
+							<h3>Ollama refine</h3>
+							<p class="genie-howto">
+								Describe the look you want in plain language. Genie asks your local Ollama
+								model for a design brief, writes a new version, and activates it (page reloads).
+								Undo anytime from <strong>History</strong>.
+							</p>
 
-			<section class="genie-sec">
-				<h3>Background (Openverse)</h3>
-				<label class="genie-row">
-					Query
-					<input type="text" bind:value={stockQuery} disabled={loading} />
-					<button type="button" disabled={loading} onclick={applyStock}>Fetch</button>
-				</label>
-			</section>
+							<div class="genie-status-pill" class:up={health.ollama.available}>
+								{health.ollama.available ? 'Ollama up' : 'Ollama down'}
+								{#if health.ollama.available && selectedModel}
+									· {selectedModel}
+								{/if}
+							</div>
 
-			<section class="genie-sec">
-				<h3>Upload</h3>
-				<label class="genie-row">
-					Hero background
-					<input
-						type="file"
-						accept="image/jpeg,image/png,image/webp,image/gif"
-						disabled={loading}
-						onchange={(e) => onUpload(e, 'hero')}
-					/>
-				</label>
-				<label class="genie-row">
-					Page background
-					<input
-						type="file"
-						accept="image/jpeg,image/png,image/webp,image/gif"
-						disabled={loading}
-						onchange={(e) => onUpload(e, 'background')}
-					/>
-				</label>
-				<label class="genie-row">
-					Logo (also sets config)
-					<input
-						type="file"
-						accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-						disabled={loading}
-						onchange={(e) => onUpload(e, 'logo')}
-					/>
-				</label>
-			</section>
+							{#if health.ollama.available && health.ollama.models?.length}
+								<label class="genie-row">
+									Model
+									<select bind:value={selectedModel} disabled={loading}>
+										{#each health.ollama.models as m (m)}
+											<option value={m}>{m}</option>
+										{/each}
+									</select>
+								</label>
+							{:else if !health.ollama.available}
+								<p class="genie-hint">{health.ollama.hint}</p>
+								<p class="genie-muted">
+									Steers, images, and inspire still work without Ollama — use the other tabs.
+								</p>
+							{:else}
+								<p class="genie-hint">{health.ollama.hint}</p>
+							{/if}
 
-			<section class="genie-sec">
-				<h3>Inspire</h3>
-				<label class="genie-row">
-					URLs (1–3, one per line)
-					<textarea rows="3" bind:value={inspireUrls} disabled={loading}></textarea>
-				</label>
-				<label class="genie-check">
-					<input type="checkbox" bind:checked={useLlm} disabled={loading} />
-					Refine with Ollama when available
-				</label>
-				<button type="button" disabled={loading} onclick={runInspire}>Crawl &amp; apply</button>
-			</section>
-
-			<section class="genie-sec">
-				<h3>Ollama refine</h3>
-				<label class="genie-row">
-					Direction
-					<input
-						type="text"
-						bind:value={refinePrompt}
-						placeholder="warmer gold, denser nav, softer hero"
-						disabled={loading || !health.ollama.available}
-					/>
-					<button
-						type="button"
-						disabled={loading || !health.ollama.available || !refinePrompt.trim()}
-						onclick={runRefine}
-					>
-						Refine
-					</button>
-				</label>
-			</section>
-
-			<section class="genie-sec">
-				<h3>Config</h3>
-				<label class="genie-row">
-					Lede
-					<input type="text" bind:value={cfgLede} disabled={loading} />
-				</label>
-				<label class="genie-row">
-					Tagline
-					<input type="text" bind:value={cfgTagline} disabled={loading} />
-				</label>
-				<label class="genie-row">
-					Logo path
-					<input type="text" bind:value={cfgLogo} placeholder="/images/logo.svg" disabled={loading} />
-				</label>
-				<button type="button" disabled={loading} onclick={runConfig}>Apply config</button>
-			</section>
-
-			<section class="genie-sec">
-				<h3>Versions</h3>
-				<p class="genie-muted">
-					Active: {health.active?.versionId ?? '(none)'}
-				</p>
-				<ul class="genie-versions">
-					{#each health.versions as v (v.id)}
-						<li class:active={health.active?.versionId === v.id}>
+							<label class="genie-row">
+								Direction
+								<textarea
+									rows="3"
+									bind:value={refinePrompt}
+									placeholder="warmer gold accents, denser nav, softer hero, less noise"
+									disabled={loading || !health.ollama.available}
+								></textarea>
+							</label>
 							<button
 								type="button"
-								disabled={loading || health.active?.versionId === v.id}
-								onclick={() => activate(v.id)}
+								class="genie-primary"
+								disabled={loading || !health.ollama.available || !refinePrompt.trim()}
+								onclick={runRefine}
 							>
-								{v.label}
+								{loading ? 'Working…' : 'Refine & activate'}
 							</button>
-							<span class="genie-muted">{v.id === 'baseline' ? 'baseline' : v.createdAt.slice(11, 19)}</span>
-						</li>
-					{/each}
-				</ul>
-				<button type="button" class="genie-linkish" disabled={loading} onclick={refresh}>
-					Refresh list
-				</button>
-			</section>
+							<p class="genie-muted">
+								Tip: set <code>FILEPRESS_OLLAMA_MODEL</code> for a default; Finetuna can tune a
+								named variant.
+							</p>
+						</section>
+					{:else if tab === 'look'}
+						<section class="genie-sec">
+							<h3>Quick steers</h3>
+							<p class="genie-howto">
+								Instant, no LLM. Each chip or accent change creates a version and reloads.
+							</p>
+							<label class="genie-row">
+								Accent
+								<input type="color" bind:value={accent} disabled={loading} />
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() =>
+										steer(
+											{ tokens: { accent, accentStrong: accent } },
+											`Accent ${accent}`
+										)}
+								>
+									Apply accent
+								</button>
+							</label>
+							<div class="genie-chips">
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() =>
+										steer(
+											{
+												paletteMode: 'dark',
+												hero: 'bold',
+												atmosphere: 'noise',
+												elevatedCards: true,
+												navStyle: 'uppercase-tracked',
+												density: 'balanced'
+											},
+											'Dark punchy'
+										)}
+								>
+									Dark punchy
+								</button>
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() =>
+										steer(
+											{
+												paletteMode: 'light',
+												hero: 'editorial',
+												atmosphere: 'none',
+												elevatedCards: false,
+												navStyle: 'soft',
+												density: 'sparse'
+											},
+											'Light editorial'
+										)}
+								>
+									Light editorial
+								</button>
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() => steer({ density: 'dense' }, 'Denser')}
+								>
+									Denser
+								</button>
+								<button
+									type="button"
+									disabled={loading}
+									onclick={() => steer({ hero: 'bold' }, 'Bold hero')}
+								>
+									Bold hero
+								</button>
+							</div>
+						</section>
+					{:else if tab === 'images'}
+						<section class="genie-sec">
+							<h3>Images</h3>
+							<p class="genie-howto">
+								Pull a CC stock background from Openverse, or upload a local file. Logo upload
+								also sets <code>logo</code> in config.
+							</p>
+							<label class="genie-row">
+								Openverse query
+								<input type="text" bind:value={stockQuery} disabled={loading} />
+								<button type="button" disabled={loading} onclick={applyStock}>
+									Fetch background
+								</button>
+							</label>
+							<label class="genie-row">
+								Hero background
+								<input
+									type="file"
+									accept="image/jpeg,image/png,image/webp,image/gif"
+									disabled={loading}
+									onchange={(e) => onUpload(e, 'hero')}
+								/>
+							</label>
+							<label class="genie-row">
+								Page background
+								<input
+									type="file"
+									accept="image/jpeg,image/png,image/webp,image/gif"
+									disabled={loading}
+									onchange={(e) => onUpload(e, 'background')}
+								/>
+							</label>
+							<label class="genie-row">
+								Logo
+								<input
+									type="file"
+									accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+									disabled={loading}
+									onchange={(e) => onUpload(e, 'logo')}
+								/>
+							</label>
+						</section>
+					{:else if tab === 'inspire'}
+						<section class="genie-sec">
+							<h3>Inspire from URLs</h3>
+							<p class="genie-howto">
+								Paste 1–3 public site URLs. Genie crawls them and blends a look. Optionally refine
+								with the model selected under <strong>Refine</strong>.
+							</p>
+							<label class="genie-row">
+								URLs (one per line)
+								<textarea rows="4" bind:value={inspireUrls} disabled={loading}></textarea>
+							</label>
+							<label class="genie-check">
+								<input type="checkbox" bind:checked={useLlm} disabled={loading} />
+								Refine with Ollama when available
+								{#if selectedModel}
+									<span class="genie-muted">({selectedModel})</span>
+								{/if}
+							</label>
+							<button type="button" class="genie-primary" disabled={loading} onclick={runInspire}>
+								Crawl &amp; apply
+							</button>
+						</section>
+					{:else if tab === 'config'}
+						<section class="genie-sec">
+							<h3>Site chrome</h3>
+							<p class="genie-howto">
+								Patches <code>filepress.config.ts</code> on activate (lede, tagline, logo path).
+								Leave a field blank to skip it.
+							</p>
+							<label class="genie-row">
+								Lede
+								<input type="text" bind:value={cfgLede} disabled={loading} />
+							</label>
+							<label class="genie-row">
+								Tagline
+								<input type="text" bind:value={cfgTagline} disabled={loading} />
+							</label>
+							<label class="genie-row">
+								Logo path
+								<input
+									type="text"
+									bind:value={cfgLogo}
+									placeholder="/images/logo.svg"
+									disabled={loading}
+								/>
+							</label>
+							<button type="button" class="genie-primary" disabled={loading} onclick={runConfig}>
+								Apply config
+							</button>
+						</section>
+					{:else}
+						<section class="genie-sec">
+							<h3>Versions</h3>
+							<p class="genie-howto">
+								Every Genie action saves a snapshot under <code>.filepress-genie/</code> (gitignored).
+								Activate to bake into the working tree; commit when you like it. <code>baseline</code> is
+								the pre-Genie look.
+							</p>
+							<p class="genie-muted">
+								Active: {health.active?.versionId ?? '(none)'}
+							</p>
+							<ul class="genie-versions">
+								{#each health.versions as v (v.id)}
+									<li class:active={health.active?.versionId === v.id}>
+										<button
+											type="button"
+											disabled={loading || health.active?.versionId === v.id}
+											onclick={() => activate(v.id)}
+										>
+											{v.label}
+										</button>
+										<span class="genie-muted"
+											>{v.id === 'baseline' ? 'baseline' : v.createdAt.slice(11, 19)}</span
+										>
+									</li>
+								{/each}
+							</ul>
+							<button type="button" class="genie-linkish" disabled={loading} onclick={refresh}>
+								Refresh list
+							</button>
+						</section>
+					{/if}
+				</div>
+			</div>
 		{:else if loading}
 			<p class="genie-muted">Loading…</p>
 		{/if}
@@ -447,21 +543,33 @@
 		right: 0;
 		bottom: 0;
 		z-index: 100000;
-		width: min(22rem, 100vw);
-		overflow: auto;
+		width: min(28rem, 100vw);
+		display: flex;
+		flex-direction: column;
 		background: color-mix(in srgb, var(--bg, #12121a) 94%, #000);
 		color: var(--ink, #eee);
 		border-left: 1px solid var(--rule, #333);
-		padding: 1rem 1rem 2rem;
+		padding: 0.85rem 0.75rem 1rem;
 		font: 0.9rem/1.45 var(--font-sans, system-ui, sans-serif);
 		box-shadow: -12px 0 40px color-mix(in srgb, #000 40%, transparent);
 	}
 
 	.genie-head {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		justify-content: space-between;
-		margin-bottom: 1rem;
+		gap: 0.75rem;
+		padding: 0 0.25rem 0.75rem;
+		border-bottom: 1px solid var(--rule, #333);
+		margin-bottom: 0.75rem;
+		flex-shrink: 0;
+	}
+
+	.genie-tagline {
+		margin: 0.2rem 0 0;
+		font-size: 0.75rem;
+		color: var(--ink-soft, #999);
+		font-weight: 400;
 	}
 
 	.genie-x,
@@ -469,32 +577,111 @@
 		cursor: pointer;
 	}
 
-	.genie-sec {
-		margin-bottom: 1.25rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--rule, #333);
+	.genie-shell {
+		display: grid;
+		grid-template-columns: 5.75rem 1fr;
+		gap: 0.65rem;
+		min-height: 0;
+		flex: 1;
+		overflow: hidden;
+	}
+
+	.genie-tabs {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		overflow: auto;
+		padding-right: 0.15rem;
+	}
+
+	.genie-tab {
+		display: grid;
+		gap: 0.1rem;
+		text-align: left;
+		border: 1px solid transparent;
+		background: transparent;
+		color: var(--ink-soft, #999);
+		border-radius: 8px;
+		padding: 0.45rem 0.4rem;
+		font-size: 0.72rem;
+	}
+
+	.genie-tab-label {
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: inherit;
+	}
+
+	.genie-tab-hint {
+		font-size: 0.65rem;
+		opacity: 0.85;
+		line-height: 1.2;
+	}
+
+	.genie-tab:hover {
+		border-color: var(--rule, #444);
+		color: var(--ink, #eee);
+	}
+
+	.genie-tab.active {
+		border-color: color-mix(in srgb, var(--accent, #f0c040) 55%, var(--rule, #444));
+		background: color-mix(in srgb, var(--accent, #f0c040) 12%, transparent);
+		color: var(--accent, #f0c040);
+	}
+
+	.genie-body {
+		overflow: auto;
+		padding: 0 0.15rem 1rem 0.35rem;
+		border-left: 1px solid var(--rule, #333);
+		min-width: 0;
 	}
 
 	.genie-sec h3 {
-		margin: 0 0 0.5rem;
-		font-size: 0.72rem;
-		letter-spacing: 0.1em;
+		margin: 0 0 0.45rem;
+		font-size: 0.78rem;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--ink-soft, #999);
 		font-weight: 600;
 	}
 
+	.genie-howto {
+		font-size: 0.8rem;
+		color: var(--ink-soft, #bbb);
+		line-height: 1.45;
+		margin: 0 0 0.85rem;
+	}
+
+	.genie-status-pill {
+		display: inline-block;
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		padding: 0.25rem 0.55rem;
+		border-radius: 999px;
+		border: 1px solid var(--rule, #444);
+		color: var(--ink-soft, #999);
+		margin-bottom: 0.75rem;
+	}
+
+	.genie-status-pill.up {
+		border-color: color-mix(in srgb, #3a8 50%, var(--rule));
+		color: #7dca9a;
+	}
+
 	.genie-muted {
 		color: var(--ink-soft, #999);
 		font-size: 0.82rem;
-		margin: 0.25rem 0;
+		margin: 0.35rem 0;
 	}
 
 	.genie-hint {
 		font-size: 0.78rem;
 		color: var(--ink-soft, #aaa);
 		line-height: 1.4;
-		margin: 0.4rem 0 0;
+		margin: 0.4rem 0 0.75rem;
 		word-break: break-word;
 	}
 
@@ -504,6 +691,8 @@
 		padding: 0.5rem 0.65rem;
 		border-radius: 6px;
 		font-size: 0.82rem;
+		margin: 0 0.25rem 0.65rem;
+		flex-shrink: 0;
 	}
 
 	.genie-row {
@@ -523,6 +712,7 @@
 
 	.genie-check {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.45rem;
 		font-size: 0.8rem;
@@ -537,19 +727,37 @@
 
 	.genie-chips button,
 	.genie-row button,
-	.genie-versions button {
+	.genie-versions button,
+	.genie-primary {
 		border: 1px solid var(--rule, #444);
 		background: var(--surface, #1c1c22);
 		color: var(--ink, #eee);
 		border-radius: 6px;
-		padding: 0.35rem 0.55rem;
+		padding: 0.4rem 0.65rem;
 		font-size: 0.78rem;
+	}
+
+	.genie-primary {
+		width: 100%;
+		margin-top: 0.25rem;
+		border-color: color-mix(in srgb, var(--accent, #f0c040) 50%, var(--rule));
+		background: color-mix(in srgb, var(--accent, #f0c040) 16%, var(--surface, #1c1c22));
+		color: var(--accent, #f0c040);
+		font-weight: 700;
 	}
 
 	.genie-chips button:hover,
 	.genie-row button:hover,
-	.genie-versions button:hover {
+	.genie-versions button:hover,
+	.genie-primary:hover:not(:disabled) {
 		border-color: var(--accent, #f0c040);
+	}
+
+	.genie-primary:disabled,
+	.genie-chips button:disabled,
+	.genie-row button:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
 	}
 
 	.genie-versions {
@@ -579,5 +787,38 @@
 		padding: 0;
 		font-size: 0.8rem;
 		text-decoration: underline;
+	}
+
+	.genie-howto code,
+	.genie-muted code {
+		font-size: 0.85em;
+	}
+
+	@media (max-width: 28rem) {
+		.genie-shell {
+			grid-template-columns: 1fr;
+		}
+
+		.genie-tabs {
+			flex-direction: row;
+			flex-wrap: wrap;
+			border-bottom: 1px solid var(--rule, #333);
+			padding-bottom: 0.5rem;
+			margin-bottom: 0.25rem;
+		}
+
+		.genie-tab {
+			flex: 1 1 auto;
+			min-width: 4.5rem;
+		}
+
+		.genie-tab-hint {
+			display: none;
+		}
+
+		.genie-body {
+			border-left: none;
+			padding-left: 0;
+		}
 	}
 </style>

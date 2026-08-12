@@ -317,7 +317,8 @@ a:hover {
 }
 
 .featured .post-card {
-	padding: 0;
+	/* Do not set padding: 0 — sites that paint boxed cards need horizontal inset.
+	   Essay cards already have horizontal padding 0 from .post-card. */
 	border-bottom: none;
 }
 
@@ -344,7 +345,7 @@ a:hover {
 	border-bottom: 1px solid var(--rule);
 }
 
-.post-list > .post-card:first-child {
+.post-list > li:first-child .post-card {
 	padding-top: 0;
 }
 

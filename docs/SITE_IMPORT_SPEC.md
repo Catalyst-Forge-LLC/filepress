@@ -305,6 +305,7 @@ Exact routing design is an open question (§9); the import CLI should block or w
 | Item | Proposal |
 | --- | --- |
 | Endpoint | `OLLAMA_HOST` or `--ollama http://127.0.0.1:11434` |
+| Discovery | Optional `--scan` (ollanet: localhost / config / Tailscale); `--lan` adds a local TCP sweep |
 | Default model | `gemma4:12b` |
 | Vision | Screenshot key pages (Playwright or similar) → `/api/chat` with images |
 | Temperature | Low (0.2–0.4) for JSON briefs |

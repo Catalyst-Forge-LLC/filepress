@@ -8,7 +8,7 @@ order: 3
 
 | Tab | Use it for |
 | --- | --- |
-| **Refine** | Main loop — pick an Ollama model, describe the look, refine & activate |
+| **Refine** | Main loop — pick an Ollama **server** (optional network scan) and model, describe the look, refine & activate |
 | **Look** | Instant steers (accent / presets), no LLM |
 | **Images** | Openverse stock or local upload (logo also patches config) |
 | **Inspire** | Crawl 1–3 URLs into a blended look |
@@ -26,12 +26,13 @@ Flow: try a look → it activates (page reloads) → when happy, commit baked fi
 
 ## Local models
 
-Genie and import share the same Ollama hooks:
+Genie and import share the same Ollama hooks. Default is still local (`OLLAMA_HOST`). To use another box on Tailscale, LAN, or a listed IP, click **Scan network** in Genie (check **Include LAN** for a TCP sweep of local /24s) or run `filepress import --scan` / `--lan`. Discovery uses [ollanet](https://ollanet.dev) (`OLLANET_HOSTS`, `~/.ollanet/config.json`, Tailscale CLI when present).
 
 | Env | Role |
 | --- | --- |
-| `FILEPRESS_OLLAMA_MODEL` | Default model (Genie also offers a picker when Ollama is up) |
-| `OLLAMA_HOST` | Remote Ollama if not local |
+| `FILEPRESS_OLLAMA_MODEL` | Default model (Genie also offers a picker when a server is up) |
+| `OLLAMA_HOST` | Default Ollama if you do not pick a scanned server |
+| `OLLANET_HOSTS` | Extra hosts/IPs for the optional scan |
 
 If Ollama is down, deterministic steers / inspire / stock still work. When Ollama is up but untuned, Genie points at [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna). Finetuna is companion tooling — not a hard dependency.
 

@@ -81,6 +81,7 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Static pages: `pages/*.md` → `/[slug]` (reserved slug guard, sitemap, demo About)
 - [x] `filepress import` CLI (`@filepress/import`): discover → extract → sibling scaffold
 - [x] Optional Ollama design brief → token `theme.css` (pass A); `--no-llm` fallback
+- [x] Optional ollanet scan (`--scan` / `--lan`) to pick a network Ollama host
 - [ ] Vision screenshots in brief prompt (Playwright); richer home-as-page mode
 - [ ] Cloudflare `_redirects` emitter for old `/writing/*` paths
 - [ ] Offline HTML fixtures for import integration tests (no live net in CI)

@@ -6,7 +6,7 @@
 **Related:** [THEME.md](./THEME.md) · [SITE_IMPORT_SPEC.md](./SITE_IMPORT_SPEC.md)  
 **Former working title:** Assistant Mode (see [ASSISTANT_MODE_SPEC.md](./ASSISTANT_MODE_SPEC.md) redirect)
 
-**Surface:** floating Genie drawer in `pnpm filepress dev`; APIs under `/__filepress/genie/*` via Vite plugin (`apply: 'serve'` only); versions in `.filepress-genie/`. M2 adds live inspire, Ollama refine, model picker, and `lede` / `tagline` / `logo` config patches.
+**Surface:** floating Genie drawer in `pnpm filepress dev`; APIs under `/__filepress/genie/*` via Vite plugin (`apply: 'serve'` only); versions in `.filepress-genie/`. M2 adds live inspire, Ollama refine, model picker, optional ollanet host scan, and `lede` / `tagline` / `logo` config patches.
 
 ---
 
@@ -61,7 +61,7 @@ Genie Mode is **not** WordPress, **not** a hosted theme marketplace, and **not**
 
 ## 3. Prerequisites: Ollama + Finetuna
 
-Genie Mode’s LLM path expects a **local [Ollama](https://ollama.com)** install. Deterministic steers (presets, Openverse, uploads, inspire crawl) still work when Ollama is missing; the panel must say so clearly.
+Genie Mode’s LLM path expects an **[Ollama](https://ollama.com)** server. Deterministic steers (presets, Openverse, uploads, inspire crawl) still work when Ollama is missing; the panel must say so clearly.
 
 ### 3.1 Detect and guide
 
@@ -70,7 +70,8 @@ On Genie open / first LLM action, filepress should:
 1. Probe `OLLAMA_HOST` (default `http://127.0.0.1:11434`) — e.g. `GET /api/tags`.
 2. If unreachable: show a verbose panel message with install link and retry.
 3. If reachable but no suitable model: list tags and suggest pulling a default (align with import: `FILEPRESS_OLLAMA_MODEL`, e.g. `gemma4:12b`).
-4. **Suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** (Catalyst Forge) to create a GPU-tuned, named Ollama variant with a remembered Modelfile — better context/batch fit for repeated Genie / import sessions than stock defaults alone.
+4. **Optional network scan** via **[ollanet](https://ollanet.dev)** (`POST /__filepress/genie/scan`). Default scan is localhost + `~/.ollanet/config.json` + `OLLANET_HOSTS` + Tailscale if the CLI is present. **LAN TCP scan is opt-in** (Genie “Include LAN” / `filepress import --lan`) — do not run it on every health check.
+5. **Suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** (Catalyst Forge) to create a GPU-tuned, named Ollama variant with a remembered Modelfile — better context/batch fit for repeated Genie / import sessions than stock defaults alone.
 
 Example panel copy (normative intent, not final UI strings):
 
@@ -80,11 +81,13 @@ Example panel copy (normative intent, not final UI strings):
 
 | Variable | Role | Default |
 | --- | --- | --- |
-| `OLLAMA_HOST` | Ollama HTTP API | `http://127.0.0.1:11434` |
-| `FILEPRESS_OLLAMA_MODEL` | Model name for Genie + import | `gemma4:12b` (or site/engine default) |
+| `OLLAMA_HOST` | Default Ollama HTTP API | `http://127.0.0.1:11434` |
+| `FILEPRESS_OLLAMA_MODEL` | Default model for Genie + import | `gemma4:12b` (or site/engine default) |
 | `FILEPRESS_GENIE` | Force Genie on in dev tooling | unset (on when `import.meta.env.DEV`) |
+| `OLLANET_HOSTS` | Extra hosts for ollanet scan | unset |
+| `OLLANET_CONFIG` | ollanet config path | `~/.ollanet/config.json` |
 
-Import CLI should share the same detection/suggestion language when `--no-llm` is not set (one helper, two call sites).
+Import CLI should share the same detection/suggestion language when `--no-llm` is not set (one helper, two call sites). `--scan` / `--lan` use ollanet; `--ollama` still wins when passed explicitly.
 
 ### 3.3 Finetuna relationship
 
@@ -335,6 +338,7 @@ Before first Genie write, snapshot current look as `baseline`.
 - Live inspire URLs; Ollama brief refine + fallbacks.
 - Config patch: lede / tagline / logo.
 - Model picker respecting `FILEPRESS_OLLAMA_MODEL`; Finetuna tip in status.
+- Optional **ollanet** scan for other Ollama hosts (Tailscale / LAN); Genie host picker + `import --scan`.
 
 ### M3 — Polish + harden
 

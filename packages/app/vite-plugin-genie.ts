@@ -8,7 +8,8 @@ import {
 	health,
 	receiveUpload,
 	refineWithOllama,
-	runInspire
+	runInspire,
+	scanOllamaHosts
 } from './src/lib/genie/ops.ts';
 import { deleteVersion, listVersions } from './src/lib/genie/store.ts';
 
@@ -100,6 +101,11 @@ export function geniePlugin(siteRoot: string): Plugin {
 						});
 					}
 
+					if (method === 'POST' && path === '/__filepress/genie/scan') {
+						const body = JSON.parse((await readBody(req)) || '{}');
+						return sendJson(res, 200, await scanOllamaHosts({ lan: Boolean(body.lan) }));
+					}
+
 					if (method === 'POST' && path === '/__filepress/genie/inspire') {
 						const body = JSON.parse(await readBody(req));
 						const urls = Array.isArray(body.urls)
@@ -114,6 +120,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 								urls,
 								useLlm: body.useLlm,
 								model: body.model,
+								host: body.host,
 								activate: body.activate,
 								label: body.label
 							})
@@ -131,6 +138,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 							await refineWithOllama(siteRoot, {
 								prompt: body.prompt,
 								model: body.model,
+								host: body.host,
 								activate: body.activate
 							})
 						);

@@ -2,6 +2,30 @@ import type { DesignBrief, SiteIR } from './ir.ts';
 import type { InspirationSignals } from './inspire.ts';
 import { DEFAULT_BRIEF, parseBriefJson } from './theme.ts';
 
+/** Strip trailing slashes; used to compare Genie picker values with env. */
+export function normalizeOllamaHost(host: string): string {
+	return host.trim().replace(/\/+$/, '');
+}
+
+/** Allow only http(s) Ollama URLs (no credentials). */
+export function assertOllamaEndpoint(raw: string): string {
+	const trimmed = raw.trim();
+	if (!trimmed) throw new Error('Ollama host is empty');
+	let url: URL;
+	try {
+		url = new URL(trimmed);
+	} catch {
+		throw new Error(`Invalid Ollama host "${trimmed}"`);
+	}
+	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+		throw new Error(`Ollama host must be http(s), got ${url.protocol}`);
+	}
+	if (url.username || url.password) {
+		throw new Error('Ollama host must not include credentials');
+	}
+	return `${url.protocol}//${url.host}`;
+}
+
 export async function ollamaAvailable(host: string): Promise<boolean> {
 	try {
 		const res = await fetch(`${host.replace(/\/+$/, '')}/api/tags`, {
@@ -37,7 +61,8 @@ export function ollamaSetupHint(host: string): string {
 		`Ollama not reachable at ${h}.`,
 		`Install from https://ollama.com then pull a model (e.g. ollama pull gemma4:12b).`,
 		`For a GPU-tuned named variant, use Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`,
-		`Then set FILEPRESS_OLLAMA_MODEL to that name (and OLLAMA_HOST if remote).`
+		`Then set FILEPRESS_OLLAMA_MODEL to that name (and OLLAMA_HOST if remote).`,
+		`To find other Ollama boxes (Tailscale, LAN, OLLANET_HOSTS), use Genie “Scan network” or filepress import --scan (ollanet).`
 	].join(' ');
 }
 

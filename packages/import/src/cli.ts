@@ -24,6 +24,7 @@ import {
 	ollamaSetupHint,
 	summarizeHtmlForBrief
 } from './ollama.ts';
+import { pickDiscoveredServer, scanOllamaNetwork } from './ollanet-scan.ts';
 import { harvestImagesFromPage, planImages, type ImagePlan } from './images.ts';
 import { formatAttributionMarkdown, planStockCovers } from './stock.ts';
 import { DEFAULT_BRIEF, themeCssFromBrief, tokensFromSourceCss } from './theme.ts';
@@ -57,22 +58,30 @@ function parseArgs(argv: string[]) {
 		author?: string;
 		url?: string;
 		ollama: string;
+		ollamaExplicit: boolean;
 		model: string;
+		modelExplicit: boolean;
 		noLlm: boolean;
 		dryRun: boolean;
 		force: boolean;
 		yes: boolean;
 		fetchImages: boolean;
+		scan: boolean;
+		lan: boolean;
 	} = {
 		_: [],
 		inspire: [],
 		ollama: process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434',
+		ollamaExplicit: Boolean(process.env.OLLAMA_HOST?.trim()),
 		model: process.env.FILEPRESS_OLLAMA_MODEL?.trim() || 'gemma4:12b',
+		modelExplicit: Boolean(process.env.FILEPRESS_OLLAMA_MODEL?.trim()),
 		noLlm: false,
 		dryRun: false,
 		force: false,
 		yes: false,
-		fetchImages: false
+		fetchImages: false,
+		scan: false,
+		lan: false
 	};
 
 	for (let i = 0; i < argv.length; i++) {
@@ -89,13 +98,24 @@ function parseArgs(argv: string[]) {
 		else if (a === '--title') out.title = next();
 		else if (a === '--author') out.author = next();
 		else if (a === '--url') out.url = next();
-		else if (a === '--ollama') out.ollama = next();
-		else if (a === '--model') out.model = next();
+		else if (a === '--ollama') {
+			out.ollama = next();
+			out.ollamaExplicit = true;
+		}
+		else if (a === '--model') {
+			out.model = next();
+			out.modelExplicit = true;
+		}
 		else if (a === '--no-llm') out.noLlm = true;
 		else if (a === '--dry-run') out.dryRun = true;
 		else if (a === '--force') out.force = true;
 		else if (a === '--yes' || a === '-y') out.yes = true;
 		else if (a === '--fetch-images') out.fetchImages = true;
+		else if (a === '--scan') out.scan = true;
+		else if (a === '--lan') {
+			out.lan = true;
+			out.scan = true;
+		}
 		else if (a === '--help' || a === '-h') out._.push('help');
 		else out._.push(a);
 	}
@@ -106,6 +126,55 @@ async function prompt(rl: ReturnType<typeof createInterface>, q: string, def?: s
 	const hint = def ? ` [${def}]` : '';
 	const ans = (await rl.question(`${q}${hint}: `)).trim();
 	return ans || def || '';
+}
+
+async function maybeScanOllama(
+	args: ReturnType<typeof parseArgs>,
+	rl: ReturnType<typeof createInterface> | null
+): Promise<{ host: string; model: string }> {
+	let host = args.ollama;
+	let model = args.model;
+	if (args.noLlm || !args.scan) return { host, model };
+
+	console.log(
+		args.lan
+			? 'import: scanning for Ollama (localhost, config, Tailscale, LAN) …'
+			: 'import: scanning for Ollama (localhost, config, Tailscale) …'
+	);
+	const result = await scanOllamaNetwork({ lan: args.lan });
+	if (result.error) {
+		console.warn(`import: ollanet scan failed: ${result.error}`);
+		return { host, model };
+	}
+	if (!result.servers.length) {
+		console.warn(
+			'import: no Ollama servers found. Add ~/.ollanet/config.json hosts, set OLLANET_HOSTS, or pass --lan.'
+		);
+		return { host, model };
+	}
+
+	for (const [i, s] of result.servers.entries()) {
+		const models = s.models.length ? s.models.join(', ') : '(no models)';
+		console.log(`  ${i + 1}. ${s.label}  ${s.endpoint}  ${models}`);
+	}
+
+	let picked = pickDiscoveredServer(result.servers, args.ollamaExplicit ? host : undefined);
+	if (rl && result.servers.length > 1) {
+		const def = String((picked ? result.servers.indexOf(picked) : 0) + 1);
+		const ans = await prompt(rl, 'Ollama server number', def);
+		const idx = Number(ans) - 1;
+		if (Number.isInteger(idx) && result.servers[idx]) picked = result.servers[idx];
+	}
+	if (picked) {
+		host = picked.endpoint;
+		if (!args.modelExplicit) {
+			const preferred = process.env.FILEPRESS_OLLAMA_MODEL?.trim();
+			if (preferred && picked.models.includes(preferred)) model = preferred;
+			else if (picked.models[0]) model = picked.models[0];
+		}
+		console.log(`import: using ${host} · ${model}`);
+	}
+	return { host, model };
 }
 
 async function main() {
@@ -121,6 +190,8 @@ Options:
   --title / --author / --url
   --ollama <host>      Default http://127.0.0.1:11434
   --model <name>       Default gemma4:12b
+  --scan               Discover Ollama hosts via ollanet (localhost, config, Tailscale)
+  --lan                Also TCP-scan local LAN (implies --scan)
   --no-llm             Skip Ollama; token theme from source CSS / defaults
   --dry-run            Crawl + report only (no write)
   --force              Overwrite generated content in --out
@@ -232,6 +303,9 @@ Options:
 					};
 
 		if (!opts.noLlm) {
+			const picked = await maybeScanOllama(args, rl);
+			opts.ollamaHost = picked.host;
+			opts.ollamaModel = picked.model;
 			const up = await ollamaAvailable(opts.ollamaHost);
 			if (!up) {
 				console.warn(`import: ${ollamaSetupHint(opts.ollamaHost)}`);

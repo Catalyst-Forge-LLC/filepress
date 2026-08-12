@@ -4,6 +4,15 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-12) — ollanet + Genie host picker
+
+- **ollanet** (`^0.3.0`) is a FilePress dependency. Genie **Scan network** and `filepress import --scan` / `--lan` discover other Ollama servers (localhost, `~/.ollanet/config.json`, `OLLANET_HOSTS`, Tailscale). **LAN TCP scan is opt-in** — never on `/health`.
+- Published ollanet 0.3.0 has no package `exports`; import `ollanet/dist/scan.js` (`scanNetwork`). Wrapper: `packages/import/src/ollanet-scan.ts`.
+- Genie refine/inspire accept `host` + `model`. Default remains `OLLAMA_HOST` / `FILEPRESS_OLLAMA_MODEL`.
+- Do **not** advance ForgeKit phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-11) — read this first
 
 Workspace path may have reset chat history (Cursor often keys history to folder path). **Pick up here.**
@@ -135,7 +144,7 @@ D1 gray-matter+remark · D2 adapter-static · D3/D4 core/site + pinned deps · D
 - Full content engine + routes + RSS/sitemap/robots + Essay theme + D12 feature batch  
 - Option C+D packaging (one app, content-only sites, CLI, external scaffold)  
 - Site import CLI (`filepress import`) + inspire/theme/stock/Openverse  
-- Genie Mode **M0–M2** (health, versions, steers, stock, upload, activate, inspire, Ollama refine, config patches)  
+- Genie Mode **M0–M2** (health, versions, steers, stock, upload, activate, inspire, Ollama refine, config patches, optional ollanet host scan)  
 - Public-prep: MIT, latin fonts, hljs allowlist, publish `files` includes import  
 - Rebrand to FilePress / `getfilepress`
 

@@ -28,6 +28,14 @@
 		};
 	};
 
+	type DiscoveredServer = {
+		label: string;
+		endpoint: string;
+		source: string;
+		self: boolean;
+		models: string[];
+	};
+
 	type TabId = 'refine' | 'look' | 'images' | 'inspire' | 'config' | 'history';
 
 	const TABS: Array<{ id: TabId; label: string; hint: string }> = [
@@ -49,6 +57,11 @@
 	let inspireUrls = $state('https://www.catalystforge.com\n');
 	let useLlm = $state(true);
 	let selectedModel = $state('');
+	let selectedHost = $state('');
+	let discovered = $state<DiscoveredServer[]>([]);
+	let includeLan = $state(false);
+	let scanning = $state(false);
+	let scanNote = $state('');
 	let refinePrompt = $state('');
 	let cfgLede = $state('');
 	let cfgTagline = $state('');
@@ -73,6 +86,7 @@
 		try {
 			health = await api('/health');
 			if (health?.brief?.tokens?.accent) accent = health.brief.tokens.accent;
+			if (health?.ollama?.host && !selectedHost) selectedHost = health.ollama.host;
 			if (health?.ollama?.model && !selectedModel) selectedModel = health.ollama.model;
 			else if (health?.ollama?.models?.length && !selectedModel) {
 				selectedModel = health.ollama.models[0];
@@ -160,6 +174,82 @@
 		}
 	}
 
+	function normalizeHost(host: string) {
+		return host.trim().replace(/\/+$/, '').toLowerCase();
+	}
+
+	function serverOptions(): DiscoveredServer[] {
+		const map = new Map<string, DiscoveredServer>();
+		if (health?.ollama?.host) {
+			map.set(normalizeHost(health.ollama.host), {
+				label: `OLLAMA_HOST (${health.ollama.host})`,
+				endpoint: health.ollama.host.replace(/\/+$/, ''),
+				source: 'env',
+				self: true,
+				models: health.ollama.models ?? []
+			});
+		}
+		for (const s of discovered) {
+			map.set(normalizeHost(s.endpoint), s);
+		}
+		return [...map.values()];
+	}
+
+	function modelsForHost(host: string): string[] {
+		const hit = serverOptions().find((s) => normalizeHost(s.endpoint) === normalizeHost(host));
+		return hit?.models ?? health?.ollama?.models ?? [];
+	}
+
+	function pickModel(models: string[], preferred: string) {
+		if (preferred && models.includes(preferred)) return preferred;
+		return models[0] || preferred || '';
+	}
+
+	function onHostChange() {
+		selectedModel = pickModel(modelsForHost(selectedHost), selectedModel || health?.ollama?.model || '');
+	}
+
+	function hostIsReady() {
+		if (modelsForHost(selectedHost).length) return true;
+		if (!health) return false;
+		return (
+			health.ollama.available &&
+			normalizeHost(selectedHost || health.ollama.host) === normalizeHost(health.ollama.host)
+		);
+	}
+
+	async function runScan() {
+		scanning = true;
+		error = '';
+		scanNote = includeLan ? 'Scanning LAN + known hosts…' : 'Scanning known hosts / Tailscale…';
+		try {
+			const data = await api('/scan', {
+				method: 'POST',
+				body: JSON.stringify({ lan: includeLan })
+			});
+			discovered = Array.isArray(data.servers) ? data.servers : [];
+			if (data.error) {
+				scanNote = data.error;
+			} else if (!discovered.length) {
+				scanNote =
+					'No Ollama servers found. Add hosts in ~/.ollanet/config.json, set OLLANET_HOSTS, or enable LAN.';
+			} else {
+				const sources = Array.isArray(data.sources) ? data.sources.join(', ') : 'scan';
+				scanNote = `Found ${discovered.length} server${discovered.length === 1 ? '' : 's'} (${sources}).`;
+			}
+			const options = serverOptions();
+			if (!options.some((s) => normalizeHost(s.endpoint) === normalizeHost(selectedHost))) {
+				selectedHost = options[0]?.endpoint || selectedHost;
+			}
+			onHostChange();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			scanNote = '';
+		} finally {
+			scanning = false;
+		}
+	}
+
 	async function runInspire() {
 		loading = true;
 		error = '';
@@ -172,7 +262,8 @@
 						.map((s) => s.trim())
 						.filter(Boolean),
 					useLlm,
-					model: selectedModel || undefined
+					model: selectedModel || undefined,
+					host: selectedHost || undefined
 				})
 			});
 			location.reload();
@@ -190,7 +281,8 @@
 				method: 'POST',
 				body: JSON.stringify({
 					prompt: refinePrompt,
-					model: selectedModel || undefined
+					model: selectedModel || undefined,
+					host: selectedHost || undefined
 				})
 			});
 			location.reload();
@@ -261,31 +353,56 @@
 						<section class="genie-sec">
 							<h3>Ollama refine</h3>
 							<p class="genie-howto">
-								Describe the look you want in plain language. Genie asks your local Ollama
-								model for a design brief, writes a new version, and activates it (page reloads).
-								Undo anytime from <strong>History</strong>.
+								Describe the look you want in plain language. Genie asks Ollama — local or another
+								server you scan on the network — for a design brief, writes a new version, and
+								activates it (page reloads). Undo anytime from <strong>History</strong>.
 							</p>
 
-							<div class="genie-status-pill" class:up={health.ollama.available}>
-								{health.ollama.available ? 'Ollama up' : 'Ollama down'}
-								{#if health.ollama.available && selectedModel}
+							<div class="genie-status-pill" class:up={hostIsReady()}>
+								{hostIsReady() ? 'Ollama up' : 'Ollama down'}
+								{#if selectedHost}
+									· {selectedHost.replace(/^https?:\/\//, '')}
+								{/if}
+								{#if hostIsReady() && selectedModel}
 									· {selectedModel}
 								{/if}
 							</div>
 
-							{#if health.ollama.available && health.ollama.models?.length}
+							<label class="genie-row">
+								Server
+								<select bind:value={selectedHost} disabled={loading || scanning} onchange={onHostChange}>
+									{#each serverOptions() as s (s.endpoint)}
+										<option value={s.endpoint}>{s.label}</option>
+									{/each}
+								</select>
+							</label>
+							<div class="genie-scan-row">
+								<label class="genie-check genie-check-inline">
+									<input type="checkbox" bind:checked={includeLan} disabled={loading || scanning} />
+									Include LAN
+								</label>
+								<button type="button" disabled={loading || scanning} onclick={runScan}>
+									{scanning ? 'Scanning…' : 'Scan network'}
+								</button>
+							</div>
+							{#if scanNote}
+								<p class="genie-muted">{scanNote}</p>
+							{/if}
+
+							{#if hostIsReady() && modelsForHost(selectedHost).length}
 								<label class="genie-row">
 									Model
-									<select bind:value={selectedModel} disabled={loading}>
-										{#each health.ollama.models as m (m)}
+									<select bind:value={selectedModel} disabled={loading || scanning}>
+										{#each modelsForHost(selectedHost) as m (m)}
 											<option value={m}>{m}</option>
 										{/each}
 									</select>
 								</label>
-							{:else if !health.ollama.available}
+							{:else if !hostIsReady()}
 								<p class="genie-hint">{health.ollama.hint}</p>
 								<p class="genie-muted">
-									Steers, images, and inspire still work without Ollama — use the other tabs.
+									Steers, images, and inspire still work without Ollama — use the other tabs. Or scan
+									for a server on Tailscale / LAN.
 								</p>
 							{:else}
 								<p class="genie-hint">{health.ollama.hint}</p>
@@ -297,20 +414,21 @@
 									rows="3"
 									bind:value={refinePrompt}
 									placeholder="warmer gold accents, denser nav, softer hero, less noise"
-									disabled={loading || !health.ollama.available}
+									disabled={loading || !hostIsReady()}
 								></textarea>
 							</label>
 							<button
 								type="button"
 								class="genie-primary"
-								disabled={loading || !health.ollama.available || !refinePrompt.trim()}
+								disabled={loading || scanning || !hostIsReady() || !refinePrompt.trim()}
 								onclick={runRefine}
 							>
 								{loading ? 'Working…' : 'Refine & activate'}
 							</button>
 							<p class="genie-muted">
-								Tip: set <code>FILEPRESS_OLLAMA_MODEL</code> for a default; Finetuna can tune a
-								named variant.
+								Tip: set <code>FILEPRESS_OLLAMA_MODEL</code> / <code>OLLAMA_HOST</code> for defaults;
+								<a href="https://ollanet.dev" target="_blank" rel="noreferrer">ollanet</a> finds other
+								boxes. Finetuna can tune a named variant.
 							</p>
 						</section>
 					{:else if tab === 'look'}
@@ -445,6 +563,9 @@
 								Refine with Ollama when available
 								{#if selectedModel}
 									<span class="genie-muted">({selectedModel})</span>
+								{/if}
+								{#if selectedHost}
+									<span class="genie-muted">{selectedHost.replace(/^https?:\/\//, '')}</span>
 								{/if}
 							</label>
 							<button type="button" class="genie-primary" disabled={loading} onclick={runInspire}>
@@ -717,6 +838,18 @@
 		gap: 0.45rem;
 		font-size: 0.8rem;
 		margin-bottom: 0.65rem;
+	}
+
+	.genie-scan-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.65rem;
+	}
+
+	.genie-check-inline {
+		margin-bottom: 0;
 	}
 
 	.genie-chips {

@@ -13,12 +13,14 @@ import {
 	type InspirationSignals
 } from '../../../../import/src/inspire.ts';
 import {
+	assertOllamaEndpoint,
 	generateDesignBrief,
 	listOllamaModels,
 	ollamaAvailable,
 	ollamaSetupHint,
 	summarizeHtmlForBrief
 } from '../../../../import/src/ollama.ts';
+import { scanOllamaNetwork } from '../../../../import/src/ollanet-scan.ts';
 import type { DesignBrief, SiteIR } from '../../../../import/src/ir.ts';
 import {
 	activateVersion,
@@ -101,7 +103,7 @@ export function ensureBaselineIfNeeded(siteRoot: string) {
 }
 
 function ollamaHost() {
-	return process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434';
+	return assertOllamaEndpoint(process.env.OLLAMA_HOST?.trim() || 'http://127.0.0.1:11434');
 }
 
 function defaultOllamaModel() {
@@ -125,7 +127,7 @@ export async function health(siteRoot: string) {
 			available: up,
 			hint: up
 				? models.length
-					? `Ollama is reachable (${models.length} model${models.length === 1 ? '' : 's'}). Pick one below, or tune with Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`
+					? `Ollama is reachable (${models.length} model${models.length === 1 ? '' : 's'}). Pick a server/model below, or tune with Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`
 					: `Ollama is up but no models listed. Pull one (e.g. ollama pull ${model}) or use Finetuna: https://github.com/Catalyst-Forge-LLC/finetuna`
 				: ollamaSetupHint(host)
 		},
@@ -138,6 +140,20 @@ export async function health(siteRoot: string) {
 			parentId: v.parentId
 		})),
 		brief: loadWorkingBrief(siteRoot)
+	};
+}
+
+function resolveRequestHost(raw?: string) {
+	return raw?.trim() ? assertOllamaEndpoint(raw) : ollamaHost();
+}
+
+/** Optional ollanet discovery (localhost / config / Tailscale; LAN only when requested). */
+export async function scanOllamaHosts(opts: { lan?: boolean } = {}) {
+	const result = await scanOllamaNetwork({ lan: Boolean(opts.lan) });
+	return {
+		...result,
+		defaultHost: ollamaHost(),
+		defaultModel: defaultOllamaModel()
 	};
 }
 
@@ -309,6 +325,7 @@ export async function runInspire(
 		urls: string[];
 		useLlm?: boolean;
 		model?: string;
+		host?: string;
 		activate?: boolean;
 		label?: string;
 	}
@@ -335,7 +352,7 @@ export async function runInspire(
 
 	let brief = mergeBrief(loadWorkingBrief(siteRoot), briefFromInspiration(signals));
 	// Prefer inspire look for chrome; keep any already-chosen image paths unless inspire cleared them
-	const host = ollamaHost();
+	const host = resolveRequestHost(opts.host);
 	const model = (opts.model || defaultOllamaModel()).trim();
 	let llm = { used: false, model: null as string | null, host: null as string | null };
 
@@ -375,13 +392,13 @@ export async function runInspire(
 /** Ollama refine of the working brief from a short natural-language prompt. */
 export async function refineWithOllama(
 	siteRoot: string,
-	opts: { prompt: string; model?: string; activate?: boolean }
+	opts: { prompt: string; model?: string; host?: string; activate?: boolean }
 ) {
 	ensureBaselineIfNeeded(siteRoot);
 	const prompt = opts.prompt.trim();
 	if (!prompt) throw new Error('`prompt` is required');
 
-	const host = ollamaHost();
+	const host = resolveRequestHost(opts.host);
 	const model = (opts.model || defaultOllamaModel()).trim();
 	if (!(await ollamaAvailable(host))) {
 		throw new Error(ollamaSetupHint(host));

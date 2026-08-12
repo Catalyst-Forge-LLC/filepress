@@ -39,7 +39,7 @@ The site folder only needs:
 
 ### Import an existing site
 
-Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling FilePress site, and optionally ask a local Ollama model for a token theme:
+Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling FilePress site, and optionally ask Ollama (local or a host found with `--scan`) for a token theme:
 
 ```bash
 pnpm install

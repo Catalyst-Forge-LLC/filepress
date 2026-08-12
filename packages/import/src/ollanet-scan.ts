@@ -1,8 +1,9 @@
-/// <reference path="./ollanet-shim.d.ts" />
 /**
- * Optional network discovery for Ollama via ollanet.
+ * Optional network discovery for Ollama via ollanet (≥ 0.4.0).
  * LAN TCP scan is opt-in (slow); default scan is localhost + config + Tailscale.
+ * Node-only — Genie middleware and the import CLI, never the Svelte client.
  */
+import { scanNetwork } from 'ollanet';
 
 export type DiscoveredOllamaServer = {
 	label: string;
@@ -21,7 +22,8 @@ export type OllamaScanResult = {
 	error?: string;
 };
 
-type OllanetPayload = {
+/** Loose scan JSON (ollanet ScanPayload plus incomplete fixtures). */
+type ScanPayloadLike = {
 	network?: string;
 	sources?: string[];
 	scanned?: number;
@@ -54,7 +56,7 @@ export function serverLabel(server: {
 	return bits.join(' · ');
 }
 
-export function mapScanPayload(payload: OllanetPayload): OllamaScanResult {
+export function mapScanPayload(payload: ScanPayloadLike): OllamaScanResult {
 	const servers = (payload.servers ?? [])
 		.map((s) => {
 			const endpoint = (s.endpoint || '').trim().replace(/\/+$/, '');
@@ -106,18 +108,6 @@ export function pickDiscoveredServer(
 	return pool.find((s) => s.self) ?? pool[0];
 }
 
-async function loadScanNetwork(): Promise<
-	(options?: { includeOffline?: boolean; lanScan?: boolean }) => Promise<OllanetPayload>
-> {
-	// Published ollanet 0.3.0 has no package "exports"/"main" — only dist/.
-	// Do not `import('ollanet')` (bare); Vite fails to resolve a package entry.
-	const mod = await import('ollanet/dist/scan.js');
-	if (typeof mod.scanNetwork !== 'function') {
-		throw new Error('ollanet is installed but dist/scan.js does not export scanNetwork');
-	}
-	return mod.scanNetwork;
-}
-
 /**
  * Discover reachable Ollama servers. Never throws — callers get `error` text.
  * Pass `lan: true` to TCP-scan local /24s (can take several seconds).
@@ -126,7 +116,6 @@ export async function scanOllamaNetwork(
 	opts: { lan?: boolean } = {}
 ): Promise<OllamaScanResult> {
 	try {
-		const scanNetwork = await loadScanNetwork();
 		const payload = await scanNetwork({ lanScan: Boolean(opts.lan) });
 		return mapScanPayload(payload);
 	} catch (e) {

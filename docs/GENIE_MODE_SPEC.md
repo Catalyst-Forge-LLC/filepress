@@ -70,7 +70,7 @@ On Genie open / first LLM action, filepress should:
 1. Probe `OLLAMA_HOST` (default `http://127.0.0.1:11434`) — e.g. `GET /api/tags`.
 2. If unreachable: show a verbose panel message with install link and retry.
 3. If reachable but no suitable model: list tags and suggest pulling a default (align with import: `FILEPRESS_OLLAMA_MODEL`, e.g. `gemma4:12b`).
-4. **Optional network scan** via **[ollanet](https://ollanet.dev)** (`POST /__filepress/genie/scan`). Default scan is localhost + `~/.ollanet/config.json` + `OLLANET_HOSTS` + Tailscale if the CLI is present. **LAN TCP scan is opt-in** (Genie “Include LAN” / `filepress import --lan`) — do not run it on every health check.
+4. **Optional network scan** via **[ollanet](https://ollanet.dev)** ≥ 0.4.0 (`import { scanNetwork } from 'ollanet'`, `POST /__filepress/genie/scan`). Default scan is localhost + `~/.ollanet/config.json` + `OLLANET_HOSTS` + Tailscale if the CLI is present. **LAN TCP scan is opt-in** (Genie “Include LAN” / `filepress import --lan`) — do not run it on every health check.
 5. **Suggest [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna)** (Catalyst Forge) to create a GPU-tuned, named Ollama variant with a remembered Modelfile — better context/batch fit for repeated Genie / import sessions than stock defaults alone.
 
 Example panel copy (normative intent, not final UI strings):

@@ -73,7 +73,7 @@
 		"gray-matter": "^4.0.3",
 		"highlight.js": "^11.11.1",
 		"linkedom": "^0.18.12",
-		"ollanet": "^0.3.0",
+		"ollanet": "^0.4.0",
 		"rehype-autolink-headings": "^7.1.0",
 		"rehype-highlight": "^7.0.2",
 		"rehype-raw": "^7.0.0",

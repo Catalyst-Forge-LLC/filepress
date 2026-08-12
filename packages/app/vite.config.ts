@@ -80,13 +80,12 @@ export default defineConfig({
 			{ find: /^@filepress\/core$/, replacement: coreEntry }
 		]
 	},
-	// ollanet 0.3.0 is CLI-shaped (no package exports). Keep it out of Vite's
-	// optimizer; Genie loads `ollanet/dist/scan.js` from Node middleware only.
+	// ollanet is Node-only (net / child_process). Genie calls it from middleware.
 	optimizeDeps: {
 		exclude: ['ollanet']
 	},
 	ssr: {
-		external: ['ollanet', 'ollanet/dist/scan.js']
+		external: ['ollanet']
 	},
 	plugins: [
 		criticalThemePlugin(siteTheme, criticalThemeOut),

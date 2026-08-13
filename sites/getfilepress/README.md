@@ -13,7 +13,7 @@ pnpm build:www               # → sites/getfilepress/build/
 pnpm filepress check --site getfilepress
 
 # Cloudflare Pages (Wrangler) — once: wrangler login && wrangler pages project create getfilepress
-pnpm deploy:www              # build + wrangler pages deploy → project "getfilepress"
+pnpm ship                    # build + wrangler pages deploy → project "getfilepress"
 ```
 
 | Path | Role |

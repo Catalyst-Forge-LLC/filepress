@@ -104,5 +104,5 @@ Optional content under `sites/*`:
 ```bash
 pnpm filepress build --site demo
 pnpm build:www          # product site → sites/getfilepress/build/
-pnpm deploy:www         # Wrangler Pages project `getfilepress`
+pnpm ship               # Wrangler Pages project `getfilepress`
 ```

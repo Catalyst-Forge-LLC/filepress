@@ -1,0 +1,8 @@
+---
+description: Deploy the product site with pnpm ship
+alwaysApply: true
+---
+
+# Deploy
+
+Product-site publish is `pnpm ship` (builds `sites/getfilepress`, then Wrangler Pages project `getfilepress`). `deploy:www` is the same command.

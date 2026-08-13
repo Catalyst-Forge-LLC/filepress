@@ -69,7 +69,7 @@ pnpm dev                 # → demo fixture
 pnpm build               # → sites/demo/build/
 pnpm dev:www             # → product site
 pnpm build:www           # → sites/getfilepress/build/
-pnpm deploy:www          # build + Wrangler Pages deploy (project: getfilepress)
+pnpm ship                # build + Wrangler Pages deploy (project: getfilepress)
 ```
 
 ## Site configuration

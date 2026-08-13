@@ -69,7 +69,7 @@ npx wrangler pages deploy build --project-name <your-pages-project>
 In this engine monorepo, the product site uses:
 
 ```bash
-pnpm deploy:www   # builds sites/getfilepress → Wrangler project `getfilepress`
+pnpm ship         # builds sites/getfilepress → Wrangler project `getfilepress`
 ```
 
 ## Any other static host

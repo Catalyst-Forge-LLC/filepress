@@ -1,6 +1,6 @@
 {
 	"name": "@filepress/core",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"private": true,
 	"type": "module",
 	"description": "Reusable engine for filepress sites: content loader, Markdown pipeline, feed/sitemap builders, config helper, Essay theme, and shared Svelte components.",

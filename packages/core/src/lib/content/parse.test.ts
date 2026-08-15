@@ -174,6 +174,9 @@ describe('parsePage', () => {
 		expect(() =>
 			parsePage('/pages/x.md', frontmatter('title: Nope\nslug: tags'))
 		).toThrow(/reserved by the engine/);
+		expect(() =>
+			parsePage('/pages/docs.md', frontmatter('title: Nope'), ['docs'])
+		).toThrow(/reserved by the engine/);
 	});
 
 	it('requires title', () => {

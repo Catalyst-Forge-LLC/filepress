@@ -46,7 +46,7 @@ ${items}
 `;
 }
 
-/** Build a sitemap covering the index, static pages, paginated pages, topics, tags, and posts. */
+/** Build a sitemap covering the index, static pages, paginated pages, topics, tags, posts, and path mounts. */
 export function buildSitemapXml(
 	site: SiteConfig,
 	data: {
@@ -55,6 +55,8 @@ export function buildSitemapXml(
 		pageCount: number;
 		/** Published static pages (`pages/*.md`). */
 		pages?: PageMeta[];
+		/** Absolute site paths from `paths` mounts (e.g. `/docs`, `/docs/install`). */
+		mountUrls?: string[];
 	}
 ): string {
 	const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -63,6 +65,7 @@ export function buildSitemapXml(
 	for (let n = 2; n <= data.pageCount; n++) extraPages.push({ loc: absoluteUrl(site, `/page/${n}`) });
 
 	const staticPages = data.pages ?? [];
+	const mountUrls = data.mountUrls ?? [];
 
 	const urls: { loc: string; lastmod?: string }[] = [
 		{ loc: absoluteUrl(site, '/') },
@@ -71,6 +74,7 @@ export function buildSitemapXml(
 		{ loc: absoluteUrl(site, '/tags') },
 		...extraPages,
 		...staticPages.map((p) => ({ loc: absoluteUrl(site, `/${p.slug}`) })),
+		...mountUrls.map((path) => ({ loc: absoluteUrl(site, path) })),
 		...data.posts.map((p) => ({
 			loc: absoluteUrl(site, `/posts/${p.slug}`),
 			lastmod: p.updated ?? p.date

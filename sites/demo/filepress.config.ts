@@ -9,11 +9,13 @@ export default defineFilepressConfig({
 	nav: [
 		{ label: 'Posts', href: '/' },
 		{ label: 'About', href: '/about' },
+		{ label: 'Docs', href: '/docs' },
 		{ label: 'Topics', href: '/topics' }
 	],
 	topics: [
 		{ label: 'Getting started', tag: 'filepress' },
 		{ label: 'Workflow', tag: 'workflow' },
 		{ label: 'Notes', tag: 'notes' }
-	]
+	],
+	paths: [{ url: '/docs', dir: 'mounts/docs' }]
 });

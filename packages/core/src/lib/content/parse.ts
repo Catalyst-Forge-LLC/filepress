@@ -157,7 +157,11 @@ export function assertUniqueSlugs(sources: { slug: string; sourcePath: string }[
 const RESERVED = new Set<string>(RESERVED_PAGE_SLUGS);
 
 /** Parse and validate one static page Markdown file. Throws ContentError. */
-export function parsePage(path: string, raw: string): PageSource {
+export function parsePage(
+	path: string,
+	raw: string,
+	extraReservedSlugs: string[] = []
+): PageSource {
 	let parsed: matter.GrayMatterFile<string>;
 	try {
 		parsed = matter(raw);
@@ -180,9 +184,14 @@ export function parsePage(path: string, raw: string): PageSource {
 			`${path}: could not derive a non-empty slug from ${explicitSlug ? 'the `slug` field' : 'the filename'}.`
 		);
 	}
-	if (RESERVED.has(slug)) {
+	const reserved = new Set([...RESERVED, ...extraReservedSlugs.map((s) => s.trim().toLowerCase())]);
+	if (reserved.has(slug)) {
+		const extras =
+			extraReservedSlugs.length > 0
+				? `, plus path mounts: ${extraReservedSlugs.join(', ')}`
+				: '';
 		throw new ContentError(
-			`${path}: slug "${slug}" is reserved by the engine (${RESERVED_PAGE_SLUGS.join(', ')}). ` +
+			`${path}: slug "${slug}" is reserved by the engine (${RESERVED_PAGE_SLUGS.join(', ')}${extras}). ` +
 				`Rename the file or set a different \`slug\` in frontmatter.`
 		);
 	}

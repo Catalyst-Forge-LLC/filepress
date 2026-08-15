@@ -7,6 +7,8 @@
  * keeps `@filepress/core` app-agnostic and importable from both client and
  * server code.
  */
+import { normalizePathMounts, type PathMount } from './paths-shared';
+export type { PathMount } from './paths-shared';
 export interface NewsletterConfig {
 	/** Full URL to an external signup form (Buttondown, Substack, etc.). */
 	url: string;
@@ -64,6 +66,12 @@ export interface SiteConfig {
 	footerLinks: NavItem[];
 	topics: Topic[];
 	newsletter: NewsletterConfig | null;
+	/**
+	 * Site-owned trees mounted at a URL prefix (e.g. `/docs` ← `docs/dist`).
+	 * Copied into `build/` on `filepress build`; served in `filepress dev`.
+	 * FilePress does not parse or theme mount contents.
+	 */
+	paths: PathMount[];
 }
 
 /** What a site author supplies; everything but `title` and `url` is optional. */
@@ -85,6 +93,8 @@ export interface SiteConfigInput {
 	footerLinks?: NavItem[];
 	topics?: Topic[];
 	newsletter?: NewsletterConfig | null;
+	/** Mount site-relative dirs at URL prefixes (docs shells, etc.). */
+	paths?: PathMount[];
 }
 
 const defaultFooterLinks: NavItem[] = [
@@ -167,7 +177,8 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		nav: normalizeNavItems(input.nav) ?? defaultNav,
 		footerLinks: normalizeNavItems(input.footerLinks) ?? [...defaultFooterLinks],
 		topics: input.topics ?? [],
-		newsletter: input.newsletter ?? null
+		newsletter: input.newsletter ?? null,
+		paths: normalizePathMounts(input.paths)
 	};
 }
 

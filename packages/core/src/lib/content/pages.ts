@@ -20,6 +20,11 @@ export interface CreatePagesOptions {
 	/** Absolute or cwd-relative path to `pages/`. Missing dir → empty site (ok). */
 	pagesDir: string;
 	listDrafts?: boolean;
+	/**
+	 * Extra slugs reserved against `pages/*.md` (e.g. first segments of `paths` mounts).
+	 * Merged with {@link RESERVED_PAGE_SLUGS}.
+	 */
+	extraReservedSlugs?: string[];
 }
 
 /**
@@ -31,6 +36,9 @@ export function createPages(opts: CreatePagesOptions): PagesApi {
 		? opts.pagesDir
 		: resolve(process.cwd(), opts.pagesDir);
 	const listDrafts = resolveListDrafts(opts.listDrafts);
+	const extraReserved = (opts.extraReservedSlugs ?? [])
+		.map((s) => s.trim().toLowerCase())
+		.filter(Boolean);
 
 	let cache: PageSource[] | null = null;
 
@@ -52,7 +60,9 @@ export function createPages(opts: CreatePagesOptions): PagesApi {
 
 		const pages = filenames
 			.sort((a, b) => a.localeCompare(b))
-			.map((name) => parsePage(`/pages/${name}`, readFileSync(join(dir, name), 'utf8')));
+			.map((name) =>
+				parsePage(`/pages/${name}`, readFileSync(join(dir, name), 'utf8'), extraReserved)
+			);
 
 		assertUniqueSlugs(pages);
 		cache = pages;

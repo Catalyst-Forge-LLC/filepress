@@ -100,7 +100,7 @@ function findPackageBin(pkgName, binName, starts = [appDir, importDir, packageRo
 	return null;
 }
 
-function runNodeBin(pkgName, binName, args, { cwd, env } = {}) {
+function runNodeBin(pkgName, binName, args, { cwd, env, onSuccess } = {}) {
 	const bin = findPackageBin(pkgName, binName);
 	if (!bin) {
 		fail(
@@ -116,7 +116,19 @@ function runNodeBin(pkgName, binName, args, { cwd, env } = {}) {
 	});
 	child.on('exit', (code, signal) => {
 		if (signal) process.kill(process.pid, signal);
-		process.exit(code ?? 1);
+		if (code) process.exit(code ?? 1);
+		if (typeof onSuccess === 'function') {
+			const result = onSuccess();
+			// If onSuccess returns a ChildProcess, wait for it instead of exiting now.
+			if (result && typeof result.on === 'function') {
+				result.on('exit', (c, s) => {
+					if (s) process.kill(process.pid, s);
+					process.exit(c ?? 1);
+				});
+				return;
+			}
+		}
+		process.exit(0);
 	});
 	return child;
 }
@@ -269,5 +281,21 @@ function runSiteCommand(argv) {
 	const viteArgs = [command];
 	if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? 'true' : args.host);
 	viteArgs.push(...args.extra);
-	runNodeBin('vite', 'vite', viteArgs, { cwd: appDir, env });
+	runNodeBin('vite', 'vite', viteArgs, {
+		cwd: appDir,
+		env,
+		onSuccess:
+			command === 'build'
+				? () => {
+						const copyScript = join(scriptDir, 'copy-path-mounts.mjs');
+						if (!existsSync(copyScript)) return;
+						return spawn(process.execPath, [copyScript, siteRoot], {
+							cwd: packageRoot,
+							env,
+							stdio: 'inherit',
+							shell: false
+						});
+					}
+				: undefined
+	});
 }

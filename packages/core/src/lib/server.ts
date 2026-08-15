@@ -21,7 +21,14 @@ export {
 } from './content/parse';
 
 export { absoluteUrl, ogImageUrl } from './config';
-export type { SiteConfig } from './config';
+export type { SiteConfig, PathMount } from './config';
+export {
+	normalizePathMounts,
+	pathMountReservedSlugs,
+	resolvePathMountDir,
+	copyPathMounts,
+	listPathMountHtmlUrls
+} from './paths';
 export type {
 	PostMeta,
 	PostSource,

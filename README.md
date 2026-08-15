@@ -34,8 +34,9 @@ The site folder only needs:
 - `filepress.config.ts` — title, URL, and other site settings
 - `posts/` — Markdown posts (`/posts/<slug>`)
 - `pages/` — optional static Markdown pages (`about.md` → `/about`)
+- `paths` mounts — optional site-owned HTML/CSS/JS trees at a URL prefix (e.g. `/docs`)
 - `static/` — favicon, images, etc.
-- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, `"getfilepress": "^0.1.1"` from npm, or a git URL + tag/SHA)
+- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, `"getfilepress": "^0.1.3"` from npm, or a git URL + tag/SHA)
 
 ### Import an existing site
 
@@ -104,6 +105,20 @@ export default defineFilepressConfig({
 `title` and `url` are required; missing values fail the build with a clear error.
 
 **Nav / footer:** `nav` is the header; `footerLinks` replaces the default RSS + Topics footer row when set (include those entries yourself if you still want them). Items may set `icon: 'github'` for a built-in mark (`.nav-github` in themes).
+
+### Path mounts
+
+Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress copies it into `build/` after the Kit build and serves it in `filepress dev`. It does **not** parse Markdown or inject Essay chrome into the mount — the site owns the shell (e.g. a docs sidebar).
+
+```ts
+paths: [
+  { url: '/docs', dir: 'docs/dist' }
+]
+```
+
+- `dir` is site-relative; `url` starts with `/` and must not collide with engine routes (`posts`, `writing`, `tags`, …).
+- The first URL segment is reserved against `pages/<slug>.md`.
+- HTML files under the mount are included in `sitemap.xml`.
 
 ## Theming
 

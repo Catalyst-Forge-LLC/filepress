@@ -130,6 +130,34 @@ describe('defineFilepressConfig', () => {
 			/must start with http/
 		);
 	});
+
+	it('defaults paths to an empty array', () => {
+		const cfg = defineFilepressConfig({ title: 'X', url: 'https://x.example.com' });
+		expect(cfg.paths).toEqual([]);
+	});
+
+	it('normalizes path mounts and rejects engine collisions', () => {
+		const cfg = defineFilepressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			paths: [{ url: '/docs/', dir: 'docs/dist/' }]
+		});
+		expect(cfg.paths).toEqual([{ url: '/docs', dir: 'docs/dist' }]);
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				paths: [{ url: '/posts', dir: 'x' }]
+			})
+		).toThrow(/collides with an engine route/);
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				paths: [{ url: '/', dir: 'x' }]
+			})
+		).toThrow(/cannot be/);
+	});
 });
 
 describe('absoluteUrl', () => {

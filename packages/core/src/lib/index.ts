@@ -20,7 +20,8 @@ export type {
 	NewsletterConfig,
 	Topic,
 	NavItem,
-	NavIconName
+	NavIconName,
+	PathMount
 } from './config';
 
 export { formatDate } from './format';

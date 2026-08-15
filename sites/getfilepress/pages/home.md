@@ -24,4 +24,4 @@ Edit on a laptop, on GitHub’s web UI, or from your phone. Push when you’re r
 
 ## What you get
 
-A reverse-chronological index (or a custom home page like this one), per-tag archives, RSS, sitemap, robots.txt, and a quiet Essay theme you can override with a site-root `theme.css`. Optional **Genie Mode** helps you tune look and feel in local `filepress dev` — it never ships in production builds.
+A reverse-chronological index (or a custom home page like this one), per-tag archives, RSS, sitemap, robots.txt, and a quiet Essay theme you can override with a site-root `theme.css`. Optional **`paths` mounts** attach a site-owned HTML tree (docs, a mini-app) at a URL prefix. Optional **Genie Mode** helps you tune look and feel in local `filepress dev` — it never ships in production builds.

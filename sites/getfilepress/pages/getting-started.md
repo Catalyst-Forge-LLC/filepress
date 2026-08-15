@@ -27,16 +27,17 @@ Or depend on the published package from an empty folder (after scaffolding by ha
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.1"
+    "getfilepress": "^0.1.3"
   }
 }
 ```
 
 The site folder stays content-only:
 
-- `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`
+- `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`, optional `paths`
 - `posts/` — dated Markdown posts (`/posts/<slug>`)
 - `pages/` — evergreen Markdown pages (`about.md` → `/about`)
+- `paths` mounts — optional site-owned HTML/CSS/JS trees at a URL prefix (e.g. `/docs`)
 - `static/` — favicon, images, logo
 - `theme.css` — optional Essay overrides
 - `package.json` — `"getfilepress": "link:../filepress"` locally, or npm / git pin in CI
@@ -78,6 +79,19 @@ export default defineFilepressConfig({
 - `icon: 'github'` — built-in mark beside the label; opens in a new tab. Theme class: `.nav-github` (see [`docs/THEME.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/THEME.md)).
 
 For a product-style home (static page at `/`, posts at `/writing`), set `homePage: 'home'` and add `pages/home.md` — this site does exactly that.
+
+### Path mounts
+
+Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress serves the mount in `filepress dev` and copies it into `build/` after the Vite/Kit build. It does **not** parse Markdown or inject Essay chrome — the site owns the shell (for example a docs sidebar).
+
+```ts
+paths: [{ url: '/docs', dir: 'docs/dist' }]
+```
+
+- `dir` is site-relative; `url` starts with `/` and must not collide with engine routes (`posts`, `writing`, `tags`, …).
+- The first URL segment is reserved against `pages/<slug>.md` (so `pages/docs.md` cannot sit next to `url: '/docs'`).
+- HTML files under the mount are included in `sitemap.xml`.
+- The engine fixture lives at `sites/demo/mounts/docs` (`paths: [{ url: '/docs', dir: 'mounts/docs' }]`).
 
 ## Commands
 

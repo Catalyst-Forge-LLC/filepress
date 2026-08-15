@@ -11,6 +11,7 @@ order: 4
 - A reusable engine (`getfilepress` on npm) plus content-only sites
 - Essay theme by default; per-site `theme.css` overrides (CSS Zen Garden style)
 - Static pages, tags, RSS, sitemap, robots.txt
+- Optional `paths` mounts (site-owned HTML at a URL prefix such as `/docs`)
 - Optional import CLI and Genie Mode for local authoring
 
 ## What it is not

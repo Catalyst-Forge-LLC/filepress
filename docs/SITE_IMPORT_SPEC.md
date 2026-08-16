@@ -181,7 +181,7 @@ cd ../example-site && pnpm install && pnpm filepress dev
 
 ## 5. Pipeline architecture
 
-Hard rule (ForgeKit lesson): **code owns structure; the model fills typed slots.**
+Hard rule (ForgeTrail lesson): **code owns structure; the model fills typed slots.**
 
 ```text
 ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐

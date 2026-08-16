@@ -38,9 +38,9 @@
         "Core CRUD works",
         "Hero flow functions end to end",
         "CONTEXT_PROMPT.md created and populated by merging PHASE_1_BRIEF.md (then template lessons as needed)",
-        "README.md created (from ForgeKit template)",
-        "TODO.md created (from ForgeKit template, seeded from PHASE_1_BRIEF §11)",
-        "IDEAS.md created (from ForgeKit template)",
+        "README.md created (from ForgeTrail template)",
+        "TODO.md created (from ForgeTrail template, seeded from PHASE_1_BRIEF §11)",
+        "IDEAS.md created (from ForgeTrail template)",
         "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
       ],
       "exitCriteriaRemaining": [],
@@ -170,7 +170,7 @@
       "completedAt": null,
       "exitCriteriaMet": [],
       "exitCriteriaRemaining": [
-        "BRAND_AND_PRODUCT.md created (from ForgeKit template)",
+        "BRAND_AND_PRODUCT.md created (from ForgeTrail template)",
         "TODO reorganized by brand value pillars",
         "Features mapped to brand pillars",
         "Gap between brand promise and product identified",
@@ -185,21 +185,21 @@
       "completedAt": null,
       "exitCriteriaMet": [],
       "exitCriteriaRemaining": [
-        "CODE_QUALITY.md produced (from ForgeKit template) and critical findings fixed",
-        "BLACK_HAT_REPORT.md produced (via ForgeKit security audit) and critical/high findings fixed",
+        "CODE_QUALITY.md produced (from ForgeTrail template) and critical findings fixed",
+        "BLACK_HAT_REPORT.md produced (via ForgeTrail security audit) and critical/high findings fixed",
         "All findings triaged into TODO.md with P0/P1/P2 priority",
         "All LLM outputs checked against field size limits",
         "No silent failures in core workflows (grep for empty catch blocks)",
         "All API routes return errors in consistent format",
         "All user input validated (centralized Zod schemas recommended)",
         "No unvalidated as-any casts on critical paths",
-        "DEPLOYMENT.md created (from ForgeKit template)",
-        "BUSINESS_PLAN.md created if pursuing paid users (from ForgeKit template)",
-        "TEST_PLAN.md complete or extended (from ForgeKit template)",
+        "DEPLOYMENT.md created (from ForgeTrail template)",
+        "BUSINESS_PLAN.md created if pursuing paid users (from ForgeTrail template)",
+        "TEST_PLAN.md complete or extended (from ForgeTrail template)",
         "TECHNICAL_REFERENCE.md complete and current",
         "Auth flow works end to end (if applicable)",
         "Payment flow works end to end (if applicable)",
-        "Docs alignment audit passed (via ForgeKit docs-alignment audit)",
+        "Docs alignment audit passed (via ForgeTrail docs-alignment audit)",
         "All documentation consolidated and cross-referenced"
       ],
       "notes": []
@@ -410,9 +410,9 @@
     },
     {
       "date": "2026-07-04",
-      "gotcha": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.).",
+      "gotcha": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgetrail/, etc.).",
       "resolution": "Scaffold into a fresh temp dir with fully non-interactive flags, then move files to the repo root.",
-      "issue": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgekit/, etc.)."
+      "issue": "sv create refuses/hangs on a non-empty directory (the repo already had docs/, .forgetrail/, etc.)."
     },
     {
       "date": "2026-07-05",
@@ -448,7 +448,7 @@
   "sessions": [
     {
       "date": "2026-07-02",
-      "summary": "Ran ForgeKit greenfield kickoff for filepress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
+      "summary": "Ran ForgeTrail greenfield kickoff for filepress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."
     },
     {
       "date": "2026-07-04",
@@ -456,7 +456,7 @@
     },
     {
       "date": "2026-07-04",
-      "summary": "Phase 2 scaffolding: ran lessons gate (getAntiPatterns + searchLessons), advanced to 2-scaffolding, and built the full runnable spine in one pass. SvelteKit adapter-static app (TS/pnpm) with a complete content engine (gray-matter + remark/rehype, all edge cases, loud file-named ContentError), index/post/tag routes, RSS/sitemap/robots, and the Classic theme. Verified build + preview: drafts previewable-but-unlisted, future-dated hidden (404), dedupe + missing-field failures loud; pnpm check clean. Wrote Phase 2 docs (CONTEXT_PROMPT merged from brief, README, TODO, .forgekit/IDEAS). All Phase 2 exit criteria met; awaiting confirmation to advance to Phase 3."
+      "summary": "Phase 2 scaffolding: ran lessons gate (getAntiPatterns + searchLessons), advanced to 2-scaffolding, and built the full runnable spine in one pass. SvelteKit adapter-static app (TS/pnpm) with a complete content engine (gray-matter + remark/rehype, all edge cases, loud file-named ContentError), index/post/tag routes, RSS/sitemap/robots, and the Classic theme. Verified build + preview: drafts previewable-but-unlisted, future-dated hidden (404), dedupe + missing-field failures loud; pnpm check clean. Wrote Phase 2 docs (CONTEXT_PROMPT merged from brief, README, TODO, .forgetrail/IDEAS). All Phase 2 exit criteria met; awaiting confirmation to advance to Phase 3."
     },
     {
       "date": "2026-07-04",
@@ -496,7 +496,7 @@
     },
     {
       "date": "2026-08-11",
-      "summary": "Public-prep + rebrand to FilePress/getfilepress (MIT, latin fonts, hljs allowlist, drop sass). npm stake getfilepress@0.0.0. Zip/symlink bloat lesson. CONTEXT_PROMPT handoff for folder rename. Post-rename session: remotes/mirror/GitHub → Catalyst-Forge-LLC/filepress; sibling sites rewired; product site sites/getfilepress (homePage, docs, Writing, press logo, wider chrome); deploy:www via Wrangler. ForgeKit tracking backfilled this session."
+      "summary": "Public-prep + rebrand to FilePress/getfilepress (MIT, latin fonts, hljs allowlist, drop sass). npm stake getfilepress@0.0.0. Zip/symlink bloat lesson. CONTEXT_PROMPT handoff for folder rename. Post-rename session: remotes/mirror/GitHub → Catalyst-Forge-LLC/filepress; sibling sites rewired; product site sites/getfilepress (homePage, docs, Writing, press logo, wider chrome); deploy:www via Wrangler. ForgeTrail tracking backfilled this session."
     }
   ]
 }

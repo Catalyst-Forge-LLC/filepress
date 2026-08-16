@@ -4,7 +4,7 @@
 Local sibling sites: `link:../filepress`. CI/CF: git pin `github:Catalyst-Forge-LLC/filepress#…`; site repos may live on personal GitHub.  
 **Context:** Goal: **link filepress, configure the bare minimum, deploy static build output.**
 
-Related: `GENESIS.md` §2.6 (core vs site), D3/D4/D5/D10 in `.forgekit/workflow_tracking.json`, current layout in `CONTEXT_PROMPT.md`.
+Related: `GENESIS.md` §2.6 (core vs site), D3/D4/D5/D10 in `.forgetrail/workflow_tracking.json`, current layout in `CONTEXT_PROMPT.md`.
 
 ---
 
@@ -305,7 +305,7 @@ No packaging option changes the **runtime** model — only **who owns the Svelte
 7. Verify: both sites build independently; demo still hides drafts/future posts; typecheck + core tests green.
 8. (Follow-up) CLI bin + document external-repo layout (D).
 
-Do **not** advance ForgeKit phase solely for this; treat as an architecture iteration under current phase, with an explicit user go-ahead before large moves.
+Do **not** advance ForgeTrail phase solely for this; treat as an architecture iteration under current phase, with an explicit user go-ahead before large moves.
 
 ---
 

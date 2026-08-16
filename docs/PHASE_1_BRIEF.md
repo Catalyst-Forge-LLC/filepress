@@ -1,12 +1,12 @@
-<!-- forgekit-template-mode: shell -->
+<!-- forgetrail-template-mode: shell -->
 
 # filepress — Phase 1 architecture brief
 
-_Structured capture of planning and architecture before code scaffolding. Goal: Phase 2 (or a new agent/session) can start from this file + `.forgekit/workflow_tracking.json` without re-reading the whole Phase 1 chat._
+_Structured capture of planning and architecture before code scaffolding. Goal: Phase 2 (or a new agent/session) can start from this file + `.forgetrail/workflow_tracking.json` without re-reading the whole Phase 1 chat._
 
 **Status:** `locked` — derived from `GENESIS.md` (a pre-written build spec); all §9 open questions resolved by user on 2026-07-04.
 **Last updated:** 2026-07-04
-**Phase 1 exit:** Do not mark Phase 1 complete in `.forgekit/workflow_tracking.json` until this brief is locked and major commitments are in `decisions[]`.
+**Phase 1 exit:** Do not mark Phase 1 complete in `.forgetrail/workflow_tracking.json` until this brief is locked and major commitments are in `decisions[]`.
 
 ---
 
@@ -158,5 +158,5 @@ Milestones from `GENESIS.md` §7 (full detail there):
 - [x] User has confirmed stack, folder shape, data sketch, hero flow, and v1 boundaries
 - [x] All 11 open questions in §9 are answered (or explicitly deferred with a documented default)
 - [x] This brief is marked **locked** (status line above updated from `draft`)
-- [x] `.forgekit/workflow_tracking.json` updated: `decisions[]` for each D#; `phases["1-architecture"]` notes summarize sign-off
-- [ ] Phase 2 opener will read this file + `.forgekit/workflow_tracking.json` first
+- [x] `.forgetrail/workflow_tracking.json` updated: `decisions[]` for each D#; `phases["1-architecture"]` notes summarize sign-off
+- [ ] Phase 2 opener will read this file + `.forgetrail/workflow_tracking.json` first

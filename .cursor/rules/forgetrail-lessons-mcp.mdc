@@ -1,18 +1,18 @@
 ---
-description: Implementation detail — ForgeKit MCP searchLessons + getAntiPatterns (also see forgekit-lessons-gate.mdc)
+description: Implementation detail — ForgeTrail MCP searchLessons + getAntiPatterns (also see forgetrail-lessons-gate.mdc)
 globs: src/**
 alwaysApply: false
 ---
 
-# ForgeKit lessons + anti-patterns (MCP)
+# ForgeTrail lessons + anti-patterns (MCP)
 
-**Workflow:** `forgekit-lessons-gate.mdc` defines when to run tools before larger tasks. This file adds density when you are already editing app code: still run `getAntiPatterns` + `searchLessons` if the gate applies and you have not run them in this task block.
+**Workflow:** `forgetrail-lessons-gate.mdc` defines when to run tools before larger tasks. This file adds density when you are already editing app code: still run `getAntiPatterns` + `searchLessons` if the gate applies and you have not run them in this task block.
 
 **Adjust `globs`** in the frontmatter above to match this repo's actual layout as it's scaffolded (e.g. `src/lib/**`, `src/content/**`, `scripts/**`).
 
 For content loading/parsing, build pipeline, feed/sitemap generation, scaffolding tooling, or site config handling:
 
-1. `searchLessons` (ForgeKit MCP — typically configured as the `forgekit` server in `.cursor/mcp.json`)
+1. `searchLessons` (ForgeTrail MCP — typically configured as the `forgetrail` server in `.cursor/mcp.json`)
    - Pass a short `query` string (keywords, not sentences), e.g. `frontmatter YAML parsing`, `static site prerender`, `git dependency versioning`, `CLI scaffold overwrite`.
    - Optional `limit` (default 10).
 

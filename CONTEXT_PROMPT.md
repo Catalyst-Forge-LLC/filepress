@@ -1,6 +1,6 @@
 # FilePress — Project Context Prompt
 
-_Paste into a new chat to resume. Single most important document for session continuity — update at the end of every session. Decisions live in `.forgekit/workflow_tracking.json`._
+_Paste into a new chat to resume. Single most important document for session continuity — update at the end of every session. Decisions live in `.forgetrail/workflow_tracking.json`._
 
 ---
 
@@ -9,7 +9,7 @@ _Paste into a new chat to resume. Single most important document for session con
 - **ollanet** (`^0.4.0`) is a FilePress dependency. Genie **Scan network** and `filepress import --scan` / `--lan` discover other Ollama servers (localhost, `~/.ollanet/config.json`, `OLLANET_HOSTS`, Tailscale). **LAN TCP scan is opt-in** — never on `/health`.
 - Import `scanNetwork` from `ollanet` (library entry since 0.4.0). Wrapper: `packages/import/src/ollanet-scan.ts`. Vite: `ssr.external` + `optimizeDeps.exclude` for `ollanet`.
 - Genie refine/inspire accept `host` + `model`. Default remains `OLLAMA_HOST` / `FILEPRESS_OLLAMA_MODEL`.
-- Do **not** advance ForgeKit phases without user OK. **Never push / npm-publish unless asked.**
+- Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
 
 ---
 
@@ -54,11 +54,11 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 - Publish shape: root hoists real deps (no `workspace:*`); CLI invokes vite/sirv/tsx; `prepack`/`postpack`; postinstall + CLI link `@filepress/*`; `pnpm pack:smoke`.
 - Bare `filepress` is **not** available on npm.
 
-### ForgeKit
+### ForgeTrail
 
 - **Phase:** `4-feature-iteration` (in_progress)
 - Do **not** advance phases without user OK
-- Source of truth: `.forgekit/workflow_tracking.json` (backfilled 2026-08-11 from downpress+filepress chats + git: D14–D16, sessions through product site / deploy:www)
+- Source of truth: `.forgetrail/workflow_tracking.json` (backfilled 2026-08-11 from downpress+filepress chats + git: D14–D16, sessions through product site / deploy:www)
 
 ### What’s next (likely)
 

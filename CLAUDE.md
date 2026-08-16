@@ -1,10 +1,10 @@
 # Agent guardrails — filepress
 
-This repo uses **ForgeKit** lifecycle tracking. Source of truth: `.forgekit/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
+This repo uses **ForgeTrail** lifecycle tracking. Source of truth: `.forgetrail/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
 
 ## Session start
 
-1. Read `.forgekit/workflow_tracking.json` and `CONTEXT_PROMPT.md` (once it exists) before making changes.
+1. Read `.forgetrail/workflow_tracking.json` and `CONTEXT_PROMPT.md` (once it exists) before making changes.
 2. Check `currentPhase` and work within that phase's scope; don't jump ahead without user confirmation.
 
 ## Git commits

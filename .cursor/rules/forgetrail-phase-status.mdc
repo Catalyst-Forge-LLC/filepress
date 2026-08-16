@@ -1,31 +1,31 @@
 ---
-description: Show ForgeKit phase, next actions, and doc gaps from workflow_tracking.json (esp. bookends & what's next)
+description: Show ForgeTrail phase, next actions, and doc gaps from workflow_tracking.json (esp. bookends & what's next)
 alwaysApply: true
 ---
 
-# ForgeKit phase awareness
+# ForgeTrail phase awareness
 
-This repo uses **ForgeKit** lifecycle tracking. **Source of truth:** `.forgekit/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
+This repo uses **ForgeTrail** lifecycle tracking. **Source of truth:** `.forgetrail/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
 
 ## When to surface status
 
-Include a short **ForgeKit** footer in replies when it helps orientation—especially:
+Include a short **ForgeTrail** footer in replies when it helps orientation—especially:
 
 - User asks **what's next**, **status**, **phase**, or **milestone**
 - **Start** of a multi-step / multi-file task block
 - **End** of a task block, PR-sized change, or session wrap-up
 
-**Lessons gate:** For substantial work (see `forgekit-lessons-gate.mdc`), run `getAntiPatterns` + `searchLessons` before deep implementation; the phase footer can still appear at start/end without repeating full lesson text.
+**Lessons gate:** For substantial work (see `forgetrail-lessons-gate.mdc`), run `getAntiPatterns` + `searchLessons` before deep implementation; the phase footer can still appear at start/end without repeating full lesson text.
 
 Skip the footer for trivial one-line answers (typos, single-token replies) unless the user asked for status.
 
-**Product-facing / non-technical users:** Do not show ForgeKit footers, phase IDs, MCP/tool names, or internal checklists unless they ask how the workflow is wired up. Plain language only.
+**Product-facing / non-technical users:** Do not show ForgeTrail footers, phase IDs, MCP/tool names, or internal checklists unless they ask how the workflow is wired up. Plain language only.
 
 **Right after bootstrap:** Omit the footer entirely—user should get a simple "what's done + what I need from you next," not methodology.
 
 ## What to read
 
-1. Open `.forgekit/workflow_tracking.json` (or use known state from the same turn).
+1. Open `.forgetrail/workflow_tracking.json` (or use known state from the same turn).
 2. Report `currentPhase` using friendly names:
    `1-architecture` → Plan · `2-scaffolding` → Build · `3-stabilization` → Stabilize · `4-feature-iteration` → Iterate · `5-refactoring` → Refine · `6-strategic-review` → Align · `7-hardening` → Harden.
 3. For that phase, note `status` (`not_started` | `in_progress` | `completed`) and 1–3 items from `exitCriteriaRemaining` as likely next actions (truncate with "…" if long).
@@ -34,7 +34,7 @@ Skip the footer for trivial one-line answers (typos, single-token replies) unles
 ## Footer format (compact, copy-paste)
 
 ```text
-**ForgeKit:** Build (2-scaffolding) · in_progress · Next: … · Docs: CONTEXT_PROMPT / TODO — pending until scaffolded
+**ForgeTrail:** Build (2-scaffolding) · in_progress · Next: … · Docs: CONTEXT_PROMPT / TODO — pending until scaffolded
 ```
 
 Keep it ≤4 lines. Do not repeat the full exit-criteria list—only the next likely moves.

@@ -60,6 +60,7 @@
 		"dev:www": "pnpm filepress dev --site getfilepress",
 		"create-site": "node scripts/create-site.mjs",
 		"import": "node scripts/filepress.mjs import",
+		"prepublishOnly": "node scripts/publish-gate.mjs",
 		"prepack": "node scripts/prepack.mjs",
 		"postpack": "node scripts/postpack.mjs",
 		"pack:smoke": "node scripts/pack-smoke.mjs"

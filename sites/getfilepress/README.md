@@ -24,4 +24,4 @@ pnpm ship                    # build + wrangler pages deploy → project "getfil
 | `theme.css` | Product accent / surface tokens |
 | `static/` | Logo + favicon |
 
-Deploy wiring (Cloudflare Pages + custom domain) is roadmap M3 — content builds locally today.
+Live at [getfilepress.com](https://getfilepress.com). Publish with `pnpm ship` from the engine root.

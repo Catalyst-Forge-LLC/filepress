@@ -2,7 +2,7 @@
 
 > File-based Markdown blogs. No admin UI. No database. Just git.
 
-A file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter — edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (e.g. Cloudflare Pages).
+A file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter. Edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (for example Cloudflare Pages).
 
 | | |
 | --- | --- |
@@ -108,7 +108,7 @@ export default defineFilepressConfig({
 
 ### Path mounts
 
-Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress copies it into `build/` after the Kit build and serves it in `filepress dev`. It does **not** parse Markdown or inject Essay chrome into the mount — the site owns the shell (e.g. a docs sidebar).
+Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress copies it into `build/` after the Kit build and serves it in `filepress dev`. It does **not** parse Markdown or inject Essay chrome into the mount. The site owns the shell (for example a docs sidebar).
 
 ```ts
 paths: [
@@ -128,8 +128,8 @@ variables and structural classes without forking the app.
 
 In local `filepress dev` / `pnpm dev`, **Genie Mode** (floating FAB) is a design cockpit:
 steers, Openverse / uploads, live inspire URLs, optional Ollama refine, and
-`lede` / `tagline` / `logo` config patches — versioned under `.filepress-genie/`,
-baked into `theme.css` / `static/` / config on activate. Dev-only; absent from
+`lede` / `tagline` / `logo` config patches. Experiments live under `.filepress-genie/`.
+Activate writes `theme.css`, `static/`, and config. Dev-only; absent from
 `preview` and production builds. See [`docs/GENIE_MODE_SPEC.md`](docs/GENIE_MODE_SPEC.md)
 and [getfilepress.com/genie](https://getfilepress.com/genie).
 
@@ -182,7 +182,7 @@ Body content in **Markdown**.
 
 ## Deploy
 
-`filepress build` emits a static `build/` folder — no Node server in production.
+`filepress build` emits a static `build/` folder. No Node server in production.
 
 **Happy path: [Cloudflare Pages](https://pages.cloudflare.com/)** (git-connected site repo or Wrangler upload).
 
@@ -192,7 +192,7 @@ Body content in **Markdown**.
 | Output directory | `build` |
 | Node | 20+ |
 
-Pin the engine in the site `package.json` (`"getfilepress": "^0.1.1"` or `github:Catalyst-Forge-LLC/filepress#v0.1.1`). Do not use `link:` in CI. Set config `url` to the live origin.
+Pin the engine in the site `package.json` (`"getfilepress": "^0.1.3"` or `github:Catalyst-Forge-LLC/filepress#v0.1.3`). Do not use `link:` in CI. Set config `url` to the live origin.
 
 Any other static host works the same way: publish `build/` as the web root.
 

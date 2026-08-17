@@ -23,7 +23,7 @@ Dry-run without writing files:
 pnpm filepress import --source https://example.com --dry-run --no-llm
 ```
 
-`--inspire` URLs (up to three) bias structure and accent; later URLs tint fonts and color. Use `--no-llm` when Ollama is unavailable — you still get a deterministic theme scaffold.
+`--inspire` URLs (up to three) bias structure and accent; later URLs tint fonts and color. Use `--no-llm` when Ollama is unavailable. You still get a deterministic theme scaffold.
 
 ## What lands on disk
 
@@ -31,6 +31,6 @@ A content-only sibling folder with `filepress.config.ts`, `posts/`, `pages/`, `s
 
 ## Design loop after import
 
-Import gets you a strong first look. For local taste-tuning (tokens, stock backgrounds, versioned experiments), open **Genie Mode** in `filepress dev`. Genie never appears in `preview` or production builds. See [Genie](/genie).
+Import writes a first `theme.css` you can edit. For local taste-tuning (tokens, stock backgrounds, versioned experiments), open **Genie Mode** in `filepress dev`. Genie never appears in `preview` or production builds. See [Genie](/genie).
 
 Full CLI notes: [`docs/SITE_IMPORT_SPEC.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/SITE_IMPORT_SPEC.md) in the engine repo. A narrative walkthrough lives in [Writing](/writing).

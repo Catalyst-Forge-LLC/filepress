@@ -15,12 +15,12 @@ Local `link:../filepress` only works on your machine. For CI:
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.1"
+    "getfilepress": "^0.1.3"
   }
 }
 ```
 
-Git pin also works: `github:Catalyst-Forge-LLC/filepress#v0.1.1`. Prefer a tag or SHA over floating `main`.
+Git pin also works: `github:Catalyst-Forge-LLC/filepress#v0.1.3`. Prefer a tag or SHA over floating `main`.
 
 ## Cloudflare Pages
 

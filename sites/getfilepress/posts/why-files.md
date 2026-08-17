@@ -1,7 +1,7 @@
 ---
 title: Why files
 date: 2026-08-11
-description: Edit Markdown in git, push, ship a static site — durable publishing without a CMS.
+description: Edit Markdown in git, push, ship a static site. Durable publishing without a CMS.
 tags: [workflow, getting-started]
 ---
 

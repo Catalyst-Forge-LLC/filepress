@@ -82,11 +82,11 @@ contract (Cloudflare Pages happy path, Wrangler, any static host, agent checklis
 Short form — pin npm or a git tag:
 
 ```json
-"getfilepress": "^0.1.1"
+"getfilepress": "^0.1.3"
 ```
 
 ```json
-"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.1"
+"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.3"
 ```
 
 | Setting | Value |

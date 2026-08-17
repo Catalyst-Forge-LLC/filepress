@@ -5,11 +5,11 @@ const github = 'https://github.com/Catalyst-Forge-LLC/filepress';
 export default defineFilepressConfig({
 	title: 'FilePress',
 	description:
-		'File-based Markdown blogs. No admin UI. No database. Edit posts in git, build a static site.',
+		'Start with files, or bring the site you already have. Design locally. Ship static. Keep everything.',
 	url: 'https://getfilepress.com',
 	author: 'FilePress',
 	tagline: 'Markdown blogs from git',
-	lede: 'Edit posts as files. Push. Ship a static site — no CMS, no database, no runtime server.',
+	lede: 'Edit posts as files. Push. Ship a static site. No CMS, no database, no runtime server.',
 	homePage: 'home',
 	logo: '/logo.svg',
 	ogImage: '/logo.svg',

@@ -1,10 +1,10 @@
 ---
 title: Deploy
-description: Ship a FilePress site — Cloudflare Pages happy path, plus the static-host contract for everywhere else.
+description: Ship a FilePress site. Cloudflare Pages happy path, plus the static-host contract for everywhere else.
 order: 2
 ---
 
-`filepress build` writes a **static** `build/` folder. There is no runtime server to run — only files to host. Set `url` in `filepress.config.ts` to your live origin (no trailing slash) so RSS, sitemap, and canonical links stay correct.
+`filepress build` writes a **static** `build/` folder. There is no runtime server: only files to host. Set `url` in `filepress.config.ts` to your live origin (no trailing slash) so RSS, sitemap, and canonical links stay correct.
 
 ## Engine dependency in CI
 
@@ -13,7 +13,7 @@ Local sibling sites use `"getfilepress": "link:../filepress"`. Hosts cannot. Pin
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.1"
+    "getfilepress": "^0.1.3"
   }
 }
 ```
@@ -23,12 +23,12 @@ or:
 ```json
 {
   "devDependencies": {
-    "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.1"
+    "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.3"
   }
 }
 ```
 
-Do not float on `main` — upgrades should be deliberate.
+Do not float on `main`. Upgrades should be deliberate.
 
 ## Cloudflare Pages (recommended)
 

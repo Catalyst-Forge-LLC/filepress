@@ -78,11 +78,11 @@ export default defineFilepressConfig({
 - `footerLinks` — footer row (defaults to RSS + Topics when omitted). Setting it **replaces** the default list, so keep RSS/Topics if you still want them.
 - `icon: 'github'` — built-in mark beside the label; opens in a new tab. Theme class: `.nav-github` (see [`docs/THEME.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/THEME.md)).
 
-For a product-style home (static page at `/`, posts at `/writing`), set `homePage: 'home'` and add `pages/home.md` — this site does exactly that.
+For a product-style home (static page at `/`, posts at `/writing`), set `homePage: 'home'` and add `pages/home.md`. This site does exactly that.
 
 ### Path mounts
 
-Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress serves the mount in `filepress dev` and copies it into `build/` after the Vite/Kit build. It does **not** parse Markdown or inject Essay chrome — the site owns the shell (for example a docs sidebar).
+Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress serves the mount in `filepress dev` and copies it into `build/` after the Vite/Kit build. It does **not** parse Markdown or inject Essay chrome. The site owns the shell (for example a docs sidebar).
 
 ```ts
 paths: [{ url: '/docs', dir: 'docs/dist' }]
@@ -91,7 +91,7 @@ paths: [{ url: '/docs', dir: 'docs/dist' }]
 - `dir` is site-relative; `url` starts with `/` and must not collide with engine routes (`posts`, `writing`, `tags`, …).
 - The first URL segment is reserved against `pages/<slug>.md` (so `pages/docs.md` cannot sit next to `url: '/docs'`).
 - HTML files under the mount are included in `sitemap.xml`.
-- The engine fixture lives at `sites/demo/mounts/docs` (`paths: [{ url: '/docs', dir: 'mounts/docs' }]`).
+- In this repo, `sites/demo` mounts `mounts/docs` at `/docs`.
 
 ## Commands
 
@@ -102,7 +102,7 @@ paths: [{ url: '/docs', dir: 'docs/dist' }]
 | `filepress preview` | Serve the build (no Genie) |
 | `filepress check` | Type-check against the site |
 
-In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd mode — no `--site` flag.
+In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd mode. No `--site` flag.
 
 ## Next
 

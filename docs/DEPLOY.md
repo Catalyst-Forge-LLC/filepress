@@ -12,7 +12,7 @@ versions; do not float on `main`.
 | --- | --- |
 | Node.js | `>=20` (`engines` in the engine `package.json`) |
 | pnpm | Recommended; matches the engine’s `packageManager` |
-| Engine pin | `"getfilepress": "^0.1.1"` (npm) **or** `github:Catalyst-Forge-LLC/filepress#v0.1.1` |
+| Engine pin | `"getfilepress": "^0.1.3"` (npm) **or** `github:Catalyst-Forge-LLC/filepress#v0.1.3` |
 
 Local `link:../filepress` is for sibling-folder development only — CI cannot use it.
 
@@ -41,7 +41,7 @@ Dependency in the site `package.json` (pick one):
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.1"
+    "getfilepress": "^0.1.3"
   }
 }
 ```
@@ -49,7 +49,7 @@ Dependency in the site `package.json` (pick one):
 ```json
 {
   "devDependencies": {
-    "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.1"
+    "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.3"
   }
 }
 ```

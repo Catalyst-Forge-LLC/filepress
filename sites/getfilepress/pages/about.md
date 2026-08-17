@@ -1,6 +1,6 @@
 ---
 title: About
-description: What FilePress is — and what it deliberately is not.
+description: What FilePress is, and what it is not.
 order: 4
 ---
 
@@ -19,7 +19,7 @@ order: 4
 - Not a hosted CMS
 - Not a database app
 - Not a runtime server
-- **Not a comments platform** — visitor comments are a permanent non-goal
+- **Not a comments platform.** Visitor comments are a permanent non-goal.
 
 ## Names
 

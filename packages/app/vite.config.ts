@@ -102,12 +102,13 @@ export default defineConfig(async () => {
 		`${JSON.stringify(pathMounts, null, '\t')}\n`
 	);
 
+	const host = process.env.HOST?.trim() || '127.0.0.1';
 	return {
 		server: fixedPort
-			? { port: fixedPort, strictPort: true }
+			? { host, port: fixedPort, strictPort: true }
 			: undefined,
 		preview: fixedPort
-			? { port: fixedPort, strictPort: true }
+			? { host, port: fixedPort, strictPort: true }
 			: undefined,
 		resolve: {
 			alias: [

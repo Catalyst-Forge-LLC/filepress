@@ -2,7 +2,7 @@
  * Local operator tool: find sibling FilePress sites and sync them to this engine.
  *
  *   pnpm sync-siblings              dry-run
- *   pnpm sync-siblings --apply      update npm pins + merge static/_headers
+ *   pnpm sync-siblings --apply      npm pins (incl. link: → registry) + merge static/_headers
  *   pnpm sync-siblings --ship       apply, then pnpm ship where a ship script exists
  *   pnpm sync-siblings --only aibreze,ollanet
  *
@@ -81,6 +81,35 @@ function pinKind(pin: string): PinKind {
 	if (pin.startsWith('link:') || pin.startsWith('workspace:') || pin.startsWith('file:')) return 'link';
 	if (/^(github:|git\+|git:)/.test(pin)) return 'git';
 	return 'npm';
+}
+
+export function npmPinFor(version: string): string {
+	return `^${version}`;
+}
+
+/** Rewrite a site package.json so getfilepress is a registry pin. */
+export function retargetGetfilepressToNpm(
+	raw: string,
+	nextPin: string
+): { text: string; changed: boolean; previous: string | null } {
+	const pkg = JSON.parse(raw) as PkgJson & { pnpm?: { onlyBuiltDependencies?: string[] } };
+	let previous: string | null = null;
+	for (const key of ['dependencies', 'devDependencies'] as const) {
+		if (pkg[key]?.getfilepress) {
+			previous = pkg[key].getfilepress;
+			pkg[key].getfilepress = nextPin;
+		}
+	}
+	if (previous === null) return { text: raw, changed: false, previous: null };
+
+	pkg.pnpm ??= {};
+	const built = Array.isArray(pkg.pnpm.onlyBuiltDependencies) ? [...pkg.pnpm.onlyBuiltDependencies] : [];
+	if (!built.includes('getfilepress')) built.push('getfilepress');
+	pkg.pnpm.onlyBuiltDependencies = built;
+
+	const indent = raw.includes('\t') ? '\t' : 2;
+	const text = JSON.stringify(pkg, null, indent) + '\n';
+	return { text, changed: text !== raw, previous };
 }
 
 function findLockfileDir(start: string, stopAt: string): string | null {
@@ -183,8 +212,12 @@ function headersPlan(site: SiblingSite): { action: 'none' | 'merge' | 'ok'; adde
 }
 
 function updatePlan(site: SiblingSite, target: string): string {
-	if (site.pinKind === 'link') return 'skip (linked to local engine)';
+	const next = npmPinFor(target);
+	if (site.pinKind === 'link') {
+		return `package.json ${site.pin} → ${next}, then pnpm update getfilepress`;
+	}
 	if (site.pinKind === 'git') return `skip (git pin ${site.pin} — edit package.json)`;
+	if (site.pin === next && site.lockedVersion === target) return `already ${next}`;
 	if (site.lockedVersion === target) return `already ${target}`;
 	return `pnpm update getfilepress  (${site.lockedVersion ?? site.pin} → ${target})`;
 }
@@ -214,7 +247,15 @@ function applyUpdate(site: SiblingSite, target: string): boolean {
 		return true;
 	}
 	console.log(`  update   ${plan}`);
-	const { ok, status } = run('pnpm', ['update', 'getfilepress'], site.packageDir);
+
+	if (site.pinKind === 'link') {
+		const pkgPath = join(site.packageDir, 'package.json');
+		const rewritten = retargetGetfilepressToNpm(readFileSync(pkgPath, 'utf8'), npmPinFor(target));
+		if (rewritten.changed) writeFileSync(pkgPath, rewritten.text);
+	}
+
+	const installCmd = site.lockfileDir ? (['update', 'getfilepress'] as const) : (['install'] as const);
+	const { ok, status } = run('pnpm', [...installCmd], site.packageDir);
 	if (!ok) {
 		console.error(`  update   failed (exit ${status})`);
 		return false;
@@ -259,7 +300,7 @@ function usage(): void {
 
 Discover sibling folders that depend on getfilepress. Dry-run by default.
 
-  --apply   update npm pins and merge missing rules into static/_headers
+  --apply   rewrite link: pins to npm, update registry pins, merge static/_headers
   --ship    apply, then run pnpm ship where the site has a ship script
   --only    subset by sibling folder name (repeat or comma-separate)
 

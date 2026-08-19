@@ -1,0 +1,10 @@
+# Emitted by FilePress. Override by adding static/_headers in the site.
+# Cloudflare Pages and Netlify read this file; it is not served as a page.
+
+/*
+  Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  ! Access-Control-Allow-Origin

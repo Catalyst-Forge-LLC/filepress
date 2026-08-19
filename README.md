@@ -196,7 +196,7 @@ Body content in **Markdown**.
 
 Pin the engine in the site `package.json` (`"getfilepress": "^0.1.3"` or `github:Catalyst-Forge-LLC/filepress#v0.1.3`). Do not use `link:` in CI. Set config `url` to the live origin.
 
-Any other static host works the same way: publish `build/` as the web root.
+Any other static host works the same way: publish `build/` as the web root. The build also writes a `_headers` file (HSTS, no framing, no wildcard CORS) for Cloudflare Pages; override it with `static/_headers`.
 
 Full notes (including an agent checklist): [`docs/DEPLOY.md`](docs/DEPLOY.md) · product page: [getfilepress.com/deploy](https://getfilepress.com/deploy).
 

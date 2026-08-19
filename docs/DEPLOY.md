@@ -83,6 +83,21 @@ Same contract everywhere:
 Examples: Netlify, GitHub Pages, S3+CloudFront, nginx, Caddy. Map their “publish
 directory” / “output” setting to `build`. No SSR, no serverless functions required.
 
+## Security headers
+
+`filepress build` writes `build/_headers` for the Cloudflare Pages happy path
+(Netlify reads the same file). Defaults:
+
+- HSTS (`max-age=31536000`) — no `includeSubDomains` or `preload`
+- `Content-Security-Policy: frame-ancestors 'none'` and `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- Detach Pages’ default `Access-Control-Allow-Origin: *`
+
+Put your own `static/_headers` in the site to replace the default entirely.
+Do not add `preload` unless you intend to submit the domain to the HSTS preload
+list. Add `includeSubDomains` only after every subdomain is HTTPS.
+
 ## Agent checklist
 
 When an agent deploys or wires CI for a FilePress site:
@@ -92,6 +107,8 @@ When an agent deploys or wires CI for a FilePress site:
 3. Set build → `pnpm install && pnpm build`, output → `build`, Node ≥ 20.
 4. Prefer Cloudflare Pages when the user has no host preference.
 5. After first deploy, verify `/`, `/rss.xml`, and `/sitemap.xml` return 200.
+6. On Cloudflare Pages, `curl -sI` the origin and confirm HSTS / CSP are present
+   and `access-control-allow-origin: *` is not.
 
 ## Related
 

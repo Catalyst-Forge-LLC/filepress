@@ -1,21 +1,36 @@
 /**
- * Copy FilePress `paths` mounts into <site>/build after `vite build`.
- * Reads `.filepress/path-mounts.json` written when vite.config loads the site config.
+ * Post-`vite build` steps for a FilePress site:
+ *   1. Write default `build/_headers` unless the site already provided one
+ *   2. Copy `paths` mounts (from `.filepress/path-mounts.json`)
  *
  * Usage: node scripts/copy-path-mounts.mjs <siteRoot>
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const siteRoot = resolve(process.argv[2] ?? '');
 const buildDir = join(siteRoot, 'build');
 const cachePath = join(siteRoot, '.filepress', 'path-mounts.json');
+const headersTemplate = join(
+	dirname(fileURLToPath(import.meta.url)),
+	'../packages/core/src/lib/default-headers.txt'
+);
 
-if (!existsSync(cachePath)) {
+if (!existsSync(buildDir)) {
+	console.warn(`filepress: post-build skipped — build dir missing (${buildDir})`);
 	process.exit(0);
 }
-if (!existsSync(buildDir)) {
-	console.warn(`filepress: path mounts skipped — build dir missing (${buildDir})`);
+
+const headersDest = join(buildDir, '_headers');
+if (existsSync(headersDest)) {
+	console.log('filepress: kept site _headers');
+} else if (existsSync(headersTemplate)) {
+	writeFileSync(headersDest, readFileSync(headersTemplate, 'utf8'));
+	console.log('filepress: wrote default _headers');
+}
+
+if (!existsSync(cachePath)) {
 	process.exit(0);
 }
 

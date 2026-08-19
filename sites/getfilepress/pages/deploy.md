@@ -56,6 +56,10 @@ This product site’s engine script is `pnpm deploy:www` (Wrangler project `getf
 
 Same contract: install → build → publish **`build/`** as the web root. Works on Netlify, GitHub Pages, object storage + CDN, nginx, etc. No SSR adapters or serverless functions are required. If the host supports a custom 404 document, point it at `404.html` (emitted by the static adapter).
 
+## Headers
+
+The build writes a `_headers` file for Cloudflare Pages (Netlify understands it too): HSTS, no framing, and it removes Pages’ default `Access-Control-Allow-Origin: *`. Drop `static/_headers` in the site if you need different values. The engine does not set `includeSubDomains` or `preload`; add those yourself if every subdomain is HTTPS and you want the preload list.
+
 ## After deploy
 
 Check `/`, `/rss.xml`, and `/sitemap.xml`. Deeper packaging notes for agents and CI: [`docs/DEPLOY.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/DEPLOY.md) in the engine repo.

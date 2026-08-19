@@ -22,7 +22,8 @@ export {
 
 export { absoluteUrl, ogImageUrl } from './config';
 export type { SiteConfig, PathMount } from './config';
-export { defaultSecurityHeaders, writeBuildHeaders } from './headers';
+export { defaultSecurityHeaders, writeBuildHeaders, mergeSecurityHeaders } from './headers';
+export type { MergeSecurityHeadersResult } from './headers';
 export {
 	normalizePathMounts,
 	pathMountReservedSlugs,

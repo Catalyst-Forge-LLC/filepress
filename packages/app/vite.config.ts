@@ -12,6 +12,7 @@ import { geniePlugin } from './vite-plugin-genie.ts';
 import { pathMountsPlugin } from './vite-plugin-path-mounts.ts';
 import { filepressLeaseName, localberthGet } from './localberth-port.ts';
 import type { PathMount } from '../core/src/lib/paths-shared.ts';
+import { unexpectedUnseenPrerenderRoutes } from './src/lib/prerender-empty-ok.ts';
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
 const defaultSiteRoot = resolve(appRoot, '../../sites/demo');
@@ -160,8 +161,7 @@ export default defineConfig(async () => {
 						throw new Error(message);
 					},
 					handleUnseenRoutes: ({ routes }) => {
-						const emptyOk = new Set(['/page/[n]', '/tags/[tag]', '/[slug]']);
-						const unexpected = routes.filter((r) => !emptyOk.has(r));
+						const unexpected = unexpectedUnseenPrerenderRoutes(routes);
 						if (unexpected.length > 0) {
 							throw new Error(
 								`Routes marked prerenderable but not prerendered: ${unexpected.join(', ')}`

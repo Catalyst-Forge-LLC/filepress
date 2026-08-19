@@ -260,6 +260,14 @@ function applyUpdate(site: SiblingSite, target: string): boolean {
 		console.error(`  update   failed (exit ${status})`);
 		return false;
 	}
+	const locked = lockedGetfilepressVersion(findLockfileDir(site.packageDir, site.repoRoot));
+	if (locked !== target) {
+		console.error(
+			`  update   still ${locked ?? 'unresolved'} after pnpm; getfilepress@${target} is not installed.`
+		);
+		console.error(`  update   publish ${target} to npm, then re-run.`);
+		return false;
+	}
 	return true;
 }
 

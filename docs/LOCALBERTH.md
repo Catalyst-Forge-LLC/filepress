@@ -28,6 +28,13 @@ Preferred house ports (do not claim 5173 for every site):
 | `dictawhisper-site` | 5186 |
 | `localberth-site` | 5187 |
 | `docupuncture-site` | 5188 |
+| `what-over-how` | 5189 |
+| `nthorderthinker` | 5190 |
+| `terrain-triad-theory` | 5191 |
+| `mohanrao` | 5192 |
+| `mohanrao-downpress` | 5194 |
+| `forgetrail-site` | 5195 |
+| `ember-dossier-site` | 5196 |
 
 ```bash
 localberth claim localberth-site --port 5187

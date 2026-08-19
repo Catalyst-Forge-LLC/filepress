@@ -33,6 +33,8 @@ Site `package.json`:
 }
 ```
 
+Local `filepress dev` follows `FILEPRESS_PORT`, then a LocalBerth lease, then Vite 5173. Details: [LOCALBERTH.md](./LOCALBERTH.md).
+
 ```bash
 # once, in the engine
 cd filepress && pnpm install

@@ -10,6 +10,7 @@ import {
 } from './vite-plugin-critical-theme.ts';
 import { geniePlugin } from './vite-plugin-genie.ts';
 import { pathMountsPlugin } from './vite-plugin-path-mounts.ts';
+import { filepressLeaseName, localberthGet } from './localberth-port.ts';
 import type { PathMount } from '../core/src/lib/paths-shared.ts';
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
@@ -84,9 +85,11 @@ async function loadPathMounts(): Promise<PathMount[]> {
 
 function resolvePort(): number | undefined {
 	const raw = process.env.FILEPRESS_PORT?.trim();
-	if (!raw) return undefined;
-	const n = Number(raw);
-	return Number.isInteger(n) && n > 0 && n <= 65535 ? n : undefined;
+	if (raw) {
+		const n = Number(raw);
+		return Number.isInteger(n) && n > 0 && n <= 65535 ? n : undefined;
+	}
+	return localberthGet(filepressLeaseName(siteRoot));
 }
 
 const fixedPort = resolvePort();

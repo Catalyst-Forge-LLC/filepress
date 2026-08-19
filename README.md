@@ -73,6 +73,8 @@ pnpm build:www           # → sites/getfilepress/build/
 pnpm ship                # build + Wrangler Pages deploy (project: getfilepress)
 ```
 
+Two `filepress dev` processes share Vite **5173** unless you pin the port. With [LocalBerth](https://www.npmjs.com/package/localberth) 0.2+, `filepress dev` reads a named lease. Claim once; see [docs/LOCALBERTH.md](docs/LOCALBERTH.md).
+
 ## Site configuration
 
 ```ts

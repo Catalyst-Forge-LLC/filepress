@@ -15,6 +15,7 @@ import {
 	discoverSiblingSites,
 	loadEngineStrip,
 	persistInventory,
+	planContext,
 	planSite,
 	type Inventory
 } from './lib.ts';
@@ -82,16 +83,36 @@ function serveStatic(urlPath: string, res: ServerResponse): void {
 	const types: Record<string, string> = {
 		'.html': 'text/html; charset=utf-8',
 		'.css': 'text/css; charset=utf-8',
-		'.js': 'text/javascript; charset=utf-8'
+		'.js': 'text/javascript; charset=utf-8',
+		'.svg': 'image/svg+xml'
 	};
 	res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
 	res.end(readFileSync(file));
 }
 
-async function inventory(): Promise<Inventory> {
-	const inv = await buildInventory();
-	persistInventory(inv);
-	return inv;
+const INVENTORY_TTL_MS = 4000;
+let cached: Inventory | null = null;
+let inFlight: Promise<Inventory> | null = null;
+
+/** Poll traffic and the first paint share one build; a rebuild never runs twice at once. */
+async function inventory(force = false): Promise<Inventory> {
+	if (!force && cached && Date.now() - Date.parse(cached.builtAt) < INVENTORY_TTL_MS) return cached;
+	inFlight ??= buildInventory()
+		.then((inv) => {
+			cached = inv;
+			persistInventory(inv);
+			return inv;
+		})
+		.finally(() => {
+			inFlight = null;
+		});
+	return inFlight;
+}
+
+function headersLine(headers: { action: string; added: string[] }): string {
+	if (headers.action === 'none') return 'none (engine writes build/_headers)';
+	if (headers.action === 'ok') return 'static/_headers already has defaults';
+	return `merge static/_headers (+${headers.added.join(', ')})`;
 }
 
 async function runJob(job: Job): Promise<void> {
@@ -113,14 +134,16 @@ async function runJob(job: Job): Promise<void> {
 			return;
 		}
 		if (job.action === 'plan') {
+			const ctx = await planContext(sites);
 			for (const site of sites) {
-				const plan = planSite(site, engine.target);
+				const plan = planSite(site, engine.target, ctx);
 				log('');
 				log(plan.name);
 				log(`  pin      ${plan.pin}${plan.lockedVersion ? `  locked ${plan.lockedVersion}` : ''}`);
 				log(`  update   ${plan.update}`);
-				log(`  headers  ${plan.headers.action}${plan.headers.added.length ? ` (+${plan.headers.added.join(', ')})` : ''}`);
+				log(`  headers  ${headersLine(plan.headers)}`);
 				log(`  ship     ${plan.ship ?? 'none'}`);
+				if (plan.gitDirty) log('  git      dirty (apply will commit those files too)');
 				job.results.push({ name: site.name, ok: true });
 			}
 			job.status = 'ok';
@@ -151,6 +174,7 @@ async function runJob(job: Job): Promise<void> {
 	} finally {
 		job.finishedAt = new Date().toISOString();
 		if (activeJobId === job.id) activeJobId = null;
+		cached = null;
 	}
 }
 
@@ -160,7 +184,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 	const method = req.method ?? 'GET';
 
 	if (method === 'GET' && url.pathname === '/api/inventory') {
-		json(res, 200, await inventory());
+		json(res, 200, await inventory(url.searchParams.get('refresh') === '1'));
 		return;
 	}
 	if (method === 'GET' && url.pathname.startsWith('/api/jobs/')) {
@@ -230,4 +254,7 @@ createServer((req, res) => {
 	const shown = host === '0.0.0.0' ? '127.0.0.1' : host;
 	console.log(`Sibling dashboard  http://${shown}:${port}`);
 	console.log('Local operator tool. Does not push. Not published.');
+	void inventory().then((inv) => {
+		console.log(`Scanned ${inv.sites.length} sibling site(s) in ${inv.buildMs}ms.`);
+	});
 });

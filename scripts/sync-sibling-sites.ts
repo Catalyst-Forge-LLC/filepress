@@ -23,6 +23,7 @@ import {
 
 export {
 	npmPinFor,
+	parseLeaseTable,
 	parseLockedGetfilepress,
 	resolveLockfileDir,
 	resolveSyncTarget,

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
 	npmPinFor,
 	parseArgs,
+	parseLeaseTable,
 	parseLockedGetfilepress,
 	resolveLockfileDir,
 	resolveSyncTarget,
@@ -125,6 +126,25 @@ packages:
 packages:
 `;
 		assert.equal(parseLockedGetfilepress(lock, 'site'), '0.1.7');
+	});
+});
+
+describe('parseLeaseTable', () => {
+	it('maps lowercased lease names to ports', () => {
+		const tsv = [
+			'aibreze-site\t5181\t127.0.0.1\talways\tskipped',
+			'Catalyst-Forge\t6173\t0.0.0.0\talways\tneeds-elevation',
+			''
+		].join('\n');
+		const leases = parseLeaseTable(tsv);
+		assert.equal(leases.get('aibreze-site'), 5181);
+		assert.equal(leases.get('catalyst-forge'), 6173);
+		assert.equal(leases.size, 2);
+	});
+
+	it('drops rows without a usable port', () => {
+		const leases = parseLeaseTable('broken\nnoport\t\t127.0.0.1\nhuge\t99999\t127.0.0.1');
+		assert.equal(leases.size, 0);
 	});
 });
 

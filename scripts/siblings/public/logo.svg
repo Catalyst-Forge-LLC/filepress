@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72" role="img" aria-label="FilePress" fill="none">
+  <title>FilePress</title>
+  <!-- Borderless mark: screw press stamping digital files (no badge/plate) -->
+  <!-- Handwheel -->
+  <circle cx="32" cy="10" r="7" stroke="#0f5c4c" stroke-width="2.6"/>
+  <circle cx="32" cy="10" r="2.2" fill="#0f5c4c"/>
+  <path d="M32 4.4v2.6M32 13v2.6M26.4 10h2.6M35 10h2.6" stroke="#0f5c4c" stroke-width="1.7" stroke-linecap="round"/>
+
+  <!-- Lead screw -->
+  <rect x="30.2" y="15" width="3.6" height="12" rx="1.2" fill="#6dbaa8"/>
+
+  <!-- Top beam -->
+  <rect x="12" y="18.5" width="40" height="5.5" rx="1.8" fill="#0f5c4c"/>
+
+  <!-- Uprights -->
+  <rect x="13.5" y="24" width="5" height="36" rx="1.6" fill="#0f5c4c"/>
+  <rect x="45.5" y="24" width="5" height="36" rx="1.6" fill="#0f5c4c"/>
+
+  <!-- Platen -->
+  <rect x="20" y="28" width="24" height="5.5" rx="1.6" fill="#0f5c4c"/>
+  <rect x="22.5" y="33.2" width="19" height="2.2" rx="1" fill="#6dbaa8"/>
+
+  <!-- Press bed -->
+  <rect x="11" y="59.5" width="42" height="4" rx="1.4" fill="#0f5c4c"/>
+
+  <!-- Rear file -->
+  <path fill="#7aaf9f" d="M26.5 37.5h13l3.6 3.6v12.2h-16.6z"/>
+  <path fill="#5f9a8a" d="M39.5 37.5v3.6h3.6z"/>
+
+  <!-- Front file -->
+  <path fill="#e8f2ee" stroke="#0f5c4c" stroke-width="1.4"
+    d="M22.5 40.5h14.5l4.3 4.3v15.2H22.5z"/>
+  <path fill="#c5ddd5" d="M37 40.5v4.3h4.3z"/>
+  <path stroke="#0f5c4c" stroke-width="1.55" stroke-linecap="round" opacity="0.65"
+    d="M26 46.5h9.5M26 50h12M26 53.5h7"/>
+</svg>

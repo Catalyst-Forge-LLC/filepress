@@ -2,7 +2,7 @@
  * Shared sibling-site library (CLI + local dashboard).
  * Not part of the published getfilepress package.
  */
-import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
+import { spawn, spawnSync, type SpawnSyncOptions } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,6 +34,12 @@ export type SiblingSite = {
 
 export type HeadersPlan = { action: 'none' | 'merge' | 'ok'; added: string[] };
 
+/** Batched lookups shared by every row of one inventory pass. */
+export type PlanContext = {
+	leases: Map<string, number>;
+	dirty: Map<string, boolean | null>;
+};
+
 export type SitePlan = {
 	name: string;
 	path: string;
@@ -59,6 +65,8 @@ export type Inventory = {
 	engine: EngineStrip;
 	workspace: string;
 	sites: SitePlan[];
+	builtAt: string;
+	buildMs: number;
 };
 
 type PkgJson = {
@@ -321,45 +329,136 @@ export function readConfigUrl(contentRoot: string): string | null {
 	return match?.[1] ?? null;
 }
 
-export function gitDirty(repoRoot: string): boolean | null {
-	const r = spawnSync('git', ['status', '--porcelain'], {
-		cwd: repoRoot,
-		encoding: 'utf8',
-		shell: false,
-		timeout: 8000,
-		windowsHide: true
+type ExecResult = { status: number | null; stdout: string; stderr: string; spawnFailed: boolean };
+
+function exec(
+	cmd: string,
+	args: string[],
+	opts: { cwd?: string; timeout?: number } = {}
+): Promise<ExecResult> {
+	return new Promise((done) => {
+		const child = spawn(cmd, args, {
+			cwd: opts.cwd,
+			shell: win,
+			windowsHide: true,
+			stdio: ['ignore', 'pipe', 'pipe']
+		});
+		let stdout = '';
+		let stderr = '';
+		let settled = false;
+		const finish = (r: ExecResult) => {
+			if (settled) return;
+			settled = true;
+			done(r);
+		};
+		const timer = setTimeout(() => {
+			child.kill();
+			finish({ status: null, stdout, stderr: 'timed out', spawnFailed: false });
+		}, opts.timeout ?? 8000);
+		child.stdout?.setEncoding('utf8');
+		child.stdout?.on('data', (chunk: string) => {
+			stdout += chunk;
+		});
+		child.stderr?.setEncoding('utf8');
+		child.stderr?.on('data', (chunk: string) => {
+			stderr += chunk;
+		});
+		child.on('error', (err) => {
+			clearTimeout(timer);
+			finish({ status: null, stdout: '', stderr: String(err), spawnFailed: true });
+		});
+		child.on('close', (status) => {
+			clearTimeout(timer);
+			finish({ status, stdout, stderr, spawnFailed: false });
+		});
 	});
-	if (r.status !== 0) return null;
-	return Boolean((r.stdout ?? '').trim());
 }
 
-let localberthAvailable: boolean | null = null;
-
-export function leasePort(contentRoot: string): number | null {
-	if (localberthAvailable === false) return null;
-	const pkg = readJson(join(contentRoot, 'package.json'));
-	const names = [pkg?.name, contentRoot.replace(/[/\\]+$/, '').split(/[/\\]/).pop()].filter(
-		(n): n is string => Boolean(n)
-	);
-	for (const name of names) {
-		const r = spawnSync('localberth', ['get', name], {
-			encoding: 'utf8',
-			timeout: 1500,
-			windowsHide: true,
-			shell: win
-		});
-		if (r.error && 'code' in r.error && r.error.code === 'ENOENT') {
-			localberthAvailable = false;
-			return null;
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+	const out = new Array<R>(items.length);
+	let next = 0;
+	const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+		while (next < items.length) {
+			const i = next++;
+			out[i] = await fn(items[i]);
 		}
-		if (r.status !== 0) continue;
-		const n = Number((r.stdout || '').trim());
-		if (Number.isInteger(n) && n > 0 && n <= 65535) return n;
+	});
+	await Promise.all(workers);
+	return out;
+}
+
+export async function gitDirtyMap(repoRoots: string[]): Promise<Map<string, boolean | null>> {
+	const repos = [...new Set(repoRoots)];
+	const states = await mapLimit(repos, 8, async (repo) => {
+		const r = await exec('git', ['status', '--porcelain'], { cwd: repo, timeout: 8000 });
+		return r.status === 0 ? Boolean(r.stdout.trim()) : null;
+	});
+	return new Map(repos.map((repo, i) => [repo, states[i]]));
+}
+
+/** `localberth ls` prints `name\tport\tbind\tkind\tfirewall` per lease. */
+export function parseLeaseTable(tsv: string): Map<string, number> {
+	const leases = new Map<string, number>();
+	for (const line of tsv.split(/\r?\n/)) {
+		const [name, port] = line.split('\t');
+		if (!name || !port) continue;
+		const n = Number(port.trim());
+		if (Number.isInteger(n) && n > 0 && n <= 65535) leases.set(name.trim().toLowerCase(), n);
+	}
+	return leases;
+}
+
+const LEASE_TTL_MS = 30_000;
+let localberthMissing = false;
+let leaseCache: { at: number; table: Map<string, number> } | null = null;
+
+/**
+ * One `localberth ls` per pass beats one `localberth get` per site by ~8s on Windows.
+ * Only a spawn failure (no localberth on PATH) disables the lookup; a slow or failed
+ * run keeps the last good table so ports do not blink out of the board.
+ */
+export async function leaseTable(): Promise<Map<string, number>> {
+	if (localberthMissing) return new Map();
+	if (leaseCache && Date.now() - leaseCache.at < LEASE_TTL_MS) return leaseCache.table;
+	const r = await exec('localberth', ['ls'], { timeout: 6000 });
+	if (r.spawnFailed) {
+		localberthMissing = true;
+		return new Map();
+	}
+	if (r.status !== 0) {
+		console.warn(`siblings: localberth ls failed (${r.status}) ${r.stderr.trim()}`);
+		return leaseCache?.table ?? new Map();
+	}
+	const table = parseLeaseTable(r.stdout);
+	leaseCache = { at: Date.now(), table };
+	return table;
+}
+
+export function leaseNames(site: SiblingSite): string[] {
+	const pkg = readJson(join(site.contentRoot, 'package.json'));
+	const folder = site.contentRoot.replace(/[/\\]+$/, '').split(/[/\\]/).pop();
+	return [pkg?.name, folder, site.name]
+		.filter((n): n is string => Boolean(n))
+		.map((n) => n.toLowerCase());
+}
+
+export function leasePortFor(site: SiblingSite, leases: Map<string, number>): number | null {
+	for (const name of leaseNames(site)) {
+		const port = leases.get(name);
+		if (port) return port;
 	}
 	return null;
 }
 
-export function planSite(site: SiblingSite, target: string): SitePlan {
+export async function planContext(sites: SiblingSite[]): Promise<PlanContext> {
+	const [leases, dirty] = await Promise.all([
+		leaseTable(),
+		gitDirtyMap(sites.map((s) => s.repoRoot))
+	]);
+	return { leases, dirty };
+}
+
+export function planSite(site: SiblingSite, target: string, ctx?: PlanContext): SitePlan {
 	return {
 		name: site.name,
 		path: relative(workspaceRoot, site.contentRoot),
@@ -370,15 +469,22 @@ export function planSite(site: SiblingSite, target: string): SitePlan {
 		headers: headersPlan(site),
 		ship: site.shipDir ? `pnpm ship in ${relative(workspaceRoot, site.shipDir)}` : null,
 		url: readConfigUrl(site.contentRoot),
-		gitDirty: gitDirty(site.repoRoot),
-		leasePort: leasePort(site.contentRoot)
+		gitDirty: ctx ? (ctx.dirty.get(site.repoRoot) ?? null) : null,
+		leasePort: ctx ? leasePortFor(site, ctx.leases) : null
 	};
 }
 
 export async function buildInventory(): Promise<Inventory> {
-	const engine = await loadEngineStrip();
-	const sites = discoverSiblingSites().map((site) => planSite(site, engine.target));
-	return { engine, workspace: workspaceRoot, sites };
+	const started = Date.now();
+	const sites = discoverSiblingSites();
+	const [engine, ctx] = await Promise.all([loadEngineStrip(), planContext(sites)]);
+	return {
+		engine,
+		workspace: workspaceRoot,
+		sites: sites.map((site) => planSite(site, engine.target, ctx)),
+		builtAt: new Date().toISOString(),
+		buildMs: Date.now() - started
+	};
 }
 
 export function syncCommitPaths(site: SiblingSite): string[] {

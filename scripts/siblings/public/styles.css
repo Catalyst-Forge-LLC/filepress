@@ -1,0 +1,97 @@
+:root {
+	color-scheme: light dark;
+	--bg: Canvas;
+	--fg: CanvasText;
+	--muted: color-mix(in srgb, CanvasText 55%, Canvas);
+	--line: color-mix(in srgb, CanvasText 16%, Canvas);
+	--accent: #1e4d6b;
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	line-height: 1.45;
+}
+body {
+	margin: 1.25rem auto;
+	max-width: 72rem;
+	padding: 0 1rem 3rem;
+	background: var(--bg);
+	color: var(--fg);
+}
+h1,
+h2 {
+	font-weight: 650;
+	margin: 0 0 0.25rem;
+}
+.strip,
+.toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+.engine {
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+.muted {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+.banner {
+	background: color-mix(in srgb, #b45309 18%, var(--bg));
+	border: 1px solid color-mix(in srgb, #b45309 40%, var(--line));
+	padding: 0.6rem 0.8rem;
+	margin-bottom: 1rem;
+}
+.hidden {
+	display: none;
+}
+button {
+	font: inherit;
+	padding: 0.35rem 0.7rem;
+	cursor: pointer;
+}
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.check {
+	display: flex;
+	gap: 0.4rem;
+	align-items: center;
+	font-size: 0.9rem;
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.88rem;
+}
+th,
+td {
+	border-bottom: 1px solid var(--line);
+	padding: 0.4rem 0.45rem;
+	text-align: left;
+	vertical-align: top;
+}
+th {
+	font-weight: 600;
+}
+.behind {
+	color: #9a3412;
+}
+.ok {
+	color: #166534;
+}
+.log pre {
+	white-space: pre-wrap;
+	background: color-mix(in srgb, CanvasText 5%, Canvas);
+	border: 1px solid var(--line);
+	padding: 0.75rem;
+	min-height: 8rem;
+	max-height: 22rem;
+	overflow: auto;
+	font-size: 0.8rem;
+}
+a {
+	color: var(--accent);
+}

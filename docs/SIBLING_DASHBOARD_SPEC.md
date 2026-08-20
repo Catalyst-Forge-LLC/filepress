@@ -1,15 +1,15 @@
 # Spec: FilePress sibling dashboard (local operator)
 
-**Status:** draft — not implemented  
+**Status:** locked — **M0–M1 implemented** (2026-08-20)  
 **Date:** 2026-08-20  
 **Phase:** 4-feature-iteration  
 **Related:** [`scripts/sync-sibling-sites.ts`](../scripts/sync-sibling-sites.ts) · [EXTERNAL_SITES.md](./EXTERNAL_SITES.md) · [DEPLOY.md](./DEPLOY.md) · [LOCALBERTH.md](./LOCALBERTH.md)
 
-**Surface (proposed):** a **localhost-only** web UI kicked off from the engine repo (`pnpm siblings` or similar), plus the existing CLI. Neither the UI nor its job state ships in the `getfilepress` npm tarball.
+**Surface:** localhost UI (`pnpm siblings`, default `http://127.0.0.1:5198`) plus CLI (`pnpm sync-siblings`). Shared library: `scripts/siblings/lib.ts`. Neither the UI nor `.filepress-siblings/` ships in the `getfilepress` npm tarball.
 
 ---
 
-## 0. Proposed decisions (lock before build)
+## 0. Locked decisions
 
 | # | Topic | Proposal |
 | --- | --- | --- |
@@ -24,7 +24,7 @@
 | Q9 | Dev servers | **Out of v1.** Show LocalBerth lease/port if present; do not claim ports or spawn `filepress dev` until a later milestone. |
 | Q10 | Name | **Sibling dashboard** in docs and UI. CLI stays `pnpm sync-siblings` for the headless path. |
 
-Lock these (or change them) before implementation. Do not treat this draft as permission to start the UI.
+Locked 2026-08-20. M0 library + M1 dashboard are in-repo.
 
 ---
 
@@ -264,7 +264,7 @@ Never a count-only failure (“1 failed”) without a way to open that site’s 
 - Extract shared module; CLI behavior unchanged (including tests).
 - Inventory JSON type documented next to the module.
 
-**Exit:** `pnpm sync-siblings` still works; unit tests still cover pin rewrite, lock parse, sync target, header merge.
+**Exit:** `pnpm sync-siblings` still works; unit tests still cover pin rewrite, lock parse, sync target, header merge. **Done.**
 
 ### M1 — Dashboard v1
 
@@ -273,7 +273,7 @@ Never a count-only failure (“1 failed”) without a way to open that site’s 
 - Job log with real output.
 - Commit after apply (Q5).
 
-**Exit:** Operator can refresh, plan, apply a subset, see a commit in that repo, without using the CLI. CLI remains available.
+**Exit:** Operator can refresh, plan, apply a subset, see a commit in that repo, without using the CLI. CLI remains available. **Done** (`pnpm siblings` → `http://127.0.0.1:5198`).
 
 ### M2 — Status depth
 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>FilePress sibling dashboard</title>
+		<link rel="stylesheet" href="/styles.css" />
+	</head>
+	<body>
+		<header class="strip">
+			<div>
+				<h1>Sibling dashboard</h1>
+				<p class="muted" id="workspace"></p>
+			</div>
+			<div class="engine" id="engine">Loading…</div>
+		</header>
+		<p class="banner hidden" id="banner"></p>
+		<section class="toolbar">
+			<button type="button" id="refresh">Refresh</button>
+			<button type="button" id="plan">Plan</button>
+			<button type="button" id="apply">Apply</button>
+			<button type="button" id="ship">Ship</button>
+			<label class="check"><input type="checkbox" id="commit" checked /> Commit after apply</label>
+			<span class="muted" id="selection">All discovered sites</span>
+		</section>
+		<table>
+			<thead>
+				<tr>
+					<th><input type="checkbox" id="all" /></th>
+					<th>Site</th>
+					<th>Pin</th>
+					<th>Locked</th>
+					<th>Update</th>
+					<th>Headers</th>
+					<th>Ship</th>
+					<th>Git</th>
+					<th>Live</th>
+					<th>Dev</th>
+				</tr>
+			</thead>
+			<tbody id="rows"></tbody>
+		</table>
+		<section class="log">
+			<h2>Job log</h2>
+			<p class="muted" id="job-meta">No job yet.</p>
+			<pre id="log"></pre>
+		</section>
+		<script type="module" src="/app.js"></script>
+	</body>
+</html>

@@ -61,6 +61,7 @@
 		"dev:www": "node scripts/ensure-lease.mjs getfilepress 5180 && pnpm filepress dev --site getfilepress --host 0.0.0.0",
 		"create-site": "node scripts/create-site.mjs",
 		"sync-siblings": "tsx scripts/sync-sibling-sites.ts",
+		"siblings": "tsx scripts/siblings/server.ts",
 		"import": "node scripts/filepress.mjs import",
 		"prepublishOnly": "node scripts/publish-gate.mjs",
 		"prepack": "node scripts/prepack.mjs",

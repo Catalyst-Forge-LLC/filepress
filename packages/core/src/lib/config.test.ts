@@ -59,7 +59,7 @@ describe('defineFilepressConfig', () => {
 		).toThrow(/unsupported icon/);
 	});
 
-	it('defaults nav to Home + /writing when homePage is set', () => {
+	it('defaults nav to Home + /posts when homePage is set', () => {
 		const cfg = defineFilepressConfig({
 			title: 'My Site',
 			url: 'https://my.site',
@@ -68,7 +68,7 @@ describe('defineFilepressConfig', () => {
 		expect(cfg.homePage).toBe('about');
 		expect(cfg.nav).toEqual([
 			{ label: 'Home', href: '/' },
-			{ label: 'Posts', href: '/writing' },
+			{ label: 'Posts', href: '/posts' },
 			{ label: 'Topics', href: '/topics' }
 		]);
 	});

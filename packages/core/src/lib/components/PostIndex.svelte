@@ -11,7 +11,7 @@
 		posts,
 		page = 1,
 		totalPages = 1,
-		/** Page-1 URL for the post index (`/` or `/writing`). */
+		/** Page-1 URL for the post index (`/` or `/posts`). */
 		indexHref = '/'
 	}: {
 		site: SiteConfig;

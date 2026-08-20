@@ -69,7 +69,7 @@ export function buildSitemapXml(
 
 	const urls: { loc: string; lastmod?: string }[] = [
 		{ loc: absoluteUrl(site, '/') },
-		...(site.homePage ? [{ loc: absoluteUrl(site, '/writing') }] : []),
+		...(site.homePage ? [{ loc: absoluteUrl(site, '/posts') }] : []),
 		{ loc: absoluteUrl(site, '/topics') },
 		{ loc: absoluteUrl(site, '/tags') },
 		...extraPages,

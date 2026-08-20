@@ -55,7 +55,7 @@ export interface SiteConfig {
 	postsPerPage: number;
 	/**
 	 * When set, `/` renders this static page slug (`pages/<slug>.md`) and the
-	 * chronological post index moves to `/writing`.
+	 * chronological post index moves to `/posts`.
 	 */
 	homePage: string | null;
 	nav: NavItem[];
@@ -86,7 +86,7 @@ export interface SiteConfigInput {
 	ogImage?: string;
 	author?: string;
 	postsPerPage?: number;
-	/** Static page slug to show at `/` (post index then lives at `/writing`). */
+	/** Static page slug to show at `/` (post index then lives at `/posts`). */
 	homePage?: string;
 	nav?: NavItem[];
 	/** Custom footer links; replaces the default RSS + Topics row when set. */
@@ -120,7 +120,7 @@ function normalizeNavItems(items: NavItem[] | undefined): NavItem[] | null {
 
 /** Path to page 1 of the chronological post index. */
 export function postsIndexPath(site: Pick<SiteConfig, 'homePage'>): string {
-	return site.homePage ? '/writing' : '/';
+	return site.homePage ? '/posts' : '/';
 }
 
 /**
@@ -151,7 +151,7 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 	const defaultNav: NavItem[] = homePage
 		? [
 				{ label: 'Home', href: '/' },
-				{ label: 'Posts', href: '/writing' },
+				{ label: 'Posts', href: '/posts' },
 				{ label: 'Topics', href: '/topics' }
 			]
 		: [

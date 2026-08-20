@@ -59,7 +59,12 @@ function parseArgs(argv) {
 		} else if (a.startsWith('--port=')) {
 			args.port = a.slice('--port='.length);
 		} else if (a === '--host') {
-			args.host = argv[++i] ?? 'true';
+			const next = argv[i + 1];
+			if (next && !next.startsWith('-')) {
+				args.host = argv[++i];
+			} else {
+				args.host = 'true';
+			}
 		} else if (a.startsWith('--host=')) {
 			args.host = a.slice('--host='.length);
 		} else if (a === '--') {

@@ -12,7 +12,7 @@ import { join, relative, resolve, sep } from 'node:path';
 import type { PathMount } from './paths-shared';
 
 export type { PathMount } from './paths-shared';
-export { normalizePathMounts, pathMountReservedSlugs } from './paths-shared';
+export { normalizePathMounts, pathMountReservedSlugs, isPathMountHref } from './paths-shared';
 
 /** Absolute filesystem path for a mount's source directory. */
 export function resolvePathMountDir(siteRoot: string, mount: PathMount): string {

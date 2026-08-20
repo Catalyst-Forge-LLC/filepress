@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SiteConfig } from '../config';
+	import { isPathMountHref } from '../paths-shared';
 	import NavIcon from './NavIcon.svelte';
 
 	let { site }: { site: SiteConfig } = $props();
@@ -28,7 +29,9 @@
 					class:nav-github={item.icon === 'github'}
 					{...(item.icon === 'github'
 						? { target: '_blank', rel: 'noopener noreferrer' }
-						: {})}
+						: isPathMountHref(item.href, site.paths)
+							? { 'data-sveltekit-reload': true }
+							: {})}
 				>
 					{#if item.icon}
 						<NavIcon name={item.icon} />

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import {
 	normalizePathMounts,
 	pathMountReservedSlugs,
+	isPathMountHref,
 	copyPathMounts,
 	listPathMountHtmlUrls
 } from './paths';
@@ -32,6 +33,18 @@ describe('normalizePathMounts', () => {
 				{ url: '/docs/api', dir: 'b' }
 			])
 		).toThrow(/nest/);
+	});
+});
+
+describe('isPathMountHref', () => {
+	const mounts = [{ url: '/docs', dir: 'docs/dist' }];
+
+	it('matches the mount and nested pages', () => {
+		expect(isPathMountHref('/docs', mounts)).toBe(true);
+		expect(isPathMountHref('/docs/install', mounts)).toBe(true);
+		expect(isPathMountHref('/docs/install?x=1', mounts)).toBe(true);
+		expect(isPathMountHref('/install', mounts)).toBe(false);
+		expect(isPathMountHref('https://example.com/docs', mounts)).toBe(false);
 	});
 });
 

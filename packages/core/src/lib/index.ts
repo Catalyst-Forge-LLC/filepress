@@ -24,6 +24,8 @@ export type {
 	PathMount
 } from './config';
 
+export { isPathMountHref } from './paths-shared';
+
 export { formatDate } from './format';
 
 export type { PostMeta, PostSource, RenderedPost, RawFrontmatter } from './content/types';

@@ -87,3 +87,11 @@ export function normalizePathMounts(input: PathMount[] | undefined): PathMount[]
 export function pathMountReservedSlugs(mounts: PathMount[]): string[] {
 	return mounts.map((m) => m.url.slice(1).split('/')[0]!).filter(Boolean);
 }
+
+/** Same-origin href that belongs to a `paths` mount (e.g. `/docs`, `/docs/install`). */
+export function isPathMountHref(href: string, mounts: PathMount[]): boolean {
+	const raw = href.trim();
+	if (!raw.startsWith('/')) return false;
+	const path = raw.split(/[?#]/)[0] ?? '';
+	return mounts.some((m) => path === m.url || path.startsWith(`${m.url}/`));
+}

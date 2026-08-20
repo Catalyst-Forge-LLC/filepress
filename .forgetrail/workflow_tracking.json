@@ -443,6 +443,12 @@
       "gotcha": "Default Vite preview/dev ports collide when multiple agents/sites run locally.",
       "resolution": "Default preview to port 27777; support --port via env for Vite on Windows.",
       "issue": "Default Vite preview/dev ports collide when multiple agents/sites run locally."
+    },
+    {
+      "date": "2026-08-20",
+      "gotcha": "filepress dev: clicking a nav href that is a `paths` mount (e.g. /docs) is SvelteKit client nav into [slug] → 404. A hard load of the same URL hits the mount middleware and works.",
+      "resolution": "Mark mount hrefs data-sveltekit-reload in SiteHeader/SiteFooter; pointerdown on in-page links. 0.1.8.",
+      "issue": "Clicking Docs in filepress dev 404s as page slug `docs` even though GET /docs serves the mount."
     }
   ],
   "sessions": [
@@ -497,6 +503,10 @@
     {
       "date": "2026-08-11",
       "summary": "Public-prep + rebrand to FilePress/getfilepress (MIT, latin fonts, hljs allowlist, drop sass). npm stake getfilepress@0.0.0. Zip/symlink bloat lesson. CONTEXT_PROMPT handoff for folder rename. Post-rename session: remotes/mirror/GitHub → Catalyst-Forge-LLC/filepress; sibling sites rewired; product site sites/getfilepress (homePage, docs, Writing, press logo, wider chrome); deploy:www via Wrangler. ForgeTrail tracking backfilled this session."
+    },
+    {
+      "date": "2026-08-20",
+      "summary": "Path-mount nav/footer/in-page links use data-sveltekit-reload so /docs is not a FilePress [slug] 404 in filepress dev. Package 0.1.8."
     }
   ]
 }

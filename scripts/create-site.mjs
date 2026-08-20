@@ -144,7 +144,7 @@ if (external) {
 				version: '0.0.1',
 				type: 'module',
 				scripts: {
-					dev: 'filepress dev --host',
+					dev: 'filepress dev --host 0.0.0.0',
 					build: 'filepress build',
 					preview: 'filepress preview',
 					check: 'filepress check'

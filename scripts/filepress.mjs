@@ -287,7 +287,7 @@ function runSiteCommand(argv) {
 
 	// dev | build → vite
 	const viteArgs = [command];
-	if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? 'true' : args.host);
+	if (args.host !== null) viteArgs.push('--host', args.host === 'true' ? '0.0.0.0' : args.host);
 	viteArgs.push(...args.extra);
 	runNodeBin('vite', 'vite', viteArgs, {
 		cwd: appDir,

@@ -183,7 +183,7 @@ function runSiteCommand(argv) {
 				`  filepress <${[...COMMANDS].join('|')}>                 # cwd is the site\n` +
 				`  filepress <${[...COMMANDS].join('|')}> --root <path>\n` +
 				`  filepress preview [--port 27777]  # serves <site>/build (default 27777)\n` +
-				`  filepress dev --port <n>            # vite dev; optional fixed port\n` +
+				`  filepress dev --port <n> [--host]   # vite dev; optional fixed port / LAN\n` +
 				`  filepress import --source <url> [--inspire <url>] …\n` +
 				`monorepo sites: ${listSites().join(', ') || '(none)'}`
 		);
@@ -218,6 +218,9 @@ function runSiteCommand(argv) {
 		...process.env,
 		FILEPRESS_SITE_ROOT: siteRoot
 	};
+	if (args.host !== null) {
+		env.HOST = args.host === 'true' ? '0.0.0.0' : args.host;
+	}
 
 	// Preview must serve the site's own build/ — not packages/app/.svelte-kit
 	// (shared across sites; another agent's last build can leak onto vite preview).
@@ -240,7 +243,7 @@ function runSiteCommand(argv) {
 				'--port',
 				String(port),
 				'--host',
-				args.host && args.host !== 'true' ? args.host : '127.0.0.1'
+				args.host && args.host !== 'true' ? args.host : args.host === 'true' ? '0.0.0.0' : '127.0.0.1'
 			],
 			{ cwd: appDir, env }
 		);

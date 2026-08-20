@@ -112,22 +112,75 @@ export function retargetGetfilepressToNpm(
 	return { text, changed: text !== raw, previous };
 }
 
-function findLockfileDir(start: string, stopAt: string): string | null {
+/** Workspace root lockfile wins over a leftover lockfile in site/. */
+export function resolveLockfileDir(
+	start: string,
+	stopAt: string,
+	exists: (path: string) => boolean = existsSync
+): string | null {
 	let dir = start;
+	let nearestLock: string | null = null;
+	let workspaceLock: string | null = null;
 	while (true) {
-		if (existsSync(join(dir, 'pnpm-lock.yaml'))) return dir;
-		if (resolve(dir) === resolve(stopAt)) return null;
+		const lock = join(dir, 'pnpm-lock.yaml');
+		const workspace = join(dir, 'pnpm-workspace.yaml');
+		if (exists(lock) && !nearestLock) nearestLock = dir;
+		if (exists(workspace) && exists(lock)) workspaceLock = dir;
+		if (resolve(dir) === resolve(stopAt)) break;
 		const parent = dirname(dir);
-		if (parent === dir) return null;
+		if (parent === dir) break;
 		dir = parent;
 	}
+	return workspaceLock ?? nearestLock;
 }
 
-function lockedGetfilepressVersion(lockfileDir: string | null): string | null {
+/** Resolved getfilepress version for one lockfile importer (`.` or `site`). */
+export function parseLockedGetfilepress(lockText: string, importer = '.'): string | null {
+	const lines = lockText.split(/\r?\n/);
+	let inImporters = false;
+	let inThis = false;
+	let inGetfilepress = false;
+	for (const line of lines) {
+		if (line.startsWith('importers:')) {
+			inImporters = true;
+			continue;
+		}
+		if (inImporters && /^[A-Za-z]/.test(line)) break;
+		if (!inImporters) continue;
+		const head = /^  (\S+):$/.exec(line);
+		if (head) {
+			inThis = head[1] === importer;
+			inGetfilepress = false;
+			continue;
+		}
+		if (inThis && /^\s+getfilepress:\s*$/.test(line)) {
+			inGetfilepress = true;
+			continue;
+		}
+		if (!inGetfilepress) continue;
+		const ver = /^\s+version:\s+(\d+\.\d+\.\d+)/.exec(line);
+		if (ver) return ver[1];
+		if (/^\s+\S+:/.test(line) && !/^\s+(specifier|version):/.test(line)) {
+			inGetfilepress = false;
+		}
+	}
+	return null;
+}
+
+function lockfileImporter(packageDir: string, lockfileDir: string): string {
+	const rel = relative(lockfileDir, packageDir).replace(/\\/g, '/');
+	return rel === '' ? '.' : rel;
+}
+
+function lockedGetfilepressVersion(lockfileDir: string | null, packageDir?: string): string | null {
 	if (!lockfileDir) return null;
 	const text = readFileSync(join(lockfileDir, 'pnpm-lock.yaml'), 'utf8');
-	const match = text.match(/getfilepress@(\d+\.\d+\.\d+)/);
-	return match?.[1] ?? null;
+	const importer = packageDir ? lockfileImporter(packageDir, lockfileDir) : '.';
+	return (
+		parseLockedGetfilepress(text, importer) ??
+		parseLockedGetfilepress(text, '.') ??
+		null
+	);
 }
 
 function shipDirFor(packageDir: string, repoRoot: string, pkg: PkgJson): string | null {
@@ -150,7 +203,7 @@ function siteFromPackageJson(packageJsonPath: string, repoRoot: string, name: st
 			: null;
 	if (!contentRoot) return null;
 	const headersCandidate = join(contentRoot, 'static', '_headers');
-	const lockfileDir = findLockfileDir(packageDir, repoRoot);
+	const lockfileDir = resolveLockfileDir(packageDir, repoRoot);
 	return {
 		name,
 		repoRoot,
@@ -159,7 +212,7 @@ function siteFromPackageJson(packageJsonPath: string, repoRoot: string, name: st
 		pin,
 		pinKind: pinKind(pin),
 		lockfileDir,
-		lockedVersion: lockedGetfilepressVersion(lockfileDir),
+		lockedVersion: lockedGetfilepressVersion(lockfileDir, packageDir),
 		headersPath: existsSync(headersCandidate) ? headersCandidate : null,
 		shipDir: shipDirFor(packageDir, repoRoot, pkg)
 	};
@@ -260,7 +313,10 @@ function applyUpdate(site: SiblingSite, target: string): boolean {
 		console.error(`  update   failed (exit ${status})`);
 		return false;
 	}
-	const locked = lockedGetfilepressVersion(findLockfileDir(site.packageDir, site.repoRoot));
+	const locked = lockedGetfilepressVersion(
+		resolveLockfileDir(site.packageDir, site.repoRoot),
+		site.packageDir
+	);
 	if (locked !== target) {
 		console.error(
 			`  update   still ${locked ?? 'unresolved'} after pnpm; getfilepress@${target} is not installed.`

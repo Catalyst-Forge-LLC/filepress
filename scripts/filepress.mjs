@@ -63,7 +63,7 @@ function parseArgs(argv) {
 			if (next && !next.startsWith('-')) {
 				args.host = argv[++i];
 			} else {
-				args.host = 'true';
+				args.host = '0.0.0.0';
 			}
 		} else if (a.startsWith('--host=')) {
 			args.host = a.slice('--host='.length);

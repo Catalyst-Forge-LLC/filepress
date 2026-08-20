@@ -259,6 +259,42 @@ function engineVersion(): string {
 	return readJson(join(filepressRoot, 'package.json'))?.version ?? 'unknown';
 }
 
+export function compareSemver(a: string, b: string): number {
+	const pa = a.split('.').map((n) => Number(n));
+	const pb = b.split('.').map((n) => Number(n));
+	for (let i = 0; i < 3; i++) {
+		const da = pa[i] ?? 0;
+		const db = pb[i] ?? 0;
+		if (da !== db) return da < db ? -1 : 1;
+	}
+	return 0;
+}
+
+/** When local is ahead of npm, sync siblings to the published version. */
+export function resolveSyncTarget(
+	local: string,
+	published: string | null
+): { target: string; note: string | null } {
+	if (published && compareSemver(local, published) > 0) {
+		return {
+			target: published,
+			note: `local ${local} is not on npm yet; syncing to ${published}`
+		};
+	}
+	return { target: local, note: null };
+}
+
+async function publishedGetfilepressVersion(): Promise<string | null> {
+	try {
+		const res = await fetch('https://registry.npmjs.org/getfilepress/latest');
+		if (!res.ok) return null;
+		const body = (await res.json()) as { version?: string };
+		return typeof body.version === 'string' ? body.version : null;
+	} catch {
+		return null;
+	}
+}
+
 function headersPlan(site: SiblingSite): { action: 'none' | 'merge' | 'ok'; added: string[] } {
 	if (!site.headersPath) return { action: 'none', added: [] };
 	const existing = readFileSync(site.headersPath, 'utf8');
@@ -447,7 +483,7 @@ Discover sibling folders that depend on getfilepress. Dry-run by default.
 Does not push. Not published on npm.`);
 }
 
-export function main(argv = process.argv.slice(2)): number {
+export async function main(argv = process.argv.slice(2)): Promise<number> {
 	let args: SyncArgs;
 	try {
 		args = parseArgs(argv);
@@ -460,7 +496,9 @@ export function main(argv = process.argv.slice(2)): number {
 		return 0;
 	}
 
-	const target = engineVersion();
+	const local = engineVersion();
+	const published = await publishedGetfilepressVersion();
+	const { target, note } = resolveSyncTarget(local, published);
 	const only = new Set(args.only.map((n) => n.toLowerCase()));
 	let sites = discoverSiblingSites();
 	if (only.size) {
@@ -473,7 +511,8 @@ export function main(argv = process.argv.slice(2)): number {
 	}
 
 	const mode = args.ship ? 'ship' : args.apply ? 'apply' : 'dry-run';
-	console.log(`Sibling FilePress sites  (${mode}, engine ${target})`);
+	console.log(`Sibling FilePress sites  (${mode}, engine ${local}, npm ${published ?? 'unknown'})`);
+	if (note) console.log(`  ${note}`);
 	console.log(`Workspace ${workspaceRoot}`);
 
 	if (sites.length === 0) {
@@ -521,5 +560,7 @@ export function main(argv = process.argv.slice(2)): number {
 
 const entry = process.argv[1];
 if (entry && resolve(entry) === resolve(here)) {
-	process.exitCode = main();
+	main().then((code) => {
+		process.exitCode = code;
+	});
 }

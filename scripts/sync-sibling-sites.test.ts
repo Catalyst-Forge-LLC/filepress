@@ -5,6 +5,7 @@ import {
 	parseArgs,
 	parseLockedGetfilepress,
 	resolveLockfileDir,
+	resolveSyncTarget,
 	retargetGetfilepressToNpm
 } from './sync-sibling-sites.ts';
 
@@ -72,6 +73,19 @@ describe('retargetGetfilepressToNpm', () => {
 		const result = retargetGetfilepressToNpm(raw, '^0.1.5');
 		assert.equal(result.previous, '^0.1.5');
 		assert.equal(JSON.parse(result.text).devDependencies.getfilepress, '^0.1.5');
+	});
+});
+
+describe('resolveSyncTarget', () => {
+	it('uses npm latest when local is unpublished', () => {
+		const resolved = resolveSyncTarget('0.1.8', '0.1.7');
+		assert.equal(resolved.target, '0.1.7');
+		assert.match(resolved.note ?? '', /not on npm yet/);
+	});
+
+	it('uses local when it matches or is behind npm', () => {
+		assert.equal(resolveSyncTarget('0.1.7', '0.1.7').target, '0.1.7');
+		assert.equal(resolveSyncTarget('0.1.7', '0.1.8').target, '0.1.7');
 	});
 });
 

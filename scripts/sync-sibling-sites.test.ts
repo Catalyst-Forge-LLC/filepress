@@ -10,7 +10,17 @@ import {
 
 describe('parseArgs', () => {
 	it('defaults to dry-run', () => {
-		assert.deepEqual(parseArgs([]), { apply: false, ship: false, only: [], help: false });
+		assert.deepEqual(parseArgs([]), {
+			apply: false,
+			ship: false,
+			commit: true,
+			only: [],
+			help: false
+		});
+	});
+
+	it('accepts --no-commit', () => {
+		assert.equal(parseArgs(['--apply', '--no-commit']).commit, false);
 	});
 
 	it('treats --ship as apply', () => {

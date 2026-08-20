@@ -2,11 +2,12 @@
  * Local operator tool: find sibling FilePress sites and sync them to this engine.
  *
  *   pnpm sync-siblings              dry-run
- *   pnpm sync-siblings --apply      npm pins (incl. link: → registry) + merge static/_headers
+ *   pnpm sync-siblings --apply      npm pins, merge headers, commit in each repo (no push)
  *   pnpm sync-siblings --ship       apply, then pnpm ship where a ship script exists
  *   pnpm sync-siblings --only aibreze,ollanet
+ *   pnpm sync-siblings --apply --no-commit
  *
- * Not part of the published package. Does not commit or push.
+ * Not part of the published package. Does not push.
  */
 import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -39,6 +40,7 @@ export type SiblingSite = {
 export type SyncArgs = {
 	apply: boolean;
 	ship: boolean;
+	commit: boolean;
 	only: string[];
 	help: boolean;
 };
@@ -52,14 +54,15 @@ type PkgJson = {
 };
 
 export function parseArgs(argv: string[]): SyncArgs {
-	const args: SyncArgs = { apply: false, ship: false, only: [], help: false };
+	const args: SyncArgs = { apply: false, ship: false, commit: true, only: [], help: false };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === '--apply') args.apply = true;
 		else if (a === '--ship') {
 			args.ship = true;
 			args.apply = true;
-		} else if (a === '--only') {
+		} else if (a === '--no-commit') args.commit = false;
+		else if (a === '--only') {
 			const next = argv[++i];
 			if (!next) throw new Error('--only needs a comma-separated folder name list');
 			args.only.push(...next.split(',').map((s) => s.trim()).filter(Boolean));
@@ -291,6 +294,77 @@ function printSite(site: SiblingSite, target: string): void {
 		console.log(`  headers  merge static/_headers (+${headers.added.join(', ')})`);
 	}
 	console.log(`  ship     ${site.shipDir ? `pnpm ship in ${relative(workspaceRoot, site.shipDir)}` : 'none'}`);
+	console.log('  commit   git commit in repo (no push)');
+}
+
+export function syncCommitPaths(site: SiblingSite): string[] {
+	const abs = [
+		join(site.packageDir, 'package.json'),
+		site.lockfileDir ? join(site.lockfileDir, 'pnpm-lock.yaml') : null,
+		site.headersPath
+	].filter((p): p is string => Boolean(p) && existsSync(p));
+	return abs
+		.map((p) => relative(site.repoRoot, p))
+		.filter((rel) => rel && !rel.startsWith('..'));
+}
+
+function git(
+	repo: string,
+	args: string[],
+	inherit = false
+): { status: number | null; stdout: string; stderr: string } {
+	const result = spawnSync('git', args, {
+		cwd: repo,
+		encoding: 'utf8',
+		shell: false,
+		stdio: inherit ? 'inherit' : ['ignore', 'pipe', 'pipe'],
+		env: process.env
+	});
+	return {
+		status: result.status,
+		stdout: result.stdout ?? '',
+		stderr: result.stderr ?? ''
+	};
+}
+
+function applyCommit(site: SiblingSite, target: string): boolean {
+	const probe = git(site.repoRoot, ['rev-parse', '--is-inside-work-tree']);
+	if (probe.status !== 0 || probe.stdout.trim() !== 'true') {
+		console.log('  commit   skip (not a git repo)');
+		return true;
+	}
+	const rels = syncCommitPaths(site);
+	if (rels.length === 0) {
+		console.log('  commit   none');
+		return true;
+	}
+	const added = git(site.repoRoot, ['add', '--', ...rels]);
+	if (added.status !== 0) {
+		console.error(`  commit   git add failed\n${added.stderr}`);
+		return false;
+	}
+	const staged = git(site.repoRoot, ['diff', '--cached', '--quiet']);
+	if (staged.status === 0) {
+		console.log('  commit   nothing to commit');
+		return true;
+	}
+	console.log(`  commit   ${rels.join(', ')}`);
+	const committed = git(
+		site.repoRoot,
+		[
+			'commit',
+			'-m',
+			`Sync getfilepress to ${target}.`,
+			'-m',
+			'Update the engine pin and FilePress security headers.'
+		],
+		true
+	);
+	if (committed.status !== 0) {
+		console.error(`  commit   git commit failed (exit ${committed.status})`);
+		return false;
+	}
+	return true;
 }
 
 function applyUpdate(site: SiblingSite, target: string): boolean {
@@ -364,11 +438,13 @@ function usage(): void {
 
 Discover sibling folders that depend on getfilepress. Dry-run by default.
 
-  --apply   rewrite link: pins to npm, update registry pins, merge static/_headers
-  --ship    apply, then run pnpm ship where the site has a ship script
-  --only    subset by sibling folder name (repeat or comma-separate)
+  --apply      rewrite link: pins to npm, update registry pins, merge static/_headers,
+               then commit those files in each sibling repo (no push)
+  --ship       apply, then run pnpm ship where the site has a ship script
+  --no-commit  apply or ship without creating a git commit
+  --only       subset by sibling folder name (repeat or comma-separate)
 
-Does not commit or push. Not published on npm.`);
+Does not push. Not published on npm.`);
 }
 
 export function main(argv = process.argv.slice(2)): number {
@@ -416,11 +492,22 @@ export function main(argv = process.argv.slice(2)): number {
 	let failed = 0;
 	for (const site of sites) {
 		console.log(`\n${site.name}`);
-		if (!applyUpdate(site, target)) failed++;
-		else if (!applyHeaders(site)) failed++;
-		else if (args.ship && !applyShip(site)) failed++;
-		else if (!args.ship) {
-			console.log(`  ship     skipped (pass --ship)`);
+		if (!applyUpdate(site, target) || !applyHeaders(site)) {
+			failed++;
+			continue;
+		}
+		if (args.commit) {
+			if (!applyCommit(site, target)) {
+				failed++;
+				continue;
+			}
+		} else {
+			console.log('  commit   skipped (--no-commit)');
+		}
+		if (args.ship) {
+			if (!applyShip(site)) failed++;
+		} else {
+			console.log('  ship     skipped (pass --ship)');
 		}
 	}
 

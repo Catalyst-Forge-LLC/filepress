@@ -26,6 +26,7 @@ export default defineFilepressConfig({
 	footerLinks: [
 		{ label: 'RSS', href: '/rss.xml' },
 		{ label: 'Topics', href: '/topics' },
+		{ label: 'Skill page', href: '/skill-page' },
 		{ label: 'GitHub', href: github, icon: 'github' }
 	],
 	topics: [

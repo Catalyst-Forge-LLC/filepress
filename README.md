@@ -200,6 +200,8 @@ Any other static host works the same way: publish `build/` as the web root. The 
 
 Full notes (including an agent checklist): [`docs/DEPLOY.md`](docs/DEPLOY.md) · product page: [getfilepress.com/deploy](https://getfilepress.com/deploy).
 
+If the site ships an agent skill, write the install page from [`docs/SKILL_PAGE.md`](docs/SKILL_PAGE.md) · [getfilepress.com/skill-page](https://getfilepress.com/skill-page).
+
 ## Repository layout
 
 ```

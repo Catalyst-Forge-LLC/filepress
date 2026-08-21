@@ -215,6 +215,12 @@ scripts/          filepress CLI and create-site scaffold
 pnpm test    # engine unit tests
 ```
 
+<!-- xfacts-nutrition-label -->
+
+## Nutrition label
+
+- **AppFacts:** [viewer](https://appfacts.dev/v#af1.eNptkkGLGzEMhf-K0dnZoVefygZKt01KYbK9lKUotjLxxmMZWzNhCPnvxZNk9tAebX9Pen7SBUYwnzRE7AkMHHyglKkU0CBTqlc9R86UGDQUQRkKGEArfiTQELylWCq2fdndCHsCc4GAsRuwqy-7KVFrs0-iVTtSENLqG474uFu3rVZfd9sNaMhDFD87-cGOnt6rj0PGns6cT2Dgpv_uBTTsh-gCZTDwywvNzafgYwcG1m0LGo5c5H4OPLhDwEzqJ3ZU4KrBUSpgfl8ggoHPZS78XprTXDtVEWdSZ9qrDwNXfcNv9J17fVGW-8SRovyHHf1CPg8-OCXMQWF0ytGoCuWR8gLLkKPjc1wsxJGyzOkoYbXFfJqfH_wQ_cGTezi5nZTlKNVMymypFB87lXyi4CMtysAWw56yHO_iLUbsSCXOogJhoaIOnNXMVasUOPUUBa5vGspol-z-CVdDHUorKN6q-xCql9G7-tW3OjofXF2ThPaEHf3p5-ZVlmLq6_JRkSXolT2SrYlCXcTihfMEBo4iqZim6bwch_2T5b5Zo2CYiqy-cO5otdmsm4-Vvv4FzW_8rQ) · [raw](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/APP_FACTS.md)
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

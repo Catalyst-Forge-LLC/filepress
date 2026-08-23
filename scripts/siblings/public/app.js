@@ -3,7 +3,7 @@ const POLL_MS = 10000;
 
 let inventory = null;
 let busy = null;
-let plannedFor = null;
+let pendingWrite = null;
 let jobTimer = null;
 let pollTimer = null;
 let renderedSites = '';
@@ -20,12 +20,6 @@ function selectedNames() {
 	return [...document.querySelectorAll('tbody input[type=checkbox]:checked')].map((el) => el.value);
 }
 
-/** Apply/Ship stay locked until Plan has run for exactly this selection. */
-function selectionKey() {
-	const names = selectedNames();
-	return names.length ? names.sort().join(',') : '*all*';
-}
-
 function show(el, text) {
 	el.textContent = text ?? '';
 	el.classList.toggle('hidden', !text);
@@ -37,11 +31,10 @@ function setBusy(label) {
 	const locked = Boolean(label);
 	$('refresh').disabled = locked;
 	$('plan').disabled = locked;
-	const gated = locked || plannedFor !== selectionKey();
-	$('apply').disabled = gated;
-	$('ship').disabled = gated;
-	$('apply').title = gated && !locked ? 'Run Plan for this selection first' : '';
-	$('ship').title = $('apply').title;
+	$('apply').disabled = locked;
+	$('ship').disabled = locked;
+	$('apply').title = locked ? '' : 'Plans first, then asks you to confirm before writing.';
+	$('ship').title = locked ? '' : 'Plans first, then asks you to confirm before shipping.';
 }
 
 function renderEngine(inv) {
@@ -186,9 +179,19 @@ async function pollJob(id, action, only) {
 		appendLog(job.lines.join('\n'));
 		if (job.status === 'running') return;
 		clearInterval(jobTimer);
-		if (action === 'plan' && job.status === 'ok') {
-			plannedFor = only.length ? [...only].sort().join(',') : '*all*';
+		if (action === 'plan' && job.status === 'ok' && pendingWrite) {
+			const write = pendingWrite;
+			pendingWrite = null;
+			setBusy(null);
+			const preview = (job.lines ?? []).filter(Boolean).slice(-24).join('\n') || 'Plan finished.';
+			const lead =
+				write === 'ship'
+					? 'Ship will apply, then deploy each site that has a ship script. No push.'
+					: 'Apply will rewrite pins and headers, then commit in each selected repo. No push.';
+			if (window.confirm(`${lead}\n\n${preview}`)) startJob(write);
+			return;
 		}
+		pendingWrite = null;
 		setBusy(null);
 		await refresh(true).catch((err) => show($('error'), err.message));
 	};
@@ -202,16 +205,17 @@ $('refresh').addEventListener('click', () => {
 		.catch((err) => show($('error'), err.message))
 		.finally(() => setBusy(null));
 });
-$('plan').addEventListener('click', () => startJob('plan'));
+$('plan').addEventListener('click', () => {
+	pendingWrite = null;
+	startJob('plan');
+});
 $('apply').addEventListener('click', () => {
-	if (confirm('Apply rewrites pins and headers, then commits in each selected repo. No push.')) {
-		startJob('apply');
-	}
+	pendingWrite = 'apply';
+	startJob('plan');
 });
 $('ship').addEventListener('click', () => {
-	if (confirm('Ship applies, then deploys each site that has a ship script. No push.')) {
-		startJob('ship');
-	}
+	pendingWrite = 'ship';
+	startJob('plan');
 });
 $('clear-log').addEventListener('click', () => {
 	appendLog('');

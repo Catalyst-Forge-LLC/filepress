@@ -39,8 +39,8 @@ importers:
         specifier: ^0.18.12
         version: 0.18.13
       ollanet:
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.6.6
+        version: 0.6.6
       rehype-autolink-headings:
         specifier: ^7.1.0
         version: 7.1.0
@@ -1523,6 +1523,11 @@ packages:
 
   ollanet@0.4.0:
     resolution: {integrity: sha512-SR0W83gwe6EcaDQB5iXEnfUAZ+882hcZ0IIO8wcYbt8J2oqP6msSjc5mqO1sAUogTO+Q87NSfkmNPCMLhdF88g==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  ollanet@0.6.6:
+    resolution: {integrity: sha512-Z28910ch9gLJOekv/qlpqk+XXl4G3FZwC3QX7GjfQYtn9UxfHQBCjdsbgPhIh/9Ei3eTo3U/JKXIiPk+XU154w==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -3181,6 +3186,8 @@ snapshots:
   obug@2.1.3: {}
 
   ollanet@0.4.0: {}
+
+  ollanet@0.6.6: {}
 
   parse5@7.3.0:
     dependencies:

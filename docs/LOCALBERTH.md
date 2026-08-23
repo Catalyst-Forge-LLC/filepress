@@ -35,6 +35,7 @@ Preferred house ports (do not claim 5173 for every site):
 | `mohanrao-downpress` | 5194 |
 | `forgetrail-site` | 5195 |
 | `ember-dossier-site` | 5196 |
+| `mediatuna-site` | 5197 |
 
 ```bash
 localberth claim localberth-site --port 5187

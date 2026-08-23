@@ -3,15 +3,17 @@
  * Invoked by localhelm.plugin.mjs in this repo.
  */
 import {
+	applyPushSite,
 	applySite,
 	buildInventory,
 	discoverSiblingSites,
 	loadEngineStrip,
+	planPushSite,
 	type SiblingSite,
 } from './lib.ts';
 
 type Cmd = {
-	cmd: 'inventory' | 'apply';
+	cmd: 'inventory' | 'apply' | 'plan';
 	action?: string;
 	names?: string[];
 	commit?: boolean;
@@ -19,8 +21,8 @@ type Cmd = {
 
 function parseArgs(argv: string[]): Cmd {
 	const cmd = argv[0];
-	if (cmd !== 'inventory' && cmd !== 'apply') {
-		throw new Error('usage: localhelm-bridge inventory | apply --action sync|ship [--names a,b] [--no-commit]');
+	if (cmd !== 'inventory' && cmd !== 'apply' && cmd !== 'plan') {
+		throw new Error('usage: localhelm-bridge inventory | plan --action push [--names a,b] | apply --action sync|ship|push [--names a,b] [--no-commit]');
 	}
 	const namesRaw = (() => {
 		const i = argv.indexOf('--names');
@@ -50,9 +52,24 @@ async function main(): Promise<void> {
 		return;
 	}
 
+	const sites = pickSites(discoverSiblingSites(), opts.names);
+	if (opts.cmd === 'plan' || opts.action === 'push') {
+		if (opts.cmd === 'plan') {
+			process.stdout.write(`${JSON.stringify({ action: 'push', rows: sites.map(planPushSite) })}\n`);
+			return;
+		}
+		const log: string[] = [];
+		const results = sites.map((site) => {
+			const ok = applyPushSite(site, (line) => log.push(`${site.name} ${line}`));
+			return { id: site.name, ok };
+		});
+		process.stdout.write(`${JSON.stringify({ action: 'push', results, log })}\n`);
+		if (results.some((row) => !row.ok)) process.exitCode = 1;
+		return;
+	}
+
 	const action = opts.action === 'ship' ? 'ship' : 'sync';
 	const engine = await loadEngineStrip();
-	const sites = pickSites(discoverSiblingSites(), opts.names);
 	const log: string[] = [];
 	const results = sites.map((site) => {
 		const ok = applySite(

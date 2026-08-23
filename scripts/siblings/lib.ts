@@ -634,6 +634,69 @@ export function applyCommit(site: SiblingSite, target: string, log: LogFn | null
 	return true;
 }
 
+export type SitePushPlan = {
+	id: string;
+	action: 'push' | 'skip';
+	writes: boolean;
+	reason: string;
+	branch?: string;
+	origin?: string;
+	ahead?: number;
+};
+
+export function planPushSite(site: SiblingSite): SitePushPlan {
+	const skip = (reason: string, extra: Partial<SitePushPlan> = {}): SitePushPlan => ({
+		id: site.name,
+		action: 'skip',
+		writes: false,
+		reason,
+		...extra,
+	});
+	const probe = git(site.repoRoot, ['rev-parse', '--is-inside-work-tree'], null);
+	if (probe.status !== 0 || probe.stdout.trim() !== 'true') return skip('no git');
+	const porcelain = git(site.repoRoot, ['status', '--porcelain'], null);
+	if (porcelain.status !== 0) return skip('git status failed');
+	if (porcelain.stdout.trim()) return skip('dirty');
+	const branch = git(site.repoRoot, ['branch', '--show-current'], null).stdout.trim();
+	if (!branch) return skip('detached');
+	const origin = git(site.repoRoot, ['remote', 'get-url', 'origin'], null);
+	const originUrl = origin.stdout.trim();
+	if (origin.status !== 0 || !originUrl) return skip('no origin');
+	const count = git(site.repoRoot, ['rev-list', '--left-right', '--count', `origin/${branch}...HEAD`], null);
+	if (count.status !== 0) return skip('no upstream', { branch, origin: originUrl });
+	const [behindRaw, aheadRaw] = count.stdout.trim().split(/\s+/);
+	const behind = Number(behindRaw);
+	const ahead = Number(aheadRaw);
+	if (!Number.isFinite(ahead) || !Number.isFinite(behind)) return skip('no upstream', { branch, origin: originUrl });
+	if (behind > 0) return skip('diverged', { branch, origin: originUrl, ahead });
+	if (ahead === 0) return skip('not ahead', { branch, origin: originUrl, ahead: 0 });
+	return {
+		id: site.name,
+		action: 'push',
+		writes: true,
+		reason: `${ahead} on ${branch} → ${originUrl}`,
+		branch,
+		origin: originUrl,
+		ahead,
+	};
+}
+
+export function applyPushSite(site: SiblingSite, log: LogFn | null = null): boolean {
+	const plan = planPushSite(site);
+	if (plan.action !== 'push' || !plan.branch) {
+		say(log, `  push     ${plan.reason}`);
+		return true;
+	}
+	say(log, `  push     git push origin ${plan.branch} (never --force)`);
+	const result = git(site.repoRoot, ['push', 'origin', plan.branch], log);
+	if (result.status !== 0) {
+		say(log, '  push     failed');
+		return false;
+	}
+	say(log, '  push     pushed');
+	return true;
+}
+
 export function applyShip(site: SiblingSite, log: LogFn | null = null): boolean {
 	if (!site.shipDir) {
 		say(log, '  ship     none');

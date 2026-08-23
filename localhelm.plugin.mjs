@@ -28,7 +28,10 @@ function bridge(args) {
 }
 
 function actionsFor(site) {
-	const list = [{ id: 'sync', label: 'Sync engine', write: true }];
+	const list = [
+		{ id: 'sync', label: 'Sync engine', write: true },
+		{ id: 'push', label: 'Push', write: true },
+	];
 	if (site.ship) list.push({ id: 'ship', label: 'Ship', write: true });
 	return list;
 }
@@ -46,7 +49,7 @@ function boardFrom(inventory) {
 		note: [
 			`Engine local ${inventory.engine.local}, npm ${inventory.engine.published ?? 'none'}, sync target ${inventory.engine.target}.`,
 			inventory.engine.note,
-			'Sync retargets getfilepress (including link:), merges static/_headers, and commits. Ship then runs pnpm ship. LocalHelm does not reimplement those jobs.',
+			'Sync retargets getfilepress (including link:), merges static/_headers, and commits. Push is git push origin <branch> only — never --force. Ship then runs pnpm ship. LocalHelm does not reimplement those jobs.',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -85,6 +88,11 @@ const plugin = {
 		return boardFrom(bridge(['inventory']));
 	},
 	async plan(action, ids) {
+		if (action === 'push') {
+			const args = ['plan', '--action', 'push'];
+			if (ids.length) args.push('--names', ids.join(','));
+			return bridge(args);
+		}
 		const inventory = bridge(['inventory']);
 		const want = new Set(ids);
 		return {
@@ -117,7 +125,8 @@ const plugin = {
 		};
 	},
 	async apply(action, ids) {
-		const args = ['apply', '--action', action === 'ship' ? 'ship' : 'sync'];
+		const job = action === 'ship' || action === 'push' ? action : 'sync';
+		const args = ['apply', '--action', job];
 		if (ids.length) args.push('--names', ids.join(','));
 		return bridge(args);
 	},

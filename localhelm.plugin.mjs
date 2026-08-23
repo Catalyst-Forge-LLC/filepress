@@ -33,6 +33,12 @@ function actionsFor(site) {
 	return list;
 }
 
+function siteNeedsSync(site) {
+	const update = String(site.update ?? '');
+	const updateWork = Boolean(update) && !update.startsWith('already') && !update.startsWith('skip');
+	return updateWork || site.headers?.action === 'merge';
+}
+
 function boardFrom(inventory) {
 	return {
 		plugin: 'filepress',
@@ -87,12 +93,27 @@ const plugin = {
 			note: inventory.engine.note,
 			rows: inventory.sites
 				.filter((site) => want.size === 0 || want.has(site.name))
-				.map((site) => ({
-					id: site.name,
-					update: site.update,
-					headers: site.headers,
-					ship: action === 'ship' ? site.ship : 'skipped',
-				})),
+				.map((site) => {
+					if (action === 'ship') {
+						return {
+							id: site.name,
+							update: site.update,
+							headers: site.headers,
+							ship: site.ship,
+							writes: Boolean(site.ship),
+							action: site.ship ? 'ship' : 'skip',
+						};
+					}
+					const writes = siteNeedsSync(site);
+					return {
+						id: site.name,
+						update: site.update,
+						headers: site.headers,
+						ship: 'skipped',
+						writes,
+						action: writes ? 'sync' : 'skip',
+					};
+				}),
 		};
 	},
 	async apply(action, ids) {

@@ -2,6 +2,7 @@
  * Shared sibling-site library (CLI + local dashboard).
  * Not part of the published getfilepress package.
  */
+import { createHash } from 'node:crypto';
 import { spawn, spawnSync, type SpawnSyncOptions } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -49,6 +50,8 @@ export type SitePlan = {
 	update: string;
 	headers: HeadersPlan;
 	ship: string | null;
+	/** HEAD + dirty tree digest — LocalHelm skips ship when this matches the last successful ship. */
+	shipFingerprint: string | null;
 	url: string | null;
 	gitDirty: boolean | null;
 	leasePort: number | null;
@@ -468,10 +471,68 @@ export function planSite(site: SiblingSite, target: string, ctx?: PlanContext): 
 		update: updatePlan(site, target),
 		headers: headersPlan(site),
 		ship: site.shipDir ? `pnpm ship in ${relative(workspaceRoot, site.shipDir)}` : null,
+		shipFingerprint: shipFingerprint(site),
 		url: readConfigUrl(site.contentRoot),
 		gitDirty: ctx ? (ctx.dirty.get(site.repoRoot) ?? null) : null,
 		leasePort: ctx ? leasePortFor(site, ctx.leases) : null
 	};
+}
+
+/** True when Sync engine would rewrite the pin or merge headers. */
+export function siteNeedsSync(site: Pick<SitePlan, 'update' | 'headers'>): boolean {
+	const update = site.update ?? '';
+	const updateWork = Boolean(update) && !update.startsWith('already') && !update.startsWith('skip');
+	return updateWork || site.headers.action === 'merge';
+}
+
+/**
+ * Fingerprint of the tree ship would deploy. Unchanged after a successful ship until
+ * commits or uncommitted files change — LocalHelm uses this to skip a no-op ship.
+ */
+export function shipFingerprint(site: SiblingSite): string | null {
+	if (!site.shipDir) return null;
+	const head = git(site.repoRoot, ['rev-parse', 'HEAD'], null);
+	if (head.status !== 0) return null;
+	const porcelain = git(site.repoRoot, ['status', '--porcelain'], null);
+	const dirty = (porcelain.stdout ?? '').replace(/\r\n/g, '\n');
+	const digest = createHash('sha1').update(dirty).digest('hex').slice(0, 12);
+	return `${head.stdout.trim()}:${digest}`;
+}
+
+export type LandSitePlanRow = {
+	id: string;
+	sync: { writes: boolean; update: string; headers: HeadersPlan };
+	push: SitePushPlan;
+	ship: { writes: boolean; fingerprint: string | null; script: string | null };
+};
+
+/** One-pass plan for LocalHelm Land: sync + push + ship needs for named sites only. */
+export async function planLandSites(sites: SiblingSite[]): Promise<{
+	engine: EngineStrip;
+	rows: LandSitePlanRow[];
+	buildMs: number;
+}> {
+	const started = Date.now();
+	const [engine, ctx] = await Promise.all([loadEngineStrip(), planContext(sites)]);
+	const rows = sites.map((site) => {
+		const planned = planSite(site, engine.target, ctx);
+		const push = planPushSite(site);
+		return {
+			id: site.name,
+			sync: {
+				writes: siteNeedsSync(planned),
+				update: planned.update,
+				headers: planned.headers,
+			},
+			push,
+			ship: {
+				writes: Boolean(site.shipDir),
+				fingerprint: planned.shipFingerprint,
+				script: planned.ship,
+			},
+		};
+	});
+	return { engine, rows, buildMs: Date.now() - started };
 }
 
 export async function buildInventory(): Promise<Inventory> {

@@ -8,6 +8,7 @@ import {
 	buildInventory,
 	discoverSiblingSites,
 	loadEngineStrip,
+	planLandSites,
 	planPushSite,
 	type SiblingSite,
 } from './lib.ts';
@@ -22,7 +23,9 @@ type Cmd = {
 function parseArgs(argv: string[]): Cmd {
 	const cmd = argv[0];
 	if (cmd !== 'inventory' && cmd !== 'apply' && cmd !== 'plan') {
-		throw new Error('usage: localhelm-bridge inventory | plan --action push [--names a,b] | apply --action sync|ship|push [--names a,b] [--no-commit]');
+		throw new Error(
+			'usage: localhelm-bridge inventory | plan --action push|land [--names a,b] | apply --action sync|ship|push [--names a,b] [--no-commit]',
+		);
 	}
 	const namesRaw = (() => {
 		const i = argv.indexOf('--names');
@@ -53,11 +56,18 @@ async function main(): Promise<void> {
 	}
 
 	const sites = pickSites(discoverSiblingSites(), opts.names);
-	if (opts.cmd === 'plan' || opts.action === 'push') {
-		if (opts.cmd === 'plan') {
-			process.stdout.write(`${JSON.stringify({ action: 'push', rows: sites.map(planPushSite) })}\n`);
+
+	if (opts.cmd === 'plan') {
+		if (opts.action === 'land') {
+			const planned = await planLandSites(sites);
+			process.stdout.write(`${JSON.stringify({ action: 'land', ...planned })}\n`);
 			return;
 		}
+		process.stdout.write(`${JSON.stringify({ action: 'push', rows: sites.map(planPushSite) })}\n`);
+		return;
+	}
+
+	if (opts.action === 'push') {
 		const log: string[] = [];
 		const results = sites.map((site) => {
 			const ok = applyPushSite(site, (line) => log.push(`${site.name} ${line}`));

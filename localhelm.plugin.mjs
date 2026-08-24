@@ -88,6 +88,11 @@ const plugin = {
 		return boardFrom(bridge(['inventory']));
 	},
 	async plan(action, ids) {
+		if (action === 'land') {
+			const args = ['plan', '--action', 'land'];
+			if (ids.length) args.push('--names', ids.join(','));
+			return bridge(args);
+		}
 		if (action === 'push') {
 			const args = ['plan', '--action', 'push'];
 			if (ids.length) args.push('--names', ids.join(','));
@@ -108,6 +113,7 @@ const plugin = {
 							update: site.update,
 							headers: site.headers,
 							ship: site.ship,
+							shipFingerprint: site.shipFingerprint ?? null,
 							writes: Boolean(site.ship),
 							action: site.ship ? 'ship' : 'skip',
 						};

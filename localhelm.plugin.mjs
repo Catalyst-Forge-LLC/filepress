@@ -29,10 +29,10 @@ function bridge(args) {
 
 function actionsFor(site) {
 	const list = [
-		{ id: 'sync', label: 'Sync engine', write: true },
-		{ id: 'push', label: 'Push', write: true },
+		{ id: 'sync', label: 'Sync engine', write: true, icon: 'lucide:refresh-cw' },
+		{ id: 'push', label: 'Push', write: true, icon: 'lucide:upload' },
 	];
-	if (site.ship) list.push({ id: 'ship', label: 'Ship', write: true });
+	if (site.ship) list.push({ id: 'ship', label: 'Ship', write: true, icon: 'lucide:ship' });
 	return list;
 }
 

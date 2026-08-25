@@ -36,6 +36,8 @@ export type SiteIR = {
 	topics: Array<{ label: string; tag: string }>;
 	/** Suggested lede for the filepress index (from home bio), or null. */
 	lede: string | null;
+	/** Full home bio as Markdown when it is long enough to be `pages/home.md`. */
+	homeMarkdown: string | null;
 	/** Notes for the import report (URL remaps, skips). */
 	notes: string[];
 	/** Same-origin chrome assets to copy into static/ (favicons, etc.). */

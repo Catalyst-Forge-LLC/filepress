@@ -9,9 +9,11 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { serializeRedirects } from '../../core/src/lib/redirects.ts';
 import type { DesignBrief, ImportOptions, SiteIR } from './ir.ts';
 import { fetchBuffer } from './fetch.ts';
 import { fetchChosenImages } from './images.ts';
+import { importRedirectRules } from './redirects.ts';
 import { themeCssFromBrief } from './theme.ts';
 
 function writeAttribution(metaDir: string, ir: SiteIR) {
@@ -178,8 +180,8 @@ Generated: ${new Date().toISOString()}
 
 ## URL remaps
 
-Posts move to \`/posts/<slug>\` (filepress default). If you need old paths (e.g. \`/writing/…\`), add Cloudflare Pages redirects.
-
+Posts live at \`/posts/<slug>\`. Old paths are written to \`static/_redirects\` (Cloudflare Pages / Netlify).
+${ir.homeMarkdown ? '\nLong home bio became `pages/home.md`; the post index is `/posts`.\n' : ''}
 ${ir.posts.map((p) => `- \`${p.sourceUrl}\` → \`/posts/${p.slug}\``).join('\n')}
 
 ${ir.pages.map((p) => `- \`${p.sourceUrl}\` → \`/${p.slug}\``).join('\n')}
@@ -295,6 +297,24 @@ ${body}
 		writeFileSync(join(out, 'pages', `${page.slug}.md`), md);
 	}
 
+	if (ir.homeMarkdown && !ir.pages.some((p) => p.slug === 'home')) {
+		writeFileSync(
+			join(out, 'pages', 'home.md'),
+			`---
+title: ${yamlQuote(ir.identity.title)}
+order: 0
+---
+
+${ir.homeMarkdown}
+`
+		);
+	}
+
+	const redirectRules = importRedirectRules(ir);
+	if (redirectRules.length) {
+		writeFileSync(join(staticDir, '_redirects'), serializeRedirects(redirectRules));
+	}
+
 	const topicsLit = ir.topics
 		.map((t) => `\t\t{ label: ${yamlQuote(t.label)}, tag: ${yamlQuote(t.tag)} }`)
 		.join(',\n');
@@ -302,6 +322,8 @@ ${body}
 		.map((n) => `\t\t{ label: ${yamlQuote(n.label)}, href: ${yamlQuote(n.href)} }`)
 		.join(',\n');
 	const ledeLine = ir.lede ? `\n\tlede: ${yamlQuote(ir.lede)},` : '';
+	const useHomePage = Boolean(ir.homeMarkdown) || ir.pages.some((p) => p.slug === 'home');
+	const homePageLine = useHomePage ? `\n\thomePage: 'home',` : '';
 	const logo = activeBrief?.images?.logo;
 	const logoLine = logo ? `\n\tlogo: ${yamlQuote(logo)},` : '';
 
@@ -313,7 +335,7 @@ export default defineFilepressConfig({
 	title: ${yamlQuote(title)},
 	description: ${yamlQuote(ir.identity.description)},
 	url: ${yamlQuote(url)},
-	author: ${yamlQuote(author)},${ledeLine}${logoLine}
+	author: ${yamlQuote(author)},${ledeLine}${homePageLine}${logoLine}
 	nav: [
 ${navLit}
 	],

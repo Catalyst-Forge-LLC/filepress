@@ -96,6 +96,7 @@ export default defineFilepressConfig({
     { label: 'RSS', href: '/rss.xml' },
     { label: 'GitHub', href: 'https://github.com/acme/site', icon: 'github' }
   ],
+  theme: 'essay', // or 'ink' | 'folio'; site theme.css still wins last
   newsletter: {
     url: 'https://buttondown.email/me',
     blurb: 'Occasional notes.',
@@ -124,8 +125,9 @@ paths: [
 
 ## Theming
 
-The engine ships a default Essay look. To restyle a site, add `theme.css` next to
-`filepress.config.ts`. It loads after the default theme, so you can override CSS
+The engine ships a default Essay look, plus two token presets (`ink`, `folio`)
+via config `theme`. To restyle a site, add `theme.css` next to
+`filepress.config.ts`. It loads last, so you can override CSS
 variables and structural classes without forking the app.
 
 In local `filepress dev` / `pnpm dev`, **Genie Mode** (floating FAB) is a design cockpit:
@@ -147,7 +149,14 @@ Token and class reference: [`docs/THEME.md`](docs/THEME.md).
 
 ## Writing a post
 
-Add a file under the site's `posts/` directory:
+From the site root (or with `--site` / `--root` in this monorepo):
+
+```bash
+filepress new "My Post"
+filepress new "My Post" --draft
+```
+
+That writes `posts/YYYY-MM-DD-my-post.md`. Or add a file by hand:
 
 ```markdown
 ---
@@ -174,7 +183,7 @@ Body content in **Markdown**.
 | `draft` | no | Hidden from production listings/feeds/sitemap; still builds at its URL. Listed with a Draft label under `pnpm dev` (localhost). |
 | `updated` | no | Shown when different from `date`. |
 
-**Images:** put files in `static/images/posts/<slug>/` and reference them as `/images/posts/<slug>/photo.jpg`.
+**Images:** put files in `static/images/posts/<slug>/` and reference them as `/images/posts/<slug>/photo.jpg`. The demo site’s [Images in posts](sites/demo/posts/images-in-posts.md) post is a worked example.
 
 **Captions:** an image alone on a line becomes a `<figure>`; the title attribute is the caption:
 

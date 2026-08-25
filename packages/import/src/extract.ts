@@ -199,6 +199,7 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 	let description = '';
 	let author = title;
 	let lede: string | null = null;
+	let homeMarkdown: string | null = null;
 	let generator: string | null = null;
 
 	if (homeDoc) {
@@ -230,7 +231,13 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 				lede = sentence && sentence.length > 80 ? sentence : `${cut.replace(/\s+\S*$/, '').trim()}…`;
 			}
 		}
-		notes.push('Home bio mapped to config `lede` (posts remain the index). Long bio → pages/about.md when present.');
+		const homeMd = htmlToMarkdown(clone.innerHTML).trim();
+		if (homeMd.length > 200 && paragraphs.length >= 2) {
+			homeMarkdown = homeMd;
+			notes.push('Home bio is long enough for pages/home.md; the post index moves to /posts.');
+		} else {
+			notes.push('Home bio mapped to config `lede` (posts remain the index).');
+		}
 	}
 
 	const posts: SiteIRPost[] = [];
@@ -334,7 +341,12 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 			tag
 		}));
 
-	const nav: Array<{ label: string; href: string }> = [{ label: 'Posts', href: '/' }];
+	const nav: Array<{ label: string; href: string }> = homeMarkdown
+		? [
+				{ label: 'Home', href: '/' },
+				{ label: 'Posts', href: '/posts' }
+			]
+		: [{ label: 'Posts', href: '/' }];
 	for (const page of pages) {
 		nav.push({
 			label: page.title,
@@ -372,6 +384,7 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 		nav,
 		topics,
 		lede,
+		homeMarkdown,
 		notes,
 		assets: [...new Set(assets)]
 	};

@@ -1,0 +1,2 @@
+/writing  /posts  308
+/writing/*  /posts/:splat  301

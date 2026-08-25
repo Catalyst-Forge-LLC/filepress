@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PostMeta } from '../content/types';
-	import { formatDate } from '../format';
+	import { formatDate, formatReadingTime } from '../format';
 
 	let {
 		post,
@@ -18,6 +18,7 @@
 		{#if post.author}
 			&middot; <span class="byline">{post.author}</span>
 		{/if}
+		&middot; <span class="reading-time">{formatReadingTime(post.readingMinutes)}</span>
 	</p>
 	<h2 class="post-title"><a href="/posts/{post.slug}">{post.title}</a></h2>
 	{#if post.description}

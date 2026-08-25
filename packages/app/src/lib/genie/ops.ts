@@ -313,6 +313,7 @@ function stubSiteIr(siteRoot: string): SiteIR {
 		nav: [],
 		topics: [],
 		lede: null,
+		homeMarkdown: null,
 		notes: [],
 		assets: []
 	};

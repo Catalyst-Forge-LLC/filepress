@@ -216,6 +216,7 @@ Any static host: publish the \`build/\` folder. Details: https://getfilepress.co
 	console.log(`Next:`);
 	console.log(`  cd ${relToEngine} && pnpm install   # if not already`);
 	console.log(`  cd ${target} && pnpm install && pnpm dev`);
+	console.log(`  filepress new "My Post"`);
 } else {
 	writeFileSync(
 		join(target, 'tsconfig.json'),

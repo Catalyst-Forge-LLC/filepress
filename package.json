@@ -34,6 +34,8 @@
 	},
 	"files": [
 		"scripts/filepress.mjs",
+		"scripts/new-post.ts",
+		"scripts/preview.mjs",
 		"scripts/copy-path-mounts.mjs",
 		"scripts/create-site.mjs",
 		"scripts/ensure-lease.mjs",
@@ -49,7 +51,7 @@
 	"scripts": {
 		"postinstall": "node scripts/postinstall.mjs",
 		"filepress": "node scripts/filepress.mjs",
-		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts",
+		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts scripts/new-post.test.ts scripts/preview.test.ts",
 		"check": "pnpm filepress check --site demo",
 		"build": "pnpm filepress build --site demo",
 		"build:demo": "pnpm filepress build --site demo",

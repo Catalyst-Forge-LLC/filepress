@@ -18,8 +18,8 @@ pnpm check                         # type-check against this site
 | Path | Role |
 | --- | --- |
 | `filepress.config.ts` | Title, URL, topics |
-| `posts/` | Example Markdown (published, draft, scheduled, phone workflow) |
+| `posts/` | Example Markdown (published, draft, scheduled, phone workflow, image figure) |
 | `theme.css` | Accent override demo (see `docs/THEME.md`) |
-| `static/` | Favicon |
+| `static/` | Favicon + `images/posts/images-in-posts/` |
 
 Frontmatter fields and conventions: [engine README](../../README.md).

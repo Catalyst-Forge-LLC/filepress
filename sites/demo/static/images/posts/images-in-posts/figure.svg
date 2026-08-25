@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Manuscript and photograph</title>
+  <desc id="desc">A stacked page and a small photograph, the FilePress image convention.</desc>
+  <rect width="720" height="420" fill="#f3efe6"/>
+  <rect x="86" y="58" width="320" height="300" rx="4" fill="#fffdf8" stroke="#d6cfc1"/>
+  <rect x="112" y="92" width="268" height="10" rx="2" fill="#c9c2b4"/>
+  <rect x="112" y="118" width="236" height="8" rx="2" fill="#ddd6c8"/>
+  <rect x="112" y="140" width="252" height="8" rx="2" fill="#ddd6c8"/>
+  <rect x="112" y="162" width="200" height="8" rx="2" fill="#ddd6c8"/>
+  <rect x="348" y="88" width="250" height="220" rx="4" fill="#e7e2d8" stroke="#c5bba8"/>
+  <circle cx="430" cy="168" r="36" fill="#c9b48a"/>
+  <path d="M360 268h226l-72-88-46 52-28-24z" fill="#8a7a5a"/>
+</svg>

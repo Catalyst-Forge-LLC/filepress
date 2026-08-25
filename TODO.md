@@ -21,8 +21,8 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] Duplicate-slug detection (names both files)
 - [x] Frontmatter edge cases: trailing whitespace, unicode/emoji slugs, tag normalization, strict dates
 - [x] SEO meta tags (title, description, canonical, Open Graph basics) on post pages
-- [ ] Document the image convention in a visible place (README done; consider a sample post with an image)
-- [ ] Decide/verify smart-quote handling on a real phone-authored title (edge case: apostrophes)
+- [x] Document the image convention in a visible place (README + demo post `images-in-posts`)
+- [x] Smart-quote titles: unit test keeps `It’s` from quoted YAML (phone keyboards)
 
 ## Feature batch + Essay restyle ✅ (2026-07-05, D11/D12)
 
@@ -63,8 +63,8 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [ ] Confirm push-to-`main` → live deploy with no manual step (if/when git-connected)
 - [x] Custom domain getfilepress.com attached; site serves at root
 - [x] `robots.txt` + `sitemap.xml` verified live
-- [ ] Responsive styling pass on real mobile + desktop
-- [ ] Lighthouse: confirm 95+ performance on a typical post page
+- [x] Responsive styling pass (narrow type, wrapping nav, smaller masthead logo; verified in browser)
+- [ ] Lighthouse: confirm 95+ performance on a typical post page _(measure on a warm preview; don’t guess)_
 
 ## M4 — Core/site split & scaffolding ✅ (2026-07-05, pnpm workspace monorepo)
 
@@ -82,19 +82,21 @@ _Flat backlog seeded from `docs/PHASE_1_BRIEF.md` §11 (milestones M1–M5). Reo
 - [x] `filepress import` CLI (`@filepress/import`): discover → extract → sibling scaffold
 - [x] Optional Ollama design brief → token `theme.css` (pass A); `--no-llm` fallback
 - [x] Optional ollanet scan (`--scan` / `--lan`) to pick a network Ollama host
-- [ ] Vision screenshots in brief prompt (Playwright); richer home-as-page mode
-- [ ] Cloudflare `_redirects` emitter for old `/writing/*` paths
+- [x] Richer home-as-page: long home bio → `pages/home.md` + `homePage` + `/posts` index
+- [ ] Vision screenshots in brief prompt (Playwright) _(deferred — new import surface)_
+- [x] Cloudflare `_redirects` emitter (`writingPostRedirects` + import source-URL map; merged at build)
 - [ ] Offline HTML fixtures for import integration tests (no live net in CI)
 
 ## M5 — Polish (optional)
 
 - [x] Pagination for the index once post count grows _(`/page/[n]`)_
 - [x] Prev/next post links _(done in the feature batch)_
-- [ ] Custom 404 page styling
-- [x] Per-site theme override — optional `theme.css` / `theme.scss` at site root (Zen Garden); tokens + class API in `docs/THEME.md`
-- [ ] Optional named theme presets in core (still possible; site file remains the escape hatch)
-- [ ] Reading-time estimate (deferred; not in this batch)
-- [ ] Client-side search (deferred; needs JS + build-time index)
+- [x] Custom 404 page (`+error.svelte` + Essay `.error-page`)
+- [x] Per-site theme override — optional `theme.css` at site root (Zen Garden); tokens + class API in `docs/THEME.md`
+- [x] Named theme presets in core (`essay` | `ink` | `folio`); site `theme.css` still wins last
+- [x] Reading-time estimate on cards and post pages (`PostMeta.readingMinutes`, ~228 wpm)
+- [x] `filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`
+- [ ] Client-side search (deferred; new product surface)
 - [ ] Tooling to bump a Site's pinned core version deliberately
 
 ## Foundation

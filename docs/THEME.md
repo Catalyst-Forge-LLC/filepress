@@ -14,9 +14,18 @@ If the file is empty/absent of rules, the default Essay look is unchanged.
 Load order:
 
 1. Engine Essay theme (`getfilepress` / `@filepress/core/theme`)
-2. Your `theme.css`
+2. Named preset from config `theme` (`essay` | `ink` | `folio`) — Essay is a no-op sheet
+3. Your `theme.css`
 
 So your rules and `:root` variables override the defaults via the cascade.
+
+```ts
+export default defineFilepressConfig({
+  title: 'My Site',
+  url: 'https://my.site',
+  theme: 'ink' // optional; default 'essay'
+});
+```
 
 ```css
 /* theme.css — retoken example */
@@ -76,7 +85,7 @@ Treat these as the stable styling API. Prefer overriding them (or tokens) over d
 
 Nav and `footerLinks` entries may set `icon: 'github'`. Chrome renders the mark beside the label, opens the link in a new tab, and adds `.has-icon` / `.nav-github` for theme overrides (see product-site `theme.css` or IngotVault for a pill-style control).
 
-**Index:** `.hero` · `.hero-lede` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.draft-label` · `.pager` · `.page-count` · `.empty-state`
+**Index:** `.hero` · `.hero-lede` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.reading-time` · `.draft-label` · `.pager` · `.page-count` · `.empty-state` · `.error-page` · `.error-code` · `.error-actions`
 
 The masthead carries the site identity inside one title link: optional `logo` image, then a `.site-brand-copy` stack of `.site-wordmark` (site title) and `.site-tagline`. The index hero shows the optional `lede` from site config; with no lede the hero collapses to a visually-hidden `h1` that keeps semantics.
 

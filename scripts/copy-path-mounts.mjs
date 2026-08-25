@@ -1,7 +1,8 @@
 /**
  * Post-`vite build` steps for a FilePress site:
  *   1. Write default `build/_headers` unless the site already provided one
- *   2. Copy `paths` mounts (from `.filepress/path-mounts.json`)
+ *   2. Merge engine `_redirects` (from `.filepress/redirects.txt`) into `build/_redirects`
+ *   3. Copy `paths` mounts (from `.filepress/path-mounts.json`)
  *
  * Usage: node scripts/copy-path-mounts.mjs <siteRoot>
  */
@@ -28,6 +29,34 @@ if (existsSync(headersDest)) {
 } else if (existsSync(headersTemplate)) {
 	writeFileSync(headersDest, readFileSync(headersTemplate, 'utf8'));
 	console.log('filepress: wrote default _headers');
+}
+
+const redirectsPlan = join(siteRoot, '.filepress', 'redirects.txt');
+const redirectsDest = join(buildDir, '_redirects');
+if (existsSync(redirectsPlan)) {
+	const planned = readFileSync(redirectsPlan, 'utf8').trim();
+	if (planned) {
+		const existing = existsSync(redirectsDest) ? readFileSync(redirectsDest, 'utf8') : '';
+		const have = new Set(
+			existing
+				.split(/\r?\n/)
+				.map((line) => line.replace(/#.*$/, '').trim())
+				.filter(Boolean)
+				.map((line) => line.split(/\s+/).slice(0, 2).join('\0'))
+		);
+		const add = planned
+			.split(/\r?\n/)
+			.map((line) => line.trim())
+			.filter(Boolean)
+			.filter((line) => !have.has(line.split(/\s+/).slice(0, 2).join('\0')));
+		if (add.length) {
+			const prefix = existing.trimEnd();
+			writeFileSync(redirectsDest, prefix ? `${prefix}\n${add.join('\n')}\n` : `${add.join('\n')}\n`);
+			console.log(`filepress: wrote ${add.length} _redirects rule(s)`);
+		} else {
+			console.log('filepress: kept site _redirects');
+		}
+	}
 }
 
 if (!existsSync(cachePath)) {

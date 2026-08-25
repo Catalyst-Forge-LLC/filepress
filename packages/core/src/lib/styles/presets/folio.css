@@ -1,0 +1,27 @@
+/* Warmer folio: more margin, amber accent. Tokens only. */
+:root {
+	--bg: #f7f1e6;
+	--surface: #fffdf8;
+	--ink: #1c1812;
+	--ink-soft: #5a5146;
+	--ink-faint: #8a7f70;
+	--rule: #e6dcc8;
+	--rule-strong: #d2c4a8;
+	--accent: #8a4b12;
+	--accent-strong: #6b3910;
+	--gap: clamp(1.5rem, 5vw, 3rem);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #16130e;
+		--surface: #1f1b14;
+		--ink: #f3ead8;
+		--ink-soft: #c4b59a;
+		--ink-faint: #8e826c;
+		--rule: #322c22;
+		--rule-strong: #443b2d;
+		--accent: #e0a05a;
+		--accent-strong: #f0c08a;
+	}
+}

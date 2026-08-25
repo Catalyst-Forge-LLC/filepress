@@ -75,6 +75,15 @@ describe('parsePost', () => {
 		expect(post.draft).toBe(false);
 		expect(post.description).toBeNull();
 		expect(post.body.trim()).toBe('Body text.');
+		expect(post.readingMinutes).toBe(1);
+	});
+
+	it('keeps a smart-quote apostrophe in a quoted title', () => {
+		const post = parsePost(
+			'/posts/quote.md',
+			frontmatter('title: "It’s a phone keyboard"\ndate: 2026-01-01')
+		);
+		expect(post.title).toBe('It’s a phone keyboard');
 	});
 
 	it('derives the slug from the filename when not given', () => {
@@ -195,6 +204,7 @@ describe('assertUniqueSlugs', () => {
 		author: null,
 		draft: false,
 		sourcePath,
+		readingMinutes: 1,
 		body: ''
 	});
 

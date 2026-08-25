@@ -1,0 +1,28 @@
+/* Cooler, slightly tighter cousin of Essay. Tokens only — HTML stays the same. */
+:root {
+	--bg: #f3f4f2;
+	--surface: #ffffff;
+	--ink: #141513;
+	--ink-soft: #454843;
+	--ink-faint: #767a73;
+	--rule: #dce0d8;
+	--rule-strong: #c5cbbf;
+	--accent: #1c3d5a;
+	--accent-strong: #132b40;
+	--measure: 38rem;
+	--measure-wide: 44rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #101210;
+		--surface: #181a17;
+		--ink: #e8ebe4;
+		--ink-soft: #a8ada4;
+		--ink-faint: #7a7f76;
+		--rule: #272a25;
+		--rule-strong: #353930;
+		--accent: #8eb6d4;
+		--accent-strong: #b0cce3;
+	}
+}

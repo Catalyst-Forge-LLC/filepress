@@ -4,6 +4,22 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-25) — engine polish (visitor / authoring / chrome)
+
+Solidify what already ships. **Deferred** (new product surfaces): client search, satori OG images, full-content RSS, git-connected Pages, core-repo split, Genie split-pane/vision/theme packs, Playwright vision import.
+
+Shipped in this pass:
+
+- Styled 404 (`packages/app/src/routes/+error.svelte`); demo image-convention post + SVG; mobile type/nav/logo tighten
+- `_redirects` module + build merge; import writes `static/_redirects` + long-bio `pages/home.md` / `homePage`
+- `filepress new "Title"` (`scripts/new-post.ts`)
+- Named presets `theme: 'essay' | 'ink' | 'folio'`; `PostMeta.readingMinutes` (~228 wpm)
+- getfilepress `static/_redirects` for `/writing` → `/posts`
+
+Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-25) — sibling M2 + Genie M3
 
 - Sibling dashboard M2: each row shows git **ahead/behind vs origin** from the same `git status --porcelain -b` used for dirty. No extra spawn. Live `HEAD` header probe after ship is still later.
@@ -158,10 +174,10 @@ D1 gray-matter+remark · D2 adapter-static · D3/D4 core/site + pinned deps · D
 
 ### Not done / next
 
-- Genie **M3** (star/label/duplicate, denser acceptance tests)  
 - Push/tag for `github:Catalyst-Forge-LLC/filepress#…` installs when asked  
-- M3 Cloudflare Pages + getfilepress.com (`sites/getfilepress` content ready)  
-- M5 polish (404, reading-time, search, …)
+- Live `HEAD` security-header probe after sibling dashboard ship  
+- Lighthouse 95+ confirmation on a warm post page (don’t guess a score)  
+- Deferred surfaces: search, OG image gen, full-content RSS, Playwright vision import
 
 ## Recent session notes (2026-08-11)
 

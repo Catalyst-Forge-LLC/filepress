@@ -25,6 +25,7 @@ const ir = {
 	nav: [],
 	topics: [],
 	lede: null,
+	homeMarkdown: null,
 	notes: [],
 	assets: []
 } satisfies SiteIR;

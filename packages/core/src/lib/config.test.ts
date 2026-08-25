@@ -21,6 +21,14 @@ describe('defineFilepressConfig', () => {
 		expect(cfg.logo).toBeNull();
 		expect(cfg.ogImage).toBeNull();
 		expect(cfg.lede).toBeNull();
+		expect(cfg.theme).toBe('essay');
+		expect(cfg.redirects).toEqual([]);
+	});
+
+	it('rejects an unknown theme preset', () => {
+		expect(() =>
+			defineFilepressConfig({ title: 'X', url: 'https://x.example.com', theme: 'neon' as 'essay' })
+		).toThrow(/theme/);
 	});
 
 	it('keeps custom footerLinks and nav icons', () => {

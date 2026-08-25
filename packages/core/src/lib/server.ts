@@ -20,8 +20,15 @@ export {
 	filenameOf
 } from './content/parse';
 
-export { absoluteUrl, ogImageUrl } from './config';
-export type { SiteConfig, PathMount } from './config';
+export { absoluteUrl, ogImageUrl, buildRedirectRules } from './config';
+export type { SiteConfig, PathMount, ThemePreset, RedirectRule } from './config';
+export {
+	serializeRedirects,
+	parseRedirectsFile,
+	mergeRedirects,
+	writingPostRedirects,
+	redirectsFromSourceUrls
+} from './redirects';
 export { defaultSecurityHeaders, writeBuildHeaders, mergeSecurityHeaders } from './headers';
 export type { MergeSecurityHeadersResult } from './headers';
 export {

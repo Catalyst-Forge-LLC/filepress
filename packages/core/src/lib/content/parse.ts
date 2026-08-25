@@ -1,4 +1,5 @@
 import matter from 'gray-matter';
+import { readingMinutes } from '../format';
 import type { PageSource, PostSource, RawFrontmatter, RawPageFrontmatter } from './types';
 import { RESERVED_PAGE_SLUGS } from './types';
 
@@ -135,6 +136,7 @@ export function parsePost(path: string, raw: string): PostSource {
 		author,
 		draft,
 		sourcePath: path,
+		readingMinutes: readingMinutes(parsed.content),
 		body: parsed.content
 	};
 }

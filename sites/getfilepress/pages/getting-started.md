@@ -34,7 +34,7 @@ Or depend on the published package from an empty folder (after scaffolding by ha
 
 The site folder stays content-only:
 
-- `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`, optional `paths`
+- `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`, optional `theme` (`essay` | `ink` | `folio`), optional `paths`
 - `posts/` — dated Markdown posts (`/posts/<slug>`)
 - `pages/` — evergreen Markdown pages (`about.md` → `/about`)
 - `paths` mounts — optional site-owned HTML/CSS/JS trees at a URL prefix (e.g. `/docs`)
@@ -93,10 +93,20 @@ paths: [{ url: '/docs', dir: 'docs/dist' }]
 - HTML files under the mount are included in `sitemap.xml`.
 - In this repo, `sites/demo` mounts `mounts/docs` at `/docs`.
 
+## Add a post
+
+```bash
+filepress new "My Post"
+filepress new "My Post" --draft
+```
+
+Writes `posts/YYYY-MM-DD-my-post.md`. You can still create the file by hand.
+
 ## Commands
 
 | Command | What it does |
 | --- | --- |
+| `filepress new "Title"` | Stamp a dated post skeleton |
 | `filepress dev` | Dev server + Genie FAB |
 | `filepress build` | Static `build/` |
 | `filepress preview` | Serve the build (no Genie) |

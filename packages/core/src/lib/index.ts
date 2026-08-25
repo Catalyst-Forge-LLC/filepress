@@ -12,7 +12,9 @@ export {
 	defineFilepressConfig,
 	absoluteUrl,
 	ogImageUrl,
-	postsIndexPath
+	postsIndexPath,
+	buildRedirectRules,
+	THEME_PRESETS
 } from './config';
 export type {
 	SiteConfig,
@@ -21,11 +23,13 @@ export type {
 	Topic,
 	NavItem,
 	NavIconName,
-	PathMount
+	PathMount,
+	ThemePreset,
+	RedirectRule
 } from './config';
 
 export { isPathMountHref } from './paths-shared';
 
-export { formatDate } from './format';
+export { formatDate, formatReadingTime, readingMinutes } from './format';
 
 export type { PostMeta, PostSource, RenderedPost, RawFrontmatter } from './content/types';

@@ -8,7 +8,12 @@
  * server code.
  */
 import { normalizePathMounts, type PathMount } from './paths-shared';
+import { writingPostRedirects, type RedirectRule } from './redirects';
 export type { PathMount } from './paths-shared';
+export type { RedirectRule } from './redirects';
+
+export const THEME_PRESETS = ['essay', 'ink', 'folio'] as const;
+export type ThemePreset = (typeof THEME_PRESETS)[number];
 export interface NewsletterConfig {
 	/** Full URL to an external signup form (Buttondown, Substack, etc.). */
 	url: string;
@@ -72,6 +77,10 @@ export interface SiteConfig {
 	 * FilePress does not parse or theme mount contents.
 	 */
 	paths: PathMount[];
+	/** Named token sheet loaded after Essay, before the site `theme.css`. */
+	theme: ThemePreset;
+	/** Extra Cloudflare/Netlify `_redirects` lines merged at build. */
+	redirects: RedirectRule[];
 }
 
 /** What a site author supplies; everything but `title` and `url` is optional. */
@@ -95,6 +104,10 @@ export interface SiteConfigInput {
 	newsletter?: NewsletterConfig | null;
 	/** Mount site-relative dirs at URL prefixes (docs shells, etc.). */
 	paths?: PathMount[];
+	/** Built-in token preset. Default `essay`. Site `theme.css` still wins last. */
+	theme?: ThemePreset;
+	/** Extra `_redirects` rules (from → to). */
+	redirects?: RedirectRule[];
 }
 
 const defaultFooterLinks: NavItem[] = [
@@ -178,8 +191,41 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		footerLinks: normalizeNavItems(input.footerLinks) ?? [...defaultFooterLinks],
 		topics: input.topics ?? [],
 		newsletter: input.newsletter ?? null,
-		paths: normalizePathMounts(input.paths)
+		paths: normalizePathMounts(input.paths),
+		theme: normalizeTheme(input.theme),
+		redirects: normalizeRedirects(input.redirects)
 	};
+}
+
+/** Engine + site rules to write into `build/_redirects`. */
+export function buildRedirectRules(site: Pick<SiteConfig, 'homePage' | 'redirects'>): RedirectRule[] {
+	return [...(site.homePage ? writingPostRedirects() : []), ...site.redirects];
+}
+
+function normalizeTheme(theme: ThemePreset | undefined): ThemePreset {
+	const name = (theme ?? 'essay').trim().toLowerCase();
+	if (!THEME_PRESETS.includes(name as ThemePreset)) {
+		throw new Error(
+			`filepress.config: \`theme\` must be ${THEME_PRESETS.join(', ')} (got "${theme}").`
+		);
+	}
+	return name as ThemePreset;
+}
+
+function normalizeRedirects(rules: RedirectRule[] | undefined): RedirectRule[] {
+	if (!rules?.length) return [];
+	return rules.map((rule) => {
+		const from = (rule.from ?? '').trim();
+		const to = (rule.to ?? '').trim();
+		if (!from || !to) {
+			throw new Error('filepress.config: redirects need non-empty `from` and `to`.');
+		}
+		const status = rule.status ?? 301;
+		if (status !== 301 && status !== 302 && status !== 308) {
+			throw new Error(`filepress.config: redirect status must be 301, 302, or 308 (got ${status}).`);
+		}
+		return { from, to, status };
+	});
 }
 
 /** Join the site origin with a path, guarding against double slashes. */

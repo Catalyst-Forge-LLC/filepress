@@ -145,6 +145,13 @@ function runImport(argv) {
 	runNodeBin('tsx', 'tsx', [importCli, ...argv], { cwd: packageRoot });
 }
 
+/** `filepress new "Title"` → dated post skeleton next to filepress.config.ts. */
+function runNew(argv) {
+	const cli = join(scriptDir, 'new-post.ts');
+	if (!existsSync(cli)) fail(`new-post CLI missing at ${cli}`);
+	runNodeBin('tsx', 'tsx', [cli, ...argv], { cwd: process.cwd() });
+}
+
 function listSites() {
 	if (!existsSync(sitesDir)) return [];
 	return readdirSync(sitesDir).filter((name) => {
@@ -173,6 +180,8 @@ const argv = process.argv.slice(2);
 await ensureEmbeddedLinks();
 if (argv[0] === 'import') {
 	runImport(argv.slice(1));
+} else if (argv[0] === 'new') {
+	runNew(argv.slice(1));
 } else {
 	runSiteCommand(argv);
 }
@@ -190,6 +199,7 @@ function runSiteCommand(argv) {
 				`  filepress preview [--port 27777]  # serves <site>/build (default 27777)\n` +
 				`  filepress dev --port <n> [--host]   # vite dev; optional fixed port / LAN\n` +
 				`  filepress import --source <url> [--inspire <url>] …\n` +
+				`  filepress new "Post title" [--draft] [--site name | --root path]\n` +
 				`monorepo sites: ${listSites().join(', ') || '(none)'}`
 		);
 	}
@@ -238,20 +248,20 @@ function runSiteCommand(argv) {
 			);
 		}
 		const port = args.port || process.env.FILEPRESS_PORT || '27777';
-		console.log(`filepress: preview http://localhost:${port} → ${buildDir}`);
-		runNodeBin(
-			'sirv-cli',
-			'sirv',
-			[
-				buildDir,
-				'--dev',
-				'--port',
-				String(port),
-				'--host',
-				args.host && args.host !== 'true' ? args.host : args.host === 'true' ? '0.0.0.0' : '127.0.0.1'
-			],
-			{ cwd: appDir, env }
-		);
+		const host =
+			args.host && args.host !== 'true' ? args.host : args.host === 'true' ? '0.0.0.0' : '127.0.0.1';
+		const previewScript = join(scriptDir, 'preview.mjs');
+		if (!existsSync(previewScript)) fail(`preview script missing at ${previewScript}`);
+		const child = spawn(process.execPath, [previewScript, buildDir, String(port), host], {
+			cwd: packageRoot,
+			env,
+			stdio: 'inherit',
+			shell: false
+		});
+		child.on('exit', (code, signal) => {
+			if (signal) process.kill(process.pid, signal);
+			process.exit(code ?? 1);
+		});
 		return;
 	}
 

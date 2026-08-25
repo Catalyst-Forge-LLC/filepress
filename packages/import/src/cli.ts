@@ -359,6 +359,7 @@ Options:
 						nav: ir.nav,
 						topics: ir.topics,
 						lede: ir.lede,
+						homeMarkdown: Boolean(ir.homeMarkdown),
 						notes: ir.notes,
 						images: imagePlan.chosen,
 						unsplashQueries: imagePlan.unsplashQueries

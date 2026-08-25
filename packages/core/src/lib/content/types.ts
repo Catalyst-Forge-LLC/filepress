@@ -29,6 +29,8 @@ export interface PostMeta {
 	draft: boolean;
 	/** Source file path relative to the repo root, e.g. "/posts/foo.md". */
 	sourcePath: string;
+	/** Whole minutes at ~228 wpm, computed from the Markdown body. */
+	readingMinutes: number;
 }
 
 /** A post's metadata plus its raw (uncompiled) Markdown body. */

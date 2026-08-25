@@ -13,6 +13,8 @@ import { pathMountsPlugin } from './vite-plugin-path-mounts.ts';
 import { filepressLeaseName, localberthGet } from './localberth-port.ts';
 import type { PathMount } from '../core/src/lib/paths-shared.ts';
 import { unexpectedUnseenPrerenderRoutes } from './src/lib/prerender-empty-ok.ts';
+import { buildRedirectRules, THEME_PRESETS, type ThemePreset } from '../core/src/lib/config.ts';
+import { serializeRedirects, type RedirectRule } from '../core/src/lib/redirects.ts';
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
 const defaultSiteRoot = resolve(appRoot, '../../sites/demo');
@@ -53,8 +55,15 @@ const coreConfig = join(appRoot, '../core/src/lib/config.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
 const coreTheme = join(appRoot, '../core/src/lib/theme.ts');
 
-/** Load `paths` via a short-lived Vite SSR graph (config-only getfilepress alias). */
-async function loadPathMounts(): Promise<PathMount[]> {
+type SiteHints = {
+	paths: PathMount[];
+	theme: ThemePreset;
+	redirects: RedirectRule[];
+};
+
+/** Load config via a short-lived Vite SSR graph (config-only getfilepress alias). */
+async function loadSiteHints(): Promise<SiteHints> {
+	const fallback: SiteHints = { paths: [], theme: 'essay', redirects: [] };
 	const temp = await createServer({
 		configFile: false,
 		root: siteRoot,
@@ -73,15 +82,33 @@ async function loadPathMounts(): Promise<PathMount[]> {
 	});
 	try {
 		const mod = await temp.ssrLoadModule(pathToFileURL(siteConfig).href);
-		const paths = mod.default?.paths;
-		return Array.isArray(paths) ? (paths as PathMount[]) : [];
+		const cfg = mod.default as {
+			paths?: PathMount[];
+			theme?: ThemePreset;
+			homePage?: string | null;
+			redirects?: RedirectRule[];
+		} | null;
+		const theme = cfg?.theme && THEME_PRESETS.includes(cfg.theme) ? cfg.theme : 'essay';
+		return {
+			paths: Array.isArray(cfg?.paths) ? cfg.paths : [],
+			theme,
+			redirects: buildRedirectRules({
+				homePage: cfg?.homePage ?? null,
+				redirects: Array.isArray(cfg?.redirects) ? cfg.redirects : []
+			})
+		};
 	} catch (err) {
 		const detail = err instanceof Error ? err.message : String(err);
-		console.warn(`filepress: could not load path mounts (${detail}); continuing with none.`);
-		return [];
+		console.warn(`filepress: could not load site config (${detail}); continuing with defaults.`);
+		return fallback;
 	} finally {
 		await temp.close();
 	}
+}
+
+function resolveSitePreset(theme: ThemePreset): string {
+	const file = join(appRoot, '../core/src/lib/styles/presets', `${theme}.css`);
+	return existsSync(file) ? file : join(appRoot, '../core/src/lib/styles/presets/essay.css');
 }
 
 function resolvePort(): number | undefined {
@@ -96,11 +123,14 @@ function resolvePort(): number | undefined {
 const fixedPort = resolvePort();
 
 export default defineConfig(async () => {
-	const pathMounts = await loadPathMounts();
+	const hints = await loadSiteHints();
+	const pathMounts = hints.paths;
+	const sitePreset = resolveSitePreset(hints.theme);
 	writeFileSync(
 		join(filepressCache, 'path-mounts.json'),
 		`${JSON.stringify(pathMounts, null, '\t')}\n`
 	);
+	writeFileSync(join(filepressCache, 'redirects.txt'), serializeRedirects(hints.redirects));
 
 	const host = process.env.HOST?.trim() || '127.0.0.1';
 	return {
@@ -134,6 +164,7 @@ export default defineConfig(async () => {
 					'getfilepress/theme': coreTheme,
 					'$site-config': siteConfig,
 					'$site-theme': siteTheme,
+					'$site-preset': sitePreset,
 					'$critical-theme': criticalThemeOut
 				},
 				paths: {

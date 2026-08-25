@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Newsletter, absoluteUrl, formatDate, ogImageUrl } from '@filepress/core';
+	import { Newsletter, absoluteUrl, formatDate, formatReadingTime, ogImageUrl } from '@filepress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
@@ -51,6 +51,7 @@
 			{#if showUpdated}
 				&middot; updated <time datetime={post.updated}>{formatDate(post.updated!)}</time>
 			{/if}
+			&middot; <span class="reading-time">{formatReadingTime(post.readingMinutes)}</span>
 		</p>
 		{#if data.tags.length}
 			<ul class="tag-list" style="margin-top:0.75rem">

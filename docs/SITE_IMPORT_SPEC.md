@@ -9,8 +9,8 @@
 | Question | Decision |
 | --- | --- |
 | Static pages routing | Top-level `/[slug]` from `pages/*.md`; reserved: posts, tags, topics, page, feeds |
-| URL parity | Clean break to `/posts/<slug>`; remaps listed in `.filepress-import/import-report.md` |
-| Home | Posts index; source home bio → config `lede`; long About stays a page |
+| URL parity | Clean break to `/posts/<slug>`; remaps in the import report and `static/_redirects` |
+| Home | Short bio → config `lede` (posts stay the index). Long bio (≥2 paragraphs, >200 chars Markdown) → `pages/home.md` + `homePage` + `/posts` |
 | Theme | Inspiration-first: extract fonts/palette/atmosphere from `--inspire`, then generate a punchy structural `theme.css` (dark forge, noise, tracked nav, elevated cards, wider measure). Ollama refines; `--no-llm` still uses extracted inspiration. Source CSS is fallback only when no inspire URLs. |
 | Chrome images | Source site: portrait + wordmark logo only. CSS covers (background/header) from **Openverse** Creative Commons stock (not `--inspire` photos). `--fetch-images` downloads into `static/images/`, wires `theme.css`, writes `.filepress-import/IMAGE_ATTRIBUTION.md`. |
 | Framing | filepress product feature (`@filepress/import`) |

@@ -35,10 +35,18 @@ export type SiblingSite = {
 
 export type HeadersPlan = { action: 'none' | 'merge' | 'ok'; added: string[] };
 
+/** One `git status --porcelain -b` per repo — dirty plus ahead/behind, no extra spawn. */
+export type GitTrack = {
+	dirty: boolean | null;
+	ahead: number | null;
+	behind: number | null;
+	branch: string | null;
+};
+
 /** Batched lookups shared by every row of one inventory pass. */
 export type PlanContext = {
 	leases: Map<string, number>;
-	dirty: Map<string, boolean | null>;
+	tracks: Map<string, GitTrack>;
 };
 
 export type SitePlan = {
@@ -54,6 +62,9 @@ export type SitePlan = {
 	shipFingerprint: string | null;
 	url: string | null;
 	gitDirty: boolean | null;
+	gitAhead: number | null;
+	gitBehind: number | null;
+	gitBranch: string | null;
 	leasePort: number | null;
 };
 
@@ -390,13 +401,47 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 	return out;
 }
 
-export async function gitDirtyMap(repoRoots: string[]): Promise<Map<string, boolean | null>> {
+/**
+ * Parse `git status --porcelain -b`. First line is `## branch...upstream [ahead N, behind M]`.
+ * No extra subprocess: the same stdout already tells us dirty vs clean.
+ */
+export function parseGitPorcelainBranch(stdout: string): GitTrack {
+	const lines = stdout.replace(/\r\n/g, '\n').split('\n');
+	const header = lines[0] ?? '';
+	if (!header.startsWith('## ')) {
+		return { dirty: Boolean(stdout.trim()), ahead: null, behind: null, branch: null };
+	}
+	const dirty = Boolean(lines.slice(1).join('\n').trim());
+	if (/^## HEAD \(no branch\)/.test(header)) {
+		return { dirty, ahead: null, behind: null, branch: null };
+	}
+	const named = /^## ([^\s.]+)/.exec(header);
+	const branch = named?.[1] ?? null;
+	const hasUpstream = header.includes('...');
+	if (!hasUpstream) return { dirty, ahead: null, behind: null, branch };
+	const aheadMatch = /ahead (\d+)/.exec(header);
+	const behindMatch = /behind (\d+)/.exec(header);
+	return {
+		dirty,
+		ahead: aheadMatch ? Number(aheadMatch[1]) : 0,
+		behind: behindMatch ? Number(behindMatch[1]) : 0,
+		branch
+	};
+}
+
+export async function gitTrackMap(repoRoots: string[]): Promise<Map<string, GitTrack>> {
 	const repos = [...new Set(repoRoots)];
+	const missing: GitTrack = { dirty: null, ahead: null, behind: null, branch: null };
 	const states = await mapLimit(repos, 8, async (repo) => {
-		const r = await exec('git', ['status', '--porcelain'], { cwd: repo, timeout: 8000 });
-		return r.status === 0 ? Boolean(r.stdout.trim()) : null;
+		const r = await exec('git', ['status', '--porcelain', '-b'], { cwd: repo, timeout: 8000 });
+		return r.status === 0 ? parseGitPorcelainBranch(r.stdout) : missing;
 	});
 	return new Map(repos.map((repo, i) => [repo, states[i]]));
+}
+
+export async function gitDirtyMap(repoRoots: string[]): Promise<Map<string, boolean | null>> {
+	const tracks = await gitTrackMap(repoRoots);
+	return new Map([...tracks].map(([repo, t]) => [repo, t.dirty]));
 }
 
 /** `localberth ls` prints `name\tport\tbind\tkind\tfirewall` per lease. */
@@ -454,14 +499,15 @@ export function leasePortFor(site: SiblingSite, leases: Map<string, number>): nu
 }
 
 export async function planContext(sites: SiblingSite[]): Promise<PlanContext> {
-	const [leases, dirty] = await Promise.all([
+	const [leases, tracks] = await Promise.all([
 		leaseTable(),
-		gitDirtyMap(sites.map((s) => s.repoRoot))
+		gitTrackMap(sites.map((s) => s.repoRoot))
 	]);
-	return { leases, dirty };
+	return { leases, tracks };
 }
 
 export function planSite(site: SiblingSite, target: string, ctx?: PlanContext): SitePlan {
+	const track = ctx?.tracks.get(site.repoRoot);
 	return {
 		name: site.name,
 		path: relative(workspaceRoot, site.contentRoot),
@@ -473,7 +519,10 @@ export function planSite(site: SiblingSite, target: string, ctx?: PlanContext): 
 		ship: site.shipDir ? `pnpm ship in ${relative(workspaceRoot, site.shipDir)}` : null,
 		shipFingerprint: shipFingerprint(site),
 		url: readConfigUrl(site.contentRoot),
-		gitDirty: ctx ? (ctx.dirty.get(site.repoRoot) ?? null) : null,
+		gitDirty: track?.dirty ?? null,
+		gitAhead: track?.ahead ?? null,
+		gitBehind: track?.behind ?? null,
+		gitBranch: track?.branch ?? null,
 		leasePort: ctx ? leasePortFor(site, ctx.leases) : null
 	};
 }

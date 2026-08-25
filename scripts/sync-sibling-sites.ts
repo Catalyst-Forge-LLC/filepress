@@ -23,6 +23,7 @@ import {
 
 export {
 	npmPinFor,
+	parseGitPorcelainBranch,
 	parseLeaseTable,
 	parseLockedGetfilepress,
 	resolveLockfileDir,

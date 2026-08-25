@@ -4,6 +4,15 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-25) — sibling M2 + Genie M3
+
+- Sibling dashboard M2: each row shows git **ahead/behind vs origin** from the same `git status --porcelain -b` used for dirty. No extra spawn. Live `HEAD` header probe after ship is still later.
+- Genie M3: History rail can **star / rename / duplicate / delete** (baseline + active stay locked). Store + plugin routes: `POST /star`, `/label`, `/duplicate`. Tests cover those plus baseline rollback. Plugin stays `apply: 'serve'`.
+- Dashboard: `pnpm siblings` → http://127.0.0.1:5198
+- Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-12) — ollanet + Genie host picker
 
 - **ollanet** (`^0.4.0`) is a FilePress dependency. Genie **Scan network** and `filepress import --scan` / `--lan` discover other Ollama servers (localhost, `~/.ollanet/config.json`, `OLLANET_HOSTS`, Tailscale). **LAN TCP scan is opt-in** — never on `/health`.
@@ -62,10 +71,9 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 
 ### What’s next (likely)
 
-1. Genie **M3** polish (star/label, harder acceptance) — M0–M2 done  
-2. Prefer site pins on `getfilepress@^0.1.1` or `github:…#v0.1.1`  
-3. Manual Genie smoke in `filepress dev` + deploy product site when ready  
-4. Polish product-site copy / assets as needed
+1. Sibling live `HEAD` check after ship (HSTS/CSP) — M2 leftover  
+2. Genie smoke in `filepress dev` (History rail)  
+3. Import leftovers / product-site git-connected Pages / Lighthouse
 
 ### Agent prefs (still true)
 

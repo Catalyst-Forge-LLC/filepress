@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
 	npmPinFor,
 	parseArgs,
+	parseGitPorcelainBranch,
 	parseLeaseTable,
 	parseLockedGetfilepress,
 	resolveLockfileDir,
@@ -126,6 +127,28 @@ packages:
 packages:
 `;
 		assert.equal(parseLockedGetfilepress(lock, 'site'), '0.1.7');
+	});
+});
+
+describe('parseGitPorcelainBranch', () => {
+	it('reads ahead and behind from the -b header', () => {
+		const track = parseGitPorcelainBranch('## main...origin/main [ahead 2, behind 1]\n M package.json\n');
+		assert.deepEqual(track, { dirty: true, ahead: 2, behind: 1, branch: 'main' });
+	});
+
+	it('treats a matching upstream as synced and clean', () => {
+		const track = parseGitPorcelainBranch('## main...origin/main\n');
+		assert.deepEqual(track, { dirty: false, ahead: 0, behind: 0, branch: 'main' });
+	});
+
+	it('leaves ahead/behind null without an upstream', () => {
+		const track = parseGitPorcelainBranch('## main\n');
+		assert.deepEqual(track, { dirty: false, ahead: null, behind: null, branch: 'main' });
+	});
+
+	it('handles a detached HEAD', () => {
+		const track = parseGitPorcelainBranch('## HEAD (no branch)\n');
+		assert.deepEqual(track, { dirty: false, ahead: null, behind: null, branch: null });
 	});
 });
 

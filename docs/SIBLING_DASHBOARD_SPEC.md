@@ -1,6 +1,6 @@
 # Spec: FilePress sibling dashboard (local operator)
 
-**Status:** locked — **M0–M1.5 implemented** (2026-08-20)  
+**Status:** locked — **M0–M2 implemented** (M2: 2026-08-25)  
 **Date:** 2026-08-20  
 **Phase:** 4-feature-iteration  
 **Related:** [`scripts/sync-sibling-sites.ts`](../scripts/sync-sibling-sites.ts) · [EXTERNAL_SITES.md](./EXTERNAL_SITES.md) · [DEPLOY.md](./DEPLOY.md) · [LOCALBERTH.md](./LOCALBERTH.md)
@@ -118,7 +118,7 @@ If local > npm: banner *“Local N is not on npm. Jobs will use M.”*
 | Pin | Kind + specifier; locked version vs sync target (behind / current / unknown) |
 | Headers | none / ok / needs merge (which header names) |
 | Ship | yes / no |
-| Git | clean / dirty / no repo; ahead N if known |
+| Git | clean / dirty / no repo; ↑N ahead / ↓N behind origin when an upstream exists |
 | Live | `url` if known (external link) |
 | Dev | LocalBerth port if known, linked to `http://127.0.0.1:<port>` (no start button in v1) |
 
@@ -297,8 +297,11 @@ Never a count-only failure (“1 failed”) without a way to open that site’s 
 
 ### M2 — Status depth
 
-- Ahead-behind vs origin on the row (dirty and `url` landed in M1.5).
-- Optional live `HEAD` check after ship (HSTS, CSP, no `access-control-allow-origin: *`).
+- Ahead-behind vs origin on the row (dirty and `url` landed in M1.5). Parsed from the same `git status --porcelain -b` already used for dirty — no extra spawn per site.
+
+**Exit:** Every git repo shows ↑N / ↓N / synced next to dirty/clean. **Done.**
+
+- Optional live `HEAD` check after ship (HSTS, CSP, no `access-control-allow-origin: *`) — still later.
 
 ### M3 — Dev and ignore
 

@@ -4,11 +4,32 @@ import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
 import {
 	activateVersion,
+	deleteVersion,
+	duplicateVersion,
 	ensureBaseline,
 	getActive,
 	listVersions,
+	updateVersionMeta,
 	writeSnapshot
 } from './store.ts';
+import { geniePlugin } from '../../../vite-plugin-genie.ts';
+
+const brief = {
+	mood: 'test',
+	do: [],
+	dont: [],
+	tokens: { accent: '#111111', accentStrong: '#000000' },
+	density: 'sparse' as const,
+	cssNotes: []
+};
+
+function siteWithBaseline(prefix: string) {
+	const root = mkdtempSync(join(tmpdir(), prefix));
+	mkdirSync(join(root, 'static', 'images'), { recursive: true });
+	writeFileSync(join(root, 'theme.css'), ':root { --accent: #111111; }\n');
+	ensureBaseline(root, { brief, themeCss: readFileSync(join(root, 'theme.css'), 'utf8') });
+	return root;
+}
 
 describe('genie store', () => {
 	it('snapshots baseline, writes a version, and activates into working tree', () => {
@@ -78,5 +99,81 @@ export default defineFilepressConfig({
 		const cfg = readFileSync(join(root, 'filepress.config.ts'), 'utf8');
 		expect(cfg).toContain('lede: "From Genie"');
 		expect(cfg).toContain('tagline: "Tagged"');
+	});
+
+	it('stars, labels, and sorts starred versions first', () => {
+		const root = siteWithBaseline('filepress-genie-meta-');
+		const later = writeSnapshot(root, {
+			label: 'Later look',
+			brief,
+			themeCss: ':root { --accent: #222222; }\n'
+		});
+		updateVersionMeta(root, later.id, { starred: true, label: 'Keeper' });
+		const listed = listVersions(root);
+		expect(listed[0].id).toBe(later.id);
+		expect(listed[0].label).toBe('Keeper');
+		expect(listed[0].starred).toBe(true);
+		expect(() => updateVersionMeta(root, 'baseline', { starred: false })).toThrow(/unstar/);
+	});
+
+	it('duplicates a snapshot without activating it', () => {
+		const root = siteWithBaseline('filepress-genie-dup-');
+		writeFileSync(join(root, 'static', 'images', 'hero.png'), 'png-bytes');
+		const source = writeSnapshot(root, {
+			label: 'Blue',
+			brief,
+			themeCss: ':root { --accent: #2244ff; }\n',
+			imageFiles: [{ absPath: join(root, 'static', 'images', 'hero.png'), destName: 'hero.png' }],
+			attribution: 'Photo: test'
+		});
+		activateVersion(root, source.id);
+		const copy = duplicateVersion(root, source.id);
+		expect(copy.id).not.toBe(source.id);
+		expect(copy.parentId).toBe(source.id);
+		expect(copy.label).toBe('Copy of Blue');
+		expect(copy.starred).toBe(false);
+		expect(getActive(root)?.versionId).toBe(source.id);
+		expect(readFileSync(join(root, '.filepress-genie', 'versions', copy.id, 'theme.css'), 'utf8')).toContain(
+			'#2244ff'
+		);
+		expect(existsSync(join(root, '.filepress-genie', 'versions', copy.id, 'images', 'hero.png'))).toBe(
+			true
+		);
+		expect(readFileSync(join(root, '.filepress-genie', 'versions', copy.id, 'attribution.md'), 'utf8')).toBe(
+			'Photo: test'
+		);
+	});
+
+	it('refuses to delete baseline or the active version, then deletes a spare', () => {
+		const root = siteWithBaseline('filepress-genie-del-');
+		const spare = writeSnapshot(root, {
+			label: 'Spare',
+			brief,
+			themeCss: ':root { --accent: #333333; }\n'
+		});
+		expect(() => deleteVersion(root, 'baseline')).toThrow(/baseline/);
+		activateVersion(root, spare.id);
+		expect(() => deleteVersion(root, spare.id)).toThrow(/active/);
+		activateVersion(root, 'baseline');
+		deleteVersion(root, spare.id);
+		expect(listVersions(root).some((v) => v.id === spare.id)).toBe(false);
+	});
+
+	it('activating baseline restores the pre-Genie theme', () => {
+		const root = siteWithBaseline('filepress-genie-roll-');
+		const blue = writeSnapshot(root, {
+			label: 'Blue',
+			brief,
+			themeCss: ':root { --accent: #2244ff; }\n'
+		});
+		activateVersion(root, blue.id);
+		expect(readFileSync(join(root, 'theme.css'), 'utf8')).toContain('#2244ff');
+		activateVersion(root, 'baseline');
+		expect(readFileSync(join(root, 'theme.css'), 'utf8')).toContain('#111111');
+		expect(getActive(root)?.versionId).toBe('baseline');
+	});
+
+	it('keeps the Genie plugin off the production Vite build', () => {
+		expect(geniePlugin('/tmp/site').apply).toBe('serve');
 	});
 });

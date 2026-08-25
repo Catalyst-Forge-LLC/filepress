@@ -66,6 +66,8 @@
 	let cfgLede = $state('');
 	let cfgTagline = $state('');
 	let cfgLogo = $state('');
+	let renamingId = $state<string | null>(null);
+	let renameDraft = $state('');
 
 	async function api(path: string, init?: RequestInit) {
 		const res = await fetch(`/__filepress/genie${path}`, {
@@ -123,6 +125,89 @@
 		try {
 			await api('/activate', { method: 'POST', body: JSON.stringify({ versionId }) });
 			location.reload();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	function versionWhen(v: VersionRow) {
+		if (v.id === 'baseline') return 'pre-Genie snapshot';
+		const d = new Date(v.createdAt);
+		if (Number.isNaN(d.getTime())) return v.createdAt;
+		return d.toLocaleString(undefined, {
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+
+	function startRename(v: VersionRow) {
+		renamingId = v.id;
+		renameDraft = v.label;
+	}
+
+	async function toggleStar(v: VersionRow) {
+		if (v.id === 'baseline') return;
+		loading = true;
+		error = '';
+		try {
+			await api('/star', {
+				method: 'POST',
+				body: JSON.stringify({ versionId: v.id, starred: !v.starred })
+			});
+			await refresh();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	async function saveLabel(v: VersionRow) {
+		const label = renameDraft.trim();
+		if (!label || label === v.label) {
+			renamingId = null;
+			return;
+		}
+		loading = true;
+		error = '';
+		try {
+			await api('/label', { method: 'POST', body: JSON.stringify({ versionId: v.id, label }) });
+			renamingId = null;
+			await refresh();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	async function duplicate(v: VersionRow) {
+		loading = true;
+		error = '';
+		try {
+			await api('/duplicate', { method: 'POST', body: JSON.stringify({ versionId: v.id }) });
+			await refresh();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			loading = false;
+		}
+	}
+
+	async function removeVersion(v: VersionRow) {
+		if (v.id === 'baseline') return;
+		if (
+			!confirm(
+				`Delete “${v.label}”? This only removes the snapshot under .filepress-genie/. The working tree stays as it is.`
+			)
+		) {
+			return;
+		}
+		loading = true;
+		error = '';
+		try {
+			await api('/delete', { method: 'POST', body: JSON.stringify({ versionId: v.id }) });
+			await refresh();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			loading = false;
@@ -605,25 +690,82 @@
 							<h3>Versions</h3>
 							<p class="genie-howto">
 								Every Genie action saves a snapshot under <code>.filepress-genie/</code> (gitignored).
-								Activate to bake into the working tree; commit when you like it. <code>baseline</code> is
-								the pre-Genie look.
+								Star keepers, rename, duplicate, then activate to bake into the working tree.
+								<code>baseline</code> is the pre-Genie look and cannot be deleted.
 							</p>
 							<p class="genie-muted">
 								Active: {health.active?.versionId ?? '(none)'}
+								{#if health.versions.length}
+									· {health.versions.length} saved
+								{/if}
 							</p>
 							<ul class="genie-versions">
 								{#each health.versions as v (v.id)}
-									<li class:active={health.active?.versionId === v.id}>
-										<button
-											type="button"
-											disabled={loading || health.active?.versionId === v.id}
-											onclick={() => activate(v.id)}
-										>
-											{v.label}
-										</button>
-										<span class="genie-muted"
-											>{v.id === 'baseline' ? 'baseline' : v.createdAt.slice(11, 19)}</span
-										>
+									{@const isActive = health.active?.versionId === v.id}
+									<li class:active={isActive} class:starred={v.starred}>
+										<div class="genie-ver-head">
+											<button
+												type="button"
+												class="genie-star"
+												class:on={v.starred}
+												disabled={loading || v.id === 'baseline'}
+												aria-pressed={v.starred}
+												aria-label={v.starred ? 'Unstar version' : 'Star version'}
+												onclick={() => toggleStar(v)}
+											>
+												{v.starred ? '★' : '☆'}
+											</button>
+											{#if renamingId === v.id}
+												<input
+													class="genie-rename"
+													type="text"
+													bind:value={renameDraft}
+													disabled={loading}
+													aria-label="Version label"
+													onkeydown={(e) => {
+														if (e.key === 'Enter') void saveLabel(v);
+														if (e.key === 'Escape') renamingId = null;
+													}}
+												/>
+											{:else}
+												<strong>{v.label}</strong>
+											{/if}
+											{#if isActive}
+												<span class="genie-ver-badge">Active</span>
+											{/if}
+										</div>
+										<p class="genie-ver-when">{versionWhen(v)}</p>
+										<div class="genie-ver-actions">
+											{#if renamingId === v.id}
+												<button type="button" disabled={loading} onclick={() => saveLabel(v)}>
+													Save name
+												</button>
+												<button type="button" disabled={loading} onclick={() => (renamingId = null)}>
+													Cancel
+												</button>
+											{:else}
+												<button
+													type="button"
+													disabled={loading || isActive}
+													onclick={() => activate(v.id)}
+												>
+													Activate
+												</button>
+												<button type="button" disabled={loading} onclick={() => startRename(v)}>
+													Rename
+												</button>
+												<button type="button" disabled={loading} onclick={() => duplicate(v)}>
+													Duplicate
+												</button>
+												<button
+													type="button"
+													disabled={loading || v.id === 'baseline' || isActive}
+													onclick={() => removeVersion(v)}
+												>
+													Delete
+												</button>
+											{/if}
+										</div>
 									</li>
 								{/each}
 							</ul>
@@ -898,19 +1040,86 @@
 		margin: 0.5rem 0;
 		padding: 0;
 		display: grid;
-		gap: 0.35rem;
+		gap: 0.55rem;
 	}
 
 	.genie-versions li {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
+		display: grid;
+		gap: 0.3rem;
+		padding: 0.5rem 0.55rem;
+		border: 1px solid var(--rule, #444);
+		border-radius: 8px;
 	}
 
-	.genie-versions li.active button {
-		border-color: var(--accent, #f0c040);
+	.genie-versions li.active {
+		border-color: color-mix(in srgb, var(--accent, #f0c040) 55%, var(--rule, #444));
+	}
+
+	.genie-ver-head {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-width: 0;
+	}
+
+	.genie-ver-head strong {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 0.84rem;
+	}
+
+	.genie-star {
+		flex: 0 0 auto;
+		width: 1.7rem;
+		padding: 0.15rem 0;
+		border: 1px solid transparent;
+		background: none;
+		color: var(--ink-soft, #999);
+		font-size: 0.95rem;
+		line-height: 1;
+	}
+
+	.genie-star.on {
 		color: var(--accent, #f0c040);
+	}
+
+	.genie-ver-badge {
+		flex: 0 0 auto;
+		font-size: 0.62rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--accent, #f0c040);
+		border: 1px solid color-mix(in srgb, var(--accent, #f0c040) 45%, var(--rule, #444));
+		border-radius: 999px;
+		padding: 0.08rem 0.4rem;
+	}
+
+	.genie-rename {
+		flex: 1 1 auto;
+		min-width: 0;
+		box-sizing: border-box;
+		font: inherit;
+		font-size: 0.82rem;
+	}
+
+	.genie-ver-when {
+		margin: 0;
+		font-size: 0.72rem;
+		color: var(--ink-soft, #999);
+	}
+
+	.genie-ver-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+
+	.genie-ver-actions button {
+		padding: 0.28rem 0.5rem;
+		font-size: 0.72rem;
 	}
 
 	.genie-linkish {

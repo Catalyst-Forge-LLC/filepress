@@ -1,7 +1,7 @@
 # Spec: filepress Genie Mode
 
-**Status:** locked — **M0–M2 implemented** (M2: 2026-08-11)  
-**Date:** 2026-08-03 (M2 update 2026-08-11)  
+**Status:** locked — **M0–M3 implemented** (M3: 2026-08-25)  
+**Date:** 2026-08-03 (M3 update 2026-08-25)  
 **Phase:** 4-feature-iteration  
 **Related:** [THEME.md](./THEME.md) · [SITE_IMPORT_SPEC.md](./SITE_IMPORT_SPEC.md)  
 **Former working title:** Assistant Mode (see [ASSISTANT_MODE_SPEC.md](./ASSISTANT_MODE_SPEC.md) redirect)
@@ -343,6 +343,8 @@ Before first Genie write, snapshot current look as `baseline`.
 ### M3 — Polish + harden
 
 - Star/label/duplicate; fuller acceptance tests; UX polish.
+
+**Exit:** History rail can star, rename, duplicate, and delete (with confirm; baseline and the active version stay locked). Store tests cover those ops plus baseline rollback. Plugin stays `apply: 'serve'`. **Done.**
 
 ---
 

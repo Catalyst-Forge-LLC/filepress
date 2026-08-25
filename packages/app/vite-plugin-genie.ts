@@ -11,7 +11,7 @@ import {
 	runInspire,
 	scanOllamaHosts
 } from './src/lib/genie/ops.ts';
-import { deleteVersion, listVersions } from './src/lib/genie/store.ts';
+import { deleteVersion, duplicateVersion, listVersions, updateVersionMeta } from './src/lib/genie/store.ts';
 
 function readBody(req: IncomingMessage): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -160,8 +160,51 @@ export function geniePlugin(siteRoot: string): Plugin {
 						);
 					}
 
+					if (method === 'POST' && path === '/__filepress/genie/star') {
+						const body = JSON.parse(await readBody(req));
+						if (!body.versionId) {
+							return sendJson(res, 400, { error: '`versionId` required' });
+						}
+						if (typeof body.starred !== 'boolean') {
+							return sendJson(res, 400, { error: '`starred` boolean required' });
+						}
+						return sendJson(res, 200, {
+							version: updateVersionMeta(siteRoot, body.versionId, { starred: body.starred })
+						});
+					}
+
+					if (method === 'POST' && path === '/__filepress/genie/label') {
+						const body = JSON.parse(await readBody(req));
+						if (!body.versionId) {
+							return sendJson(res, 400, { error: '`versionId` required' });
+						}
+						if (typeof body.label !== 'string') {
+							return sendJson(res, 400, { error: '`label` string required' });
+						}
+						return sendJson(res, 200, {
+							version: updateVersionMeta(siteRoot, body.versionId, { label: body.label })
+						});
+					}
+
+					if (method === 'POST' && path === '/__filepress/genie/duplicate') {
+						const body = JSON.parse(await readBody(req));
+						if (!body.versionId) {
+							return sendJson(res, 400, { error: '`versionId` required' });
+						}
+						return sendJson(res, 200, {
+							version: duplicateVersion(
+								siteRoot,
+								body.versionId,
+								typeof body.label === 'string' ? body.label : undefined
+							)
+						});
+					}
+
 					if (method === 'POST' && path === '/__filepress/genie/delete') {
 						const body = JSON.parse(await readBody(req));
+						if (!body.versionId) {
+							return sendJson(res, 400, { error: '`versionId` required' });
+						}
 						deleteVersion(siteRoot, body.versionId);
 						return sendJson(res, 200, { ok: true });
 					}

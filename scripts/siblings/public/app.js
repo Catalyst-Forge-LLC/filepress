@@ -54,12 +54,16 @@ function renderChips(sites) {
 	const behind = sites.filter((s) => s.update.startsWith('pnpm update') || s.pinKind === 'link').length;
 	const headers = sites.filter((s) => s.headers.action === 'merge').length;
 	const dirty = sites.filter((s) => s.gitDirty).length;
+	const aheadOrigin = sites.filter((s) => (s.gitAhead ?? 0) > 0).length;
+	const behindOrigin = sites.filter((s) => (s.gitBehind ?? 0) > 0).length;
 	const picked = selectedNames().length;
 	const chips = [
 		`<span class="chip">${sites.length} sites</span>`,
 		`<span class="chip${behind ? ' hot' : ''}">${behind} to update</span>`,
 		`<span class="chip${headers ? ' hot' : ''}">${headers} header merges</span>`,
-		`<span class="chip${dirty ? ' bad' : ''}">${dirty} dirty</span>`
+		`<span class="chip${dirty ? ' bad' : ''}">${dirty} dirty</span>`,
+		`<span class="chip${aheadOrigin ? ' on' : ''}">${aheadOrigin} ahead</span>`,
+		`<span class="chip${behindOrigin ? ' hot' : ''}">${behindOrigin} behind origin</span>`
 	];
 	if (picked) chips.push(`<span class="chip on">${picked} selected</span>`);
 	$('chips').innerHTML = chips.join('');
@@ -78,9 +82,21 @@ function headersBadge(h) {
 	return `<span class="badge todo" title="${esc(h.added.join(', '))}">merge +${h.added.length}</span>`;
 }
 
-function gitBadge(dirty) {
-	if (dirty === null) return '<span class="badge mute">no git</span>';
-	return dirty ? '<span class="badge bad">dirty</span>' : '<span class="badge ok">clean</span>';
+function gitBadge(site) {
+	if (site.gitDirty === null && !site.gitBranch) return '<span class="badge mute">no git</span>';
+	const bits = [];
+	if (site.gitDirty) bits.push('<span class="badge bad">dirty</span>');
+	else bits.push('<span class="badge ok">clean</span>');
+	if ((site.gitAhead ?? 0) > 0) {
+		bits.push(`<span class="badge on" title="${esc(site.gitBranch ?? 'branch')}">↑${site.gitAhead}</span>`);
+	}
+	if ((site.gitBehind ?? 0) > 0) {
+		bits.push(`<span class="badge todo" title="${esc(site.gitBranch ?? 'branch')}">↓${site.gitBehind}</span>`);
+	}
+	if (site.gitAhead === 0 && site.gitBehind === 0 && site.gitBranch) {
+		bits.push('<span class="badge mute">synced</span>');
+	}
+	return bits.join(' ');
 }
 
 function renderSkeleton() {
@@ -112,7 +128,7 @@ function renderRows(sites, force = false) {
 			<td><span class="pin">${esc(site.lockedVersion ?? '—')}</span></td>
 			<td>${updateBadge(site)}</td>
 			<td>${headersBadge(site.headers)}</td>
-			<td>${gitBadge(site.gitDirty)}</td>
+			<td>${gitBadge(site)}</td>
 			<td class="num">${site.leasePort ? `<a href="http://127.0.0.1:${site.leasePort}" target="_blank" rel="noreferrer">:${site.leasePort}</a>` : '—'}</td>
 			<td>${site.url ? `<a href="${esc(site.url)}" target="_blank" rel="noreferrer">${esc(site.url.replace(/^https?:\/\//, ''))}</a>` : '—'}</td>
 		`;

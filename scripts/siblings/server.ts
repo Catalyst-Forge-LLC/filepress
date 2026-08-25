@@ -144,6 +144,13 @@ async function runJob(job: Job): Promise<void> {
 				log(`  headers  ${headersLine(plan.headers)}`);
 				log(`  ship     ${plan.ship ?? 'none'}`);
 				if (plan.gitDirty) log('  git      dirty (apply will commit those files too)');
+				const syncBits = [
+					plan.gitAhead ? `ahead ${plan.gitAhead}` : '',
+					plan.gitBehind ? `behind ${plan.gitBehind}` : ''
+				].filter(Boolean);
+				if (syncBits.length) {
+					log(`  origin   ${plan.gitBranch ?? 'branch'} ${syncBits.join(', ')}`);
+				}
 				job.results.push({ name: site.name, ok: true });
 			}
 			job.status = 'ok';

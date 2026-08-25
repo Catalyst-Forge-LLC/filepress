@@ -1,5 +1,6 @@
 import {
 	copyFileSync,
+	cpSync,
 	existsSync,
 	mkdirSync,
 	readFileSync,
@@ -62,7 +63,10 @@ export function listVersions(siteRoot: string): GenieVersionMeta[] {
 		const meta = readJson<GenieVersionMeta | null>(join(dir, id, 'meta.json'), null);
 		if (meta) out.push(meta);
 	}
-	return out.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+	return out.sort((a, b) => {
+		if (a.starred !== b.starred) return a.starred ? -1 : 1;
+		return b.createdAt.localeCompare(a.createdAt);
+	});
 }
 
 export function readVersionBrief(siteRoot: string, id: string): DesignBrief | null {
@@ -159,6 +163,55 @@ export function activateVersion(siteRoot: string, versionId: string): GenieActiv
 	};
 	writeJson(join(genieRoot(siteRoot), 'active.json'), active);
 	return active;
+}
+
+export function readVersionMeta(siteRoot: string, versionId: string): GenieVersionMeta {
+	const meta = readJson<GenieVersionMeta | null>(join(versionPath(siteRoot, versionId), 'meta.json'), null);
+	if (!meta) throw new Error(`Unknown Genie version: ${versionId}`);
+	return meta;
+}
+
+export function updateVersionMeta(
+	siteRoot: string,
+	versionId: string,
+	patch: { label?: string; starred?: boolean }
+): GenieVersionMeta {
+	const meta = readVersionMeta(siteRoot, versionId);
+	if (typeof patch.label === 'string') {
+		const label = patch.label.trim();
+		if (!label) throw new Error('label cannot be empty');
+		meta.label = label.slice(0, 80);
+	}
+	if (typeof patch.starred === 'boolean') {
+		if (versionId === 'baseline' && patch.starred === false) {
+			throw new Error('Cannot unstar the baseline version');
+		}
+		meta.starred = patch.starred;
+	}
+	writeJson(join(versionPath(siteRoot, versionId), 'meta.json'), meta);
+	return meta;
+}
+
+/** Copy a snapshot folder to a new id. Does not activate. */
+export function duplicateVersion(siteRoot: string, sourceId: string, label?: string): GenieVersionMeta {
+	const src = versionPath(siteRoot, sourceId);
+	if (!existsSync(join(src, 'theme.css'))) {
+		throw new Error(`Unknown Genie version: ${sourceId}`);
+	}
+	const source = readVersionMeta(siteRoot, sourceId);
+	const id = newVersionId();
+	const dest = versionPath(siteRoot, id);
+	cpSync(src, dest, { recursive: true });
+	const meta: GenieVersionMeta = {
+		...source,
+		id,
+		createdAt: new Date().toISOString(),
+		parentId: sourceId,
+		label: (label?.trim() || `Copy of ${source.label}`).slice(0, 80),
+		starred: false
+	};
+	writeJson(join(dest, 'meta.json'), meta);
+	return meta;
 }
 
 export function deleteVersion(siteRoot: string, versionId: string) {

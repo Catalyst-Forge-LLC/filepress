@@ -4,6 +4,14 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-26) — Genie refine visibility
+
+Refine was aborting at 180s (`AbortSignal.timeout`) while `gemma4:12b` still loaded. Chat now streams, default wait is 10 minutes (`FILEPRESS_OLLAMA_TIMEOUT_MS`), terminal logs `still generating…` every 15s, panel shows elapsed time, timeout errors tell you to retry warm.
+
+Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-25) — engine polish (visitor / authoring / chrome)
 
 Solidify what already ships. **Deferred** (new product surfaces): client search, satori OG images, full-content RSS, git-connected Pages, core-repo split, Genie split-pane/vision/theme packs, Playwright vision import.

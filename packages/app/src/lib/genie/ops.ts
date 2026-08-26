@@ -406,13 +406,17 @@ export async function refineWithOllama(
 	}
 
 	const seed = loadWorkingBrief(siteRoot);
+	const logLabel = `filepress genie: refine ${model} @ ${host}`;
+	console.log(`${logLabel}: prompt “${prompt.slice(0, 80)}${prompt.length > 80 ? '…' : ''}”`);
 	const brief = await generateDesignBrief({
 		host,
 		model,
 		ir: stubSiteIr(siteRoot),
 		inspireSummaries: [`Author steer: ${prompt}`],
 		inspireSignals: [],
-		seed
+		seed,
+		strictParse: true,
+		logLabel
 	});
 	const themeCss = themeCssFromBrief(brief);
 	const meta = writeSnapshot(siteRoot, {
@@ -424,6 +428,7 @@ export async function refineWithOllama(
 		llm: { used: true, model, host },
 		steers: [{ type: 'refine', prompt }]
 	});
+	console.log(`${logLabel}: wrote ${meta.id}`);
 	const active =
 		opts.activate !== false ? activateVersion(siteRoot, meta.id) : getActive(siteRoot);
 	return { meta, active, brief, llm: { used: true, model, host } };

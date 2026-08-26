@@ -31,7 +31,10 @@ Genie and import share the same Ollama hooks. Default is still local (`OLLAMA_HO
 | --- | --- |
 | `FILEPRESS_OLLAMA_MODEL` | Default model (Genie also offers a picker when a server is up) |
 | `OLLAMA_HOST` | Default Ollama if you do not pick a scanned server |
+| `FILEPRESS_OLLAMA_TIMEOUT_MS` | How long Refine/import will wait for `/api/chat` (default 600000 = 10 minutes) |
 | `OLLANET_HOSTS` | Extra hosts/IPs for the optional scan |
+
+A first refine after `ollama pull` can sit on “loading” for several minutes while the weights enter VRAM. The Genie panel shows elapsed time; the `filepress dev` terminal prints `still generating…` every 15 seconds. If you see a timeout, retry — a warm `gemma4:12b` is much faster.
 
 If Ollama is down, deterministic steers / inspire / stock still work. When Ollama is up but untuned, Genie points at [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna). Finetuna is companion tooling, not a hard dependency.
 

@@ -212,6 +212,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 					return sendJson(res, 404, { error: `Unknown Genie route: ${method} ${path}` });
 				} catch (e) {
 					const message = e instanceof Error ? e.message : String(e);
+					console.error(`filepress genie: ${method} ${path} failed: ${message}`);
 					return sendJson(res, 500, { error: message });
 				}
 			});

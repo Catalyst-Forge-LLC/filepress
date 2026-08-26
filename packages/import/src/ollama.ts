@@ -66,6 +66,77 @@ export function ollamaSetupHint(host: string): string {
 	].join(' ');
 }
 
+/** Wall-clock budget for `/api/chat`. 12B first-load often exceeds 3 minutes. */
+export const DEFAULT_OLLAMA_CHAT_TIMEOUT_MS = 600_000;
+
+export function ollamaChatTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
+	const raw = env.FILEPRESS_OLLAMA_TIMEOUT_MS?.trim();
+	if (!raw) return DEFAULT_OLLAMA_CHAT_TIMEOUT_MS;
+	const n = Number(raw);
+	if (!Number.isFinite(n) || n < 10_000) return DEFAULT_OLLAMA_CHAT_TIMEOUT_MS;
+	return Math.min(n, 3_600_000);
+}
+
+export function ollamaTimeoutMessage(opts: { host: string; model: string; timeoutMs: number }): string {
+	const secs = Math.round(opts.timeoutMs / 1000);
+	return (
+		`Ollama did not finish within ${secs}s (${opts.model} at ${opts.host}). ` +
+		`The model may still be loading — check \`ollama ps\`, then retry (a warm model is much faster). ` +
+		`Or raise FILEPRESS_OLLAMA_TIMEOUT_MS (milliseconds; default ${DEFAULT_OLLAMA_CHAT_TIMEOUT_MS}).`
+	);
+}
+
+export function isAbortLike(err: unknown): boolean {
+	if (!err || typeof err !== 'object') return false;
+	const name = 'name' in err ? String(err.name) : '';
+	const msg = 'message' in err ? String(err.message) : '';
+	return (
+		name === 'TimeoutError' ||
+		name === 'AbortError' ||
+		/aborted due to timeout/i.test(msg) ||
+		/The operation was aborted/i.test(msg)
+	);
+}
+
+/** Append one NDJSON line from Ollama `stream: true` `/api/chat`. */
+export function appendOllamaChatDelta(line: string, acc: { content: string }): void {
+	const trimmed = line.trim();
+	if (!trimmed) return;
+	const ev = JSON.parse(trimmed) as { message?: { content?: string }; error?: string };
+	if (ev.error) throw new Error(ev.error);
+	if (ev.message?.content) acc.content += ev.message.content;
+}
+
+async function readOllamaChatStream(
+	res: Response,
+	logLabel: string,
+	started: number
+): Promise<string> {
+	if (!res.body) throw new Error('Ollama chat returned an empty body');
+	const reader = res.body.getReader();
+	const decoder = new TextDecoder();
+	let buf = '';
+	const acc = { content: '' };
+	let lastLog = 0;
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		buf += decoder.decode(value, { stream: true });
+		const lines = buf.split(/\r?\n/);
+		buf = lines.pop() ?? '';
+		for (const line of lines) appendOllamaChatDelta(line, acc);
+		const elapsed = Date.now() - started;
+		if (elapsed - lastLog >= 15_000) {
+			lastLog = elapsed;
+			console.log(
+				`${logLabel}: still generating… ${Math.round(elapsed / 1000)}s, ${acc.content.length} chars`
+			);
+		}
+	}
+	if (buf.trim()) appendOllamaChatDelta(buf, acc);
+	return acc.content;
+}
+
 export async function generateDesignBrief(opts: {
 	host: string;
 	model: string;
@@ -73,8 +144,15 @@ export async function generateDesignBrief(opts: {
 	inspireSummaries: string[];
 	inspireSignals: InspirationSignals[];
 	seed: DesignBrief;
+	/** When true, unparseable model JSON fails instead of silently using the seed. */
+	strictParse?: boolean;
+	logLabel?: string;
 }): Promise<DesignBrief> {
 	const host = opts.host.replace(/\/+$/, '');
+	const timeoutMs = ollamaChatTimeoutMs();
+	const started = Date.now();
+	const logLabel = opts.logLabel ?? `filepress: Ollama ${opts.model} @ ${host}`;
+	console.log(`${logLabel}: starting chat (up to ${Math.round(timeoutMs / 1000)}s)`);
 	const prompt = `You are a design director restyling a personal Markdown blog (filepress Essay chrome).
 The seed brief below was extracted from inspiration site CSS/fonts. Refine it — keep the punch.
 Return ONLY JSON (no fences) with this shape:
@@ -126,33 +204,41 @@ Inspiration text snippets:
 ${opts.inspireSummaries.map((s, i) => `(${i + 1}) ${s}`).join('\n') || '(none)'}
 `;
 
-	const res = await fetch(`${host}/api/chat`, {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({
-			model: opts.model,
-			stream: false,
-			format: 'json',
-			options: { temperature: 0.35 },
-			messages: [
-				{
-					role: 'system',
-					content:
-						'You output only valid JSON. Preserve dark inspiration palettes; do not flatten them into cream editorial.'
-				},
-				{ role: 'user', content: prompt }
-			]
-		}),
-		signal: AbortSignal.timeout(180_000)
-	});
+	let content = '';
+	try {
+		const res = await fetch(`${host}/api/chat`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				model: opts.model,
+				stream: true,
+				format: 'json',
+				options: { temperature: 0.35 },
+				messages: [
+					{
+						role: 'system',
+						content:
+							'You output only valid JSON. Preserve dark inspiration palettes; do not flatten them into cream editorial.'
+					},
+					{ role: 'user', content: prompt }
+				]
+			}),
+			signal: AbortSignal.timeout(timeoutMs)
+		});
 
-	if (!res.ok) {
-		const body = await res.text().catch(() => '');
-		throw new Error(`Ollama chat failed (${res.status}): ${body.slice(0, 400)}`);
+		if (!res.ok) {
+			const body = await res.text().catch(() => '');
+			throw new Error(`Ollama chat failed (${res.status}): ${body.slice(0, 400)}`);
+		}
+
+		content = await readOllamaChatStream(res, logLabel, started);
+		console.log(`${logLabel}: done in ${Math.round((Date.now() - started) / 1000)}s (${content.length} chars)`);
+	} catch (e) {
+		if (isAbortLike(e)) {
+			throw new Error(ollamaTimeoutMessage({ host, model: opts.model, timeoutMs }));
+		}
+		throw e;
 	}
-
-	const data = (await res.json()) as { message?: { content?: string } };
-	const content = data.message?.content ?? '';
 	try {
 		const refined = parseBriefJson(content);
 		// Never let the model drop fonts/googleHref from a rich seed
@@ -168,7 +254,13 @@ ${opts.inspireSummaries.map((s, i) => `(${i + 1}) ${s}`).join('\n') || '(none)'}
 			elevatedCards: refined.elevatedCards ?? opts.seed.elevatedCards
 		};
 	} catch (e) {
-		console.warn(`import: brief parse failed (${e}); using seed brief`);
+		const detail = e instanceof Error ? e.message : String(e);
+		if (opts.strictParse) {
+			throw new Error(
+				`Ollama returned a brief we could not parse (${detail}). First 200 chars: ${content.slice(0, 200)}`
+			);
+		}
+		console.warn(`import: brief parse failed (${detail}); using seed brief`);
 		return opts.seed;
 	}
 }

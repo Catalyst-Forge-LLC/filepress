@@ -115,7 +115,7 @@ In `filepress dev`, a floating **Genie** control opens a design cockpit:
 | Openverse stock + local upload | Hero / page background (and logo upload → config) |
 | Version rail + activate | Gitignored `.filepress-genie/`; bake into `theme.css` / `static/` |
 | Live inspire (1–3 URLs) | Reuses import inspire pipeline |
-| Ollama refine | Optional; host + model picker; **Scan network** (ollanet) |
+| Ollama refine | Optional; host + model picker; **Scan network** (ollanet); streamed chat + 10m default timeout (`FILEPRESS_OLLAMA_TIMEOUT_MS`) |
 | Config patch | `lede` / `tagline` / `logo` on activate |
 
 Hand-edited `theme.css` remains fully supported. Genie never ships in `preview` or production builds. Spec: [GENIE_MODE_SPEC.md](./GENIE_MODE_SPEC.md). Ollama optional for the LLM path; [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna) recommended for a tuned local model.

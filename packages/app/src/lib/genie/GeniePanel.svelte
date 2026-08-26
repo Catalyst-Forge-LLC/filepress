@@ -68,6 +68,31 @@
 	let cfgLogo = $state('');
 	let renamingId = $state<string | null>(null);
 	let renameDraft = $state('');
+	let jobNote = $state('');
+	let jobSecs = $state(0);
+	let jobTimer: ReturnType<typeof setInterval> | null = null;
+
+	function formatWait(secs: number): string {
+		const m = Math.floor(secs / 60);
+		const r = secs % 60;
+		return m ? `${m}m ${String(r).padStart(2, '0')}s` : `${r}s`;
+	}
+
+	function beginJob(note: string) {
+		jobNote = note;
+		jobSecs = 0;
+		if (jobTimer) clearInterval(jobTimer);
+		jobTimer = setInterval(() => {
+			jobSecs += 1;
+		}, 1000);
+	}
+
+	function endJob() {
+		if (jobTimer) clearInterval(jobTimer);
+		jobTimer = null;
+		jobNote = '';
+		jobSecs = 0;
+	}
 
 	async function api(path: string, init?: RequestInit) {
 		const res = await fetch(`/__filepress/genie${path}`, {
@@ -338,6 +363,11 @@
 	async function runInspire() {
 		loading = true;
 		error = '';
+		beginJob(
+			useLlm
+				? `Inspire + ${selectedModel || 'Ollama'} — first load of a 12B model can take several minutes`
+				: 'Crawling inspiration URLs'
+		);
 		try {
 			await api('/inspire', {
 				method: 'POST',
@@ -355,12 +385,17 @@
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			loading = false;
+		} finally {
+			endJob();
 		}
 	}
 
 	async function runRefine() {
 		loading = true;
 		error = '';
+		beginJob(
+			`Asking ${selectedModel || 'Ollama'} — first load of a 12B model can take several minutes`
+		);
 		try {
 			await api('/refine', {
 				method: 'POST',
@@ -374,6 +409,8 @@
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			loading = false;
+		} finally {
+			endJob();
 		}
 	}
 
@@ -409,11 +446,17 @@
 				<strong>Genie</strong>
 				<p class="genie-tagline">Try a look → activate → commit baked files</p>
 			</div>
-			<button type="button" class="genie-x" onclick={() => (open = false)}>Close</button>
+			<button type="button" class="genie-x" onclick={() => { open = false; endJob(); }}>Close</button>
 		</header>
 
 		{#if error}
 			<p class="genie-err">{error}</p>
+		{/if}
+		{#if jobNote}
+			<p class="genie-progress" aria-live="polite">
+				{jobNote} · {formatWait(jobSecs)} elapsed. Watch the <code>filepress dev</code> terminal for
+				“still generating…”.
+			</p>
 		{/if}
 
 		{#if health}
@@ -508,10 +551,13 @@
 								disabled={loading || scanning || !hostIsReady() || !refinePrompt.trim()}
 								onclick={runRefine}
 							>
-								{loading ? 'Working…' : 'Refine & activate'}
+								{loading ? `Asking Ollama… ${formatWait(jobSecs)}` : 'Refine & activate'}
 							</button>
 							<p class="genie-muted">
-								Tip: set <code>FILEPRESS_OLLAMA_MODEL</code> / <code>OLLAMA_HOST</code> for defaults;
+								<code>gemma4:12b</code> often spends the first few minutes loading into VRAM — that is
+								normal. Progress prints in the filepress terminal every 15s. Raise the budget with
+								<code>FILEPRESS_OLLAMA_TIMEOUT_MS</code> (default 10 minutes). Tip: set
+								<code>FILEPRESS_OLLAMA_MODEL</code> / <code>OLLAMA_HOST</code> for defaults;
 								<a href="https://ollanet.dev" target="_blank" rel="noreferrer">ollanet</a> finds other
 								boxes. Finetuna can tune a named variant.
 							</p>
@@ -955,6 +1001,16 @@
 		border-radius: 6px;
 		font-size: 0.82rem;
 		margin: 0 0.25rem 0.65rem;
+		flex-shrink: 0;
+	}
+
+	.genie-progress {
+		margin: 0 0.25rem 0.65rem;
+		padding: 0.5rem 0.65rem;
+		border-radius: 6px;
+		border: 1px solid color-mix(in srgb, var(--accent, #f0c040) 40%, var(--rule, #444));
+		font-size: 0.82rem;
+		color: var(--ink-soft, #ccc);
 		flex-shrink: 0;
 	}
 

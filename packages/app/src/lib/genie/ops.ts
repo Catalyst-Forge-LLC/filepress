@@ -25,6 +25,7 @@ import type { DesignBrief, SiteIR } from '../../../../import/src/ir.ts';
 import {
 	activateVersion,
 	ensureBaseline,
+	genieRoot,
 	getActive,
 	listVersions,
 	readVersionBrief,
@@ -416,7 +417,10 @@ export async function refineWithOllama(
 		inspireSignals: [],
 		seed,
 		strictParse: true,
-		logLabel
+		logLabel,
+		intent: 'steer',
+		steer: prompt,
+		dumpPath: join(genieRoot(siteRoot), 'last-ollama.json')
 	});
 	const themeCss = themeCssFromBrief(brief);
 	const meta = writeSnapshot(siteRoot, {

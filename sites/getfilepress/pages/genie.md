@@ -34,7 +34,9 @@ Genie and import share the same Ollama hooks. Default is still local (`OLLAMA_HO
 | `FILEPRESS_OLLAMA_TIMEOUT_MS` | How long Refine/import will wait for `/api/chat` (default 600000 = 10 minutes) |
 | `OLLANET_HOSTS` | Extra hosts/IPs for the optional scan |
 
-A first refine after `ollama pull` can sit on “loading” for several minutes while the weights enter VRAM. The Genie panel shows elapsed time; the `filepress dev` terminal prints `still generating…` every 15 seconds. If you see a timeout, retry — a warm `gemma4:12b` is much faster.
+A first refine after `ollama pull` can sit on “loading” for several minutes while the weights enter VRAM. The Genie panel shows elapsed time; the `filepress dev` terminal prints `still generating…` every 15 seconds, then the **raw JSON** and `paletteMode` / `bg` / `ink`. The same dump is written to `.filepress-genie/last-ollama.json` (gitignored). If you see a timeout, retry — a warm `gemma4:12b` is much faster.
+
+Genie Refine follows your written palette. “Icy / Antarctica / bright / white” is a **light** page. The import prompt still keeps dark inspiration dark; that rule no longer applies to Refine. If a previous dark version is active, activate **baseline** in History first so the seed is not a black brief.
 
 If Ollama is down, deterministic steers / inspire / stock still work. When Ollama is up but untuned, Genie points at [Finetuna](https://github.com/Catalyst-Forge-LLC/finetuna). Finetuna is companion tooling, not a hard dependency.
 

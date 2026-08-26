@@ -554,6 +554,10 @@
 								{loading ? `Asking Ollama… ${formatWait(jobSecs)}` : 'Refine & activate'}
 							</button>
 							<p class="genie-muted">
+								The raw Ollama JSON is printed in the <code>filepress dev</code> terminal and saved to
+								<code>.filepress-genie/last-ollama.json</code>. “Icy / Antarctica / bright” means a
+								light page — activate <strong>baseline</strong> in History first if a prior dark look
+								is still the seed.
 								<code>gemma4:12b</code> often spends the first few minutes loading into VRAM — that is
 								normal. Progress prints in the filepress terminal every 15s. Raise the budget with
 								<code>FILEPRESS_OLLAMA_TIMEOUT_MS</code> (default 10 minutes). Tip: set

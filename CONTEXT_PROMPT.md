@@ -8,6 +8,8 @@ _Paste into a new chat to resume. Single most important document for session con
 
 Refine was aborting at 180s (`AbortSignal.timeout`) while `gemma4:12b` still loaded. Chat now streams, default wait is 10 minutes (`FILEPRESS_OLLAMA_TIMEOUT_MS`), terminal logs `still generating…` every 15s, panel shows elapsed time, timeout errors tell you to retry warm.
 
+**Palette:** import prompt still says “keep dark inspiration.” Genie Refine uses a separate **steer** prompt. Icy/Antarctica/bright → light page; code floors a black `bg` if the model ignores that. Raw JSON is printed in the terminal and written to `.filepress-genie/last-ollama.json`.
+
 Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
 
 ---

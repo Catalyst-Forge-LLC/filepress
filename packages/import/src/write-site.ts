@@ -262,7 +262,7 @@ export async function writeSite(
 	];
 	const imageMap = await downloadImages(allImages, staticDir);
 	await downloadRootAssets(ir.assets ?? [], staticDir);
-	// Layout always links /favicon.svg — guarantee one exists for prerender.
+	// Layout prefers /favicon.png, then /favicon.svg — keep an svg so prerender has a fallback.
 	const faviconDest = join(staticDir, 'favicon.svg');
 	if (!existsSync(faviconDest) && existsSync(DEFAULT_FAVICON)) {
 		copyFileSync(DEFAULT_FAVICON, faviconDest);

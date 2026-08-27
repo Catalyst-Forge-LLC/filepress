@@ -4,6 +4,14 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-27) — default masthead logo
+
+Omitted `logo` now defaults to `/logo.png` (`static/logo.png`). Blank or `null` is a text-only masthead. A missing file is hidden, not a broken image. Bump is **0.1.14**. User publishes.
+
+Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-27) — Genie versions show what they did
 
 History rows were label + timestamp only. Health now sends `did` (from `design-brief.json`) and the original `prompt`. Click the prompt to copy. Bump is **0.1.13**; sites stay on npm (do not link). User publishes.

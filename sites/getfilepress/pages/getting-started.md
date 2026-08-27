@@ -72,6 +72,8 @@ export default defineFilepressConfig({
 
 `title` and `url` are required. Missing values fail the build with a clear error.
 
+Omit `logo` and the masthead uses `/logo.png` from `static/` if you drop one there. Set `logo: ""` or `null` for a text-only title.
+
 ### Nav, footer, and icons
 
 - `nav` — header links (defaults to Posts + Topics, or Home + Posts + Topics when `homePage` is set).

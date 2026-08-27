@@ -11,7 +11,14 @@
 		<div class="site-id">
 			<a class="site-title" href="/">
 				{#if site.logo}
-					<img class="site-logo" src={site.logo} alt="" />
+					<img
+						class="site-logo"
+						src={site.logo}
+						alt=""
+						onerror={(e) => {
+							e.currentTarget.hidden = true;
+						}}
+					/>
 				{/if}
 				<span class="site-brand-copy">
 					<span class="site-wordmark">{site.title}</span>

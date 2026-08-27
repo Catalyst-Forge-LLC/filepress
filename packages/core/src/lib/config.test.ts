@@ -18,8 +18,8 @@ describe('defineFilepressConfig', () => {
 		]);
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
-		expect(cfg.logo).toBeNull();
-		expect(cfg.ogImage).toBeNull();
+		expect(cfg.logo).toBe('/logo.png');
+		expect(cfg.ogImage).toBe('/logo.png');
 		expect(cfg.lede).toBeNull();
 		expect(cfg.theme).toBe('essay');
 		expect(cfg.redirects).toEqual([]);
@@ -92,17 +92,23 @@ describe('defineFilepressConfig', () => {
 		expect(blank.lede).toBeNull();
 	});
 
-	it('keeps a trimmed logo path and nulls a blank one', () => {
+	it('defaults an omitted logo to /logo.png and lets a blank path opt out', () => {
+		const omitted = defineFilepressConfig({ title: 'X', url: 'https://x.example.com' });
+		expect(omitted.logo).toBe('/logo.png');
+		expect(omitted.ogImage).toBe('/logo.png');
 		const withLogo = defineFilepressConfig({
 			title: 'X',
 			url: 'https://x.example.com',
-			logo: ' /logo.png '
+			logo: ' /images/mark.png '
 		});
-		expect(withLogo.logo).toBe('/logo.png');
-		expect(withLogo.ogImage).toBe('/logo.png');
+		expect(withLogo.logo).toBe('/images/mark.png');
+		expect(withLogo.ogImage).toBe('/images/mark.png');
 		const blank = defineFilepressConfig({ title: 'X', url: 'https://x.example.com', logo: '  ' });
 		expect(blank.logo).toBeNull();
 		expect(blank.ogImage).toBeNull();
+		const cleared = defineFilepressConfig({ title: 'X', url: 'https://x.example.com', logo: null });
+		expect(cleared.logo).toBeNull();
+		expect(cleared.ogImage).toBeNull();
 	});
 
 	it('lets ogImage override logo for social cards', () => {

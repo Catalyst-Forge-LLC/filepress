@@ -89,7 +89,7 @@ Nav and `footerLinks` entries may set `icon: 'github'`. Chrome renders the mark 
 
 **Index:** `.hero` · `.hero-lede` · `.eyebrow` · `.featured` · `.post-list` · `.post-card` · `.post-title` · `.excerpt` · `.read-more` · `.card-tags` · `.byline` · `.reading-time` · `.draft-label` · `.pager` · `.page-count` · `.empty-state` · `.error-page` · `.error-code` · `.error-actions`
 
-The masthead carries the site identity inside one title link: optional `logo` image, then a `.site-brand-copy` stack of `.site-wordmark` (site title) and `.site-tagline`. The index hero shows the optional `lede` from site config; with no lede the hero collapses to a visually-hidden `h1` that keeps semantics.
+The masthead carries the site identity inside one title link: optional `logo` image, then a `.site-brand-copy` stack of `.site-wordmark` (site title) and `.site-tagline`. Omit `logo` and FilePress uses `/logo.png` from `static/` (a missing file is hidden). Pass `logo: ""` or `null` for a text-only masthead. The index hero shows the optional `lede` from site config; with no lede the hero collapses to a visually-hidden `h1` that keeps semantics.
 
 **Post:** `.post-header` · `.draft-banner` · `.prose` · `.post-nav` · `.post-nav-label` · `.post-nav-title` · `.older` · `.newer`
 

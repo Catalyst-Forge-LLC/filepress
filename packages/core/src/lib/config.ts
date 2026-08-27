@@ -46,7 +46,11 @@ export interface SiteConfig {
 	tagline: string;
 	/** One-line lede shown on the index hero, or null for no visible hero. */
 	lede: string | null;
-	/** Path to a masthead logo image (site-relative, e.g. "/logo.png"), or null for text. */
+	/**
+	 * Path to a masthead logo image (site-relative, e.g. "/logo.png"), or null for text.
+	 * When omitted, defaults to `/logo.png` (drop the file in `static/`).
+	 * Pass `""` or `null` to keep a text-only masthead.
+	 */
 	logo: string | null;
 	/**
 	 * Absolute or site-relative Open Graph image (e.g. "/logo.png").
@@ -90,7 +94,8 @@ export interface SiteConfigInput {
 	description?: string;
 	tagline?: string;
 	lede?: string;
-	logo?: string;
+	/** Masthead logo path. Omitted → `/logo.png`. Empty or null → text only. */
+	logo?: string | null;
 	/** Open Graph image path; defaults to `logo`. */
 	ogImage?: string;
 	author?: string;
@@ -136,6 +141,13 @@ export function postsIndexPath(site: Pick<SiteConfig, 'homePage'>): string {
 	return site.homePage ? '/posts' : '/';
 }
 
+/** Omitted → fallback. Explicit null or blank → no image. */
+function optionalChromePath(value: string | null | undefined, whenOmitted: string | null): string | null {
+	if (value === undefined) return whenOmitted;
+	if (value === null) return null;
+	return value.trim() || null;
+}
+
 /**
  * Validate and normalize a site's config, applying defaults. Fails loudly if a
  * required field is missing (edge case 19) so a misconfigured site never builds
@@ -161,6 +173,8 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		);
 	}
 
+	const logo = optionalChromePath(input.logo, '/logo.png');
+
 	const defaultNav: NavItem[] = homePage
 		? [
 				{ label: 'Home', href: '/' },
@@ -177,9 +191,8 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		description,
 		tagline: (input.tagline ?? '').trim() || description || title,
 		lede: (input.lede ?? '').trim() || null,
-		logo: (input.logo ?? '').trim() || null,
-		ogImage:
-			(input.ogImage ?? '').trim() || (input.logo ?? '').trim() || null,
+		logo,
+		ogImage: (input.ogImage ?? '').trim() || logo,
 		url: url.replace(/\/+$/, ''),
 		author: (input.author ?? '').trim() || title,
 		postsPerPage:

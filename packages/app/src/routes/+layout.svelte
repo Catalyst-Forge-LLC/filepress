@@ -22,7 +22,8 @@
 	{#if criticalTheme}
 		{@html `<style data-filepress-critical>${criticalTheme}</style>`}
 	{/if}
-	<link rel="icon" href="/favicon.svg" />
+	<link rel="icon" type="image/png" href="/favicon.png" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="alternate" type="application/rss+xml" title={config.title} href="/rss.xml" />
 </svelte:head>
 

@@ -4,6 +4,14 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-27) — Genie History: no Activate on the active row
+
+The active version already has an Active badge. Hide Activate there. Delete still uses `confirm()` and stays disabled on the active / baseline rows. Bump is **0.1.15**. User publishes.
+
+Do **not** advance ForgeTrail phases without user OK. **Never push / npm-publish unless asked.**
+
+---
+
 ## HANDOFF (2026-08-27) — default masthead logo
 
 Omitted `logo` now defaults to `/logo.png` (`static/logo.png`). Blank or `null` is a text-only masthead. A missing file is hidden, not a broken image. Bump is **0.1.14**. User publishes.

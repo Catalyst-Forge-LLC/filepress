@@ -856,13 +856,11 @@
 													Cancel
 												</button>
 											{:else}
-												<button
-													type="button"
-													disabled={loading || isActive}
-													onclick={() => activate(v.id)}
-												>
-													Activate
-												</button>
+												{#if !isActive}
+													<button type="button" disabled={loading} onclick={() => activate(v.id)}>
+														Activate
+													</button>
+												{/if}
 												<button type="button" disabled={loading} onclick={() => startRename(v)}>
 													Rename
 												</button>

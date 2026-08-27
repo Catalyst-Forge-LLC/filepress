@@ -397,6 +397,12 @@
   ],
   "gotchas": [
     {
+      "date": "2026-08-27",
+      "gotcha": "Inlining site :root tokens does not stop Essay from flashing. Vite injects core :root after the critical <style> (same specificity, later source). Google Fonts @import URLs also contain semicolons (wght@400;700), so a [^;]+ strip corrupts the sheet.",
+      "resolution": "Declare @layer filepress, site. Wrap engine CSS in filepress and site theme in site. Inline the full site sheet (minus quoted @import) as @layer site. Parse @import with a quoted-string regex.",
+      "issue": "First paint flashed the default FilePress Essay look before theme.css."
+    },
+    {
       "date": "2026-07-04",
       "gotcha": "This Svelte tooling version (Kit 2.69 / Vite 8 / vite-plugin-svelte 7) has NO svelte.config.js — adapter and kit options (adapter, prerender, compilerOptions) are passed directly to the sveltekit() plugin inside vite.config.ts.",
       "resolution": "Configure adapter-static and prerender.entries in vite.config.ts, not a separate svelte.config.js.",

@@ -13,11 +13,13 @@ If the file is empty/absent of rules, the default Essay look is unchanged.
 
 Load order:
 
-1. Engine Essay theme (`getfilepress` / `@filepress/core/theme`)
+1. Engine Essay theme (`getfilepress` / `@filepress/core/theme`) — `@layer filepress`
 2. Named preset from config `theme` (`essay` | `ink` | `folio`) — Essay is a no-op sheet
-3. Your `theme.css`
+3. Your `theme.css` — `@layer site`
 
-So your rules and `:root` variables override the defaults via the cascade.
+`@layer filepress, site` is declared first. Site rules win even if Vite injects Essay CSS later (dev) or splits the sheets (build). First paint inlines your `theme.css` (minus remote `@import`) in the document head so the page does not flash Essay parchment, then restyle.
+
+You still write `:root` in `theme.css`. The engine lifts it to `:root:root` and wraps the sheet in `@layer site`. Remote `@import` (Google Fonts) stays outside the layer and may swap after first paint.
 
 ```ts
 export default defineFilepressConfig({

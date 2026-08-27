@@ -1,8 +1,9 @@
 /**
- * Essay chrome + fonts, then a named preset, then the site theme.
- * Site rules use higher-specificity selectors (`:root:root`, `header.site-header …`)
- * so they win even if Vite emits Essay CSS after the site sheet.
+ * Layer order is declared first. Essay chrome, then preset, then site theme.
+ * Site rules live in `@layer site` so they win even if Vite injects Essay CSS
+ * after the site sheet (dev) or splits the CSS (build).
  */
+import './theme-layers.css';
 import '@filepress/core/theme';
 import '$site-preset';
 import '$site-theme';

@@ -2,28 +2,42 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
 
 /**
- * Extract early paint tokens from the site theme: `:root` blocks (including
- * those nested in `prefers-color-scheme` media) and top-level `body { ... }`.
+ * @import cannot live inside @layer. Pull them out, wrap the rest.
+ * Quoted URLs may contain `;` (Google Fonts `wght@400;700`).
+ */
+const IMPORT_RE = /@import\s+(?:url\(\s*)?(["'])(?:\\.|(?!\1).)*\1\s*\)?\s*;/g;
+
+export function takeImports(css: string): { imports: string[]; rest: string } {
+	const imports: string[] = [];
+	const rest = css.replace(IMPORT_RE, (m) => {
+		imports.push(m.trim());
+		return '';
+	});
+	return { imports, rest };
+}
+
+export function hoistImportsAndLayer(css: string, layer: string): string {
+	const { imports, rest } = takeImports(css);
+	const body = rest.trim();
+	const hoisted = imports.length ? `${imports.join('\n')}\n` : '';
+	if (!body) return hoisted;
+	return `${hoisted}@layer ${layer} {\n${body}\n}\n`;
+}
+
+/** Site tokens must beat later Essay `:root` (same specificity, later source). */
+export function boostRoot(css: string): string {
+	return css.replace(/:root(?::root)?/g, ':root:root');
+}
+
+/**
+ * Inline the site theme for first paint (minus remote @import).
+ * Cascade layer `site` wins over Essay even after Vite injects core CSS.
  */
 export function extractCriticalTheme(css: string): string {
-	const chunks: string[] = [];
-
-	// Prefer `:root:root` (higher specificity site tokens) when present.
-	for (const m of css.matchAll(/:root(?::root)?\s*\{[^}]*\}/g)) {
-		chunks.push(m[0]);
-	}
-
-	for (const m of css.matchAll(
-		/@media\s*\([^)]*prefers-color-scheme[^)]*\)\s*\{\s*:root(?::root)?\s*\{[^}]*\}\s*\}/g
-	)) {
-		chunks.push(m[0]);
-	}
-
-	for (const m of css.matchAll(/(?:^|\n)(?:html\s+)?body\s*\{[^}]*\}/g)) {
-		chunks.push(m[0].trim());
-	}
-
-	return chunks.join('\n');
+	const withoutImport = takeImports(css).rest;
+	const meaningful = withoutImport.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+	if (!meaningful) return '';
+	return `@layer filepress, site;\n${hoistImportsAndLayer(boostRoot(withoutImport), 'site')}`;
 }
 
 export function writeCriticalThemeModule(siteThemePath: string, outPath: string): string {
@@ -41,15 +55,31 @@ export function writeCriticalThemeModule(siteThemePath: string, outPath: string)
 	return critical;
 }
 
+function fileId(id: string): string {
+	return id.replace(/\\/g, '/').split('?')[0] ?? id;
+}
+
 /**
- * Keep `$lib/critical-theme.generated.ts` in sync with the site theme so
- * layout can inline tokens without a Vite virtual module (SSR-safe).
+ * Keep `$critical-theme` in sync, and put Essay vs site CSS in cascade
+ * layers so Vite's inject order cannot flash the default look.
  */
 export function criticalThemePlugin(siteThemePath: string, outPath: string): Plugin {
+	const siteNorm = siteThemePath.replace(/\\/g, '/');
+
 	return {
 		name: 'filepress-critical-theme',
 		buildStart() {
 			writeCriticalThemeModule(siteThemePath, outPath);
+		},
+		transform(code, id) {
+			const path = fileId(id);
+			if (path === siteNorm) {
+				return hoistImportsAndLayer(boostRoot(code), 'site');
+			}
+			if (path.endsWith('/lib/styles/theme.css') || path.includes('/lib/styles/presets/')) {
+				return hoistImportsAndLayer(code, 'filepress');
+			}
+			return null;
 		},
 		configureServer(server) {
 			writeCriticalThemeModule(siteThemePath, outPath);

@@ -115,7 +115,7 @@ In `filepress dev`, a floating **Genie** control opens a design cockpit:
 | --- | --- |
 | Token / structure steers | Accent, density, dark/light presets |
 | Openverse stock + local upload | Hero / page background (and logo upload → config) |
-| Version rail + activate | Gitignored `.filepress-genie/`; bake into `theme.css` / `static/` |
+| Version rail + activate | Gitignored `.filepress-genie/`; each row shows the applied look and the original prompt (click to copy); bake into `theme.css` / `static/` |
 | Live inspire (1–3 URLs) | Reuses import inspire pipeline |
 | Ollama refine | Optional; host + model picker; **Scan network** (ollanet); streamed chat + 10m default timeout (`FILEPRESS_OLLAMA_TIMEOUT_MS`) |
 | Config patch | `lede` / `tagline` / `logo` on activate |

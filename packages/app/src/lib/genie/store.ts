@@ -10,8 +10,9 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
-import type { DesignBrief, GenieActive, GenieVersionMeta } from './types.ts';
+import type { DesignBrief, GenieActive, GenieVersionMeta, GenieVersionRow } from './types.ts';
 import { applyConfigPatch, readConfigPatchFile, type GenieConfigPatch } from './config-patch.ts';
+import { summarizeVersionDid, versionPrompt } from './version-summary.ts';
 
 const GENIE_DIR = '.filepress-genie';
 
@@ -67,6 +68,27 @@ export function listVersions(siteRoot: string): GenieVersionMeta[] {
 		if (a.starred !== b.starred) return a.starred ? -1 : 1;
 		return b.createdAt.localeCompare(a.createdAt);
 	});
+}
+
+export function toVersionRow(siteRoot: string, meta: GenieVersionMeta): GenieVersionRow {
+	const brief = readVersionBrief(siteRoot, meta.id);
+	return {
+		...meta,
+		prompt: versionPrompt(meta),
+		did: summarizeVersionDid(brief),
+		tokens: {
+			accent: brief?.tokens.accent,
+			bg: brief?.tokens.bg,
+			ink: brief?.tokens.ink
+		},
+		paletteMode: brief?.paletteMode,
+		hero: brief?.hero,
+		atmosphere: brief?.atmosphere
+	};
+}
+
+export function listVersionRows(siteRoot: string): GenieVersionRow[] {
+	return listVersions(siteRoot).map((v) => toVersionRow(siteRoot, v));
 }
 
 export function readVersionBrief(siteRoot: string, id: string): DesignBrief | null {

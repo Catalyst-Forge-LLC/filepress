@@ -48,6 +48,14 @@ export type GenieVersionMeta = {
 	llm: { used: boolean; model: string | null; host: string | null };
 };
 
+export type GenieVersionRow = GenieVersionMeta & {
+	did: string;
+	tokens: { accent?: string; bg?: string; ink?: string };
+	paletteMode?: string;
+	hero?: string;
+	atmosphere?: string;
+};
+
 export type GenieActive = {
 	versionId: string;
 	activatedAt: string;

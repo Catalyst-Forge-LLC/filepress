@@ -11,7 +11,7 @@ import {
 	runInspire,
 	scanOllamaHosts
 } from './src/lib/genie/ops.ts';
-import { deleteVersion, duplicateVersion, listVersions, updateVersionMeta } from './src/lib/genie/store.ts';
+import { deleteVersion, duplicateVersion, listVersionRows, updateVersionMeta } from './src/lib/genie/store.ts';
 
 function readBody(req: IncomingMessage): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -54,7 +54,7 @@ export function geniePlugin(siteRoot: string): Plugin {
 						const h = await health(siteRoot);
 						return sendJson(res, 200, {
 							active: h.active,
-							versions: listVersions(siteRoot),
+							versions: listVersionRows(siteRoot),
 							brief: h.brief
 						});
 					}

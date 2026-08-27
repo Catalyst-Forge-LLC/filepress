@@ -5,6 +5,9 @@
 		createdAt: string;
 		starred?: boolean;
 		parentId?: string | null;
+		prompt?: string;
+		did?: string;
+		tokens?: { accent?: string; bg?: string; ink?: string };
 	};
 
 	type Health = {
@@ -68,6 +71,8 @@
 	let cfgLogo = $state('');
 	let renamingId = $state<string | null>(null);
 	let renameDraft = $state('');
+	let copiedId = $state<string | null>(null);
+	let copyTimer: ReturnType<typeof setTimeout> | null = null;
 	let jobNote = $state('');
 	let jobSecs = $state(0);
 	let jobTimer: ReturnType<typeof setInterval> | null = null;
@@ -154,6 +159,29 @@
 			error = e instanceof Error ? e.message : String(e);
 			loading = false;
 		}
+	}
+
+	async function copyPrompt(v: VersionRow) {
+		const text = v.prompt?.trim();
+		if (!text) return;
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch {
+			const ta = document.createElement('textarea');
+			ta.value = text;
+			ta.setAttribute('readonly', '');
+			ta.style.position = 'fixed';
+			ta.style.left = '-9999px';
+			document.body.appendChild(ta);
+			ta.select();
+			document.execCommand('copy');
+			ta.remove();
+		}
+		copiedId = v.id;
+		if (copyTimer) clearTimeout(copyTimer);
+		copyTimer = setTimeout(() => {
+			copiedId = null;
+		}, 1600);
 	}
 
 	function versionWhen(v: VersionRow) {
@@ -740,6 +768,7 @@
 							<h3>Versions</h3>
 							<p class="genie-howto">
 								Every Genie action saves a snapshot under <code>.filepress-genie/</code> (gitignored).
+								Each row shows what that pass applied. Click the prompt to copy it.
 								Star keepers, rename, duplicate, then activate to bake into the working tree.
 								<code>baseline</code> is the pre-Genie look and cannot be deleted.
 							</p>
@@ -784,6 +813,39 @@
 												<span class="genie-ver-badge">Active</span>
 											{/if}
 										</div>
+										{#if v.did}
+											<p class="genie-ver-did">
+												{#if v.tokens?.bg || v.tokens?.accent || v.tokens?.ink}
+													<span class="genie-swatches" aria-hidden="true">
+														{#if v.tokens.bg}
+															<span class="genie-swatch" style:background={v.tokens.bg}></span>
+														{/if}
+														{#if v.tokens.ink}
+															<span class="genie-swatch" style:background={v.tokens.ink}></span>
+														{/if}
+														{#if v.tokens.accent}
+															<span class="genie-swatch" style:background={v.tokens.accent}></span>
+														{/if}
+													</span>
+												{/if}
+												{v.did}
+											</p>
+										{/if}
+										{#if v.prompt}
+											<button
+												type="button"
+												class="genie-ver-prompt"
+												class:copied={copiedId === v.id}
+												disabled={loading}
+												title="Copy prompt"
+												onclick={() => copyPrompt(v)}
+											>
+												<span class="genie-ver-prompt-kicker">
+													{copiedId === v.id ? 'Copied' : 'Prompt — click to copy'}
+												</span>
+												<span class="genie-ver-prompt-text">{v.prompt}</span>
+											</button>
+										{/if}
 										<p class="genie-ver-when">{versionWhen(v)}</p>
 										<div class="genie-ver-actions">
 											{#if renamingId === v.id}
@@ -1163,6 +1225,61 @@
 		box-sizing: border-box;
 		font: inherit;
 		font-size: 0.82rem;
+	}
+
+	.genie-ver-did {
+		margin: 0;
+		font-size: 0.78rem;
+		line-height: 1.4;
+		color: var(--ink, #eee);
+	}
+
+	.genie-swatches {
+		display: inline-flex;
+		gap: 0.2rem;
+		margin-right: 0.35rem;
+		vertical-align: middle;
+	}
+
+	.genie-swatch {
+		display: inline-block;
+		width: 0.7rem;
+		height: 0.7rem;
+		border-radius: 2px;
+		border: 1px solid var(--rule, #444);
+		vertical-align: -0.05em;
+	}
+
+	.genie-versions button.genie-ver-prompt {
+		display: grid;
+		gap: 0.15rem;
+		width: 100%;
+		text-align: left;
+		padding: 0.4rem 0.45rem;
+		border: 1px dashed var(--rule, #444);
+		border-radius: 6px;
+		background: color-mix(in srgb, var(--surface, #1c1c22) 70%, transparent);
+		color: inherit;
+		cursor: pointer;
+	}
+
+	.genie-versions button.genie-ver-prompt:hover,
+	.genie-versions button.genie-ver-prompt.copied {
+		border-color: var(--accent, #f0c040);
+	}
+
+	.genie-ver-prompt-kicker {
+		font-size: 0.68rem;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		color: var(--ink-soft, #999);
+	}
+
+	.genie-ver-prompt-text {
+		font-size: 0.78rem;
+		line-height: 1.4;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 
 	.genie-ver-when {

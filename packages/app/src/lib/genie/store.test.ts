@@ -8,6 +8,7 @@ import {
 	duplicateVersion,
 	ensureBaseline,
 	getActive,
+	listVersionRows,
 	listVersions,
 	updateVersionMeta,
 	writeSnapshot
@@ -171,6 +172,29 @@ export default defineFilepressConfig({
 		activateVersion(root, 'baseline');
 		expect(readFileSync(join(root, 'theme.css'), 'utf8')).toContain('#111111');
 		expect(getActive(root)?.versionId).toBe('baseline');
+	});
+
+	it('lists what a version applied and the original prompt', () => {
+		const root = siteWithBaseline('filepress-genie-did-');
+		writeSnapshot(root, {
+			label: 'Refine: Icy blue',
+			prompt: 'Icy blue, but still a white/light background, think Antarctica',
+			brief: {
+				...brief,
+				mood: 'Crisp, academic, and icy',
+				paletteMode: 'light',
+				hero: 'editorial',
+				atmosphere: 'none',
+				tokens: { accent: '#2c7bb6', accentStrong: '#1f5a8c', bg: '#f0f8ff' }
+			},
+			themeCss: ':root { --bg: #f0f8ff; }\n'
+		});
+		const icy = listVersionRows(root).find((v) => v.label.startsWith('Refine'));
+		expect(icy?.prompt).toBe('Icy blue, but still a white/light background, think Antarctica');
+		expect(icy?.did).toContain('Crisp, academic, and icy');
+		expect(icy?.did).toContain('#f0f8ff');
+		expect(icy?.did).toContain('#2c7bb6');
+		expect(icy?.tokens.bg).toBe('#f0f8ff');
 	});
 
 	it('keeps the Genie plugin off the production Vite build', () => {

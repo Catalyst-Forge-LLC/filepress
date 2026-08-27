@@ -27,7 +27,7 @@ import {
 	ensureBaseline,
 	genieRoot,
 	getActive,
-	listVersions,
+	listVersionRows,
 	readVersionBrief,
 	writeSnapshot
 } from './store.ts';
@@ -133,13 +133,7 @@ export async function health(siteRoot: string) {
 				: ollamaSetupHint(host)
 		},
 		active: getActive(siteRoot),
-		versions: listVersions(siteRoot).map((v) => ({
-			id: v.id,
-			label: v.label,
-			createdAt: v.createdAt,
-			starred: v.starred,
-			parentId: v.parentId
-		})),
+		versions: listVersionRows(siteRoot),
 		brief: loadWorkingBrief(siteRoot)
 	};
 }

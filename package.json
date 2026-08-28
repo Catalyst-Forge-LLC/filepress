@@ -1,6 +1,6 @@
 {
 	"name": "getfilepress",
-	"version": "0.1.17",
+	"version": "0.1.18",
 	"private": false,
 	"type": "module",
 	"description": "FilePress — file-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",

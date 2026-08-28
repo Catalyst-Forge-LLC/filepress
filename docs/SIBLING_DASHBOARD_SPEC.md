@@ -15,7 +15,7 @@
 | --- | --- | --- |
 | Q1 | Framing | **Local operator tool** for the person who maintains the engine and many content sites. Not a product feature, not on getfilepress.com, not in the published `files` list. |
 | Q2 | Source of truth | **One library** used by CLI and UI. The dashboard does not reimplement pin rewrite, header merge, lockfile resolution, or git commit. It calls the same functions `sync-siblings` already uses. |
-| Q3 | Discovery | **Walk sibling folders** next to the engine (same rules as today’s CLI). Optional local ignore list. No hardcoded site roster in the spec or the default code. |
+| Q3 | Discovery | **Walk sibling folders** next to the engine, plus in-repo `sites/*` that have `filepress.config.ts`. Optional **Scan folder** enrolls extra paths (LocalHelm-shaped: scan never writes; add confirms). Optional local ignore list. No hardcoded site roster. |
 | Q4 | Bind | **127.0.0.1** by default. Optional `--host` for LAN, same caution as `filepress dev`. |
 | Q5 | Git write | **Commit on apply** (stage only engine pin, lockfile, `static/_headers`). **Never push** unless a later milestone adds an explicit, confirmed Push action. |
 | Q6 | Sync target | **Published npm `getfilepress` latest** when local engine version is ahead (unpublished bump). Local version wins only when it is on the registry or npm is unreachable (then say so). |
@@ -71,13 +71,13 @@ The dashboard is a **read-mostly inventory** plus **buttons that run the same jo
 
 ## 3. Discovery (same as the CLI)
 
-Workspace root = parent of the engine checkout.
+Workspace root = parent of the engine checkout. A site is listed from **one** of:
 
-For each immediate child directory (skip the engine folder, `node_modules`, dot-dirs, `__*`):
+1. **Siblings** — each immediate child of the workspace (skip the engine folder, `node_modules`, dot-dirs, `__*`). Keep it if `package.json` or `site/package.json` depends on `getfilepress` **and** a `filepress.config.ts` exists.
+2. **In-repo** — each `sites/<name>/` under the engine that has `filepress.config.ts` (no own `package.json` required). Pin kind is `engine`; Sync does not rewrite the engine package. Ship only when the engine `ship` / `build:www` script names that site.
+3. **Enrolled extras** — paths in gitignored `.filepress-siblings/extras.json`, added from **Scan folder**. Scan walks a chosen root (default workspace, depth 3, skip `node_modules` / `build` / `.git`). It never writes. Add persists the ticked new paths.
 
-1. Look at `package.json` and `site/package.json`.
-2. Keep it if it depends on `getfilepress` **and** a `filepress.config.ts` exists (package dir or repo root).
-3. Deduplicate by content root.
+Deduplicate by content root. Optional ignore list (folder names) still hides rows.
 
 A site record is derived, not configured:
 

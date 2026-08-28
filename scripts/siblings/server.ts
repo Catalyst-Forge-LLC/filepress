@@ -13,10 +13,14 @@ import {
 	applySite,
 	buildInventory,
 	discoverSiblingSites,
+	enrollExtraSites,
 	loadEngineStrip,
 	persistInventory,
 	planContext,
 	planSite,
+	scanFilepressSites,
+	unenrollExtraSites,
+	workspaceRoot,
 	type Inventory
 } from './lib.ts';
 
@@ -192,6 +196,60 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 
 	if (method === 'GET' && url.pathname === '/api/inventory') {
 		json(res, 200, await inventory(url.searchParams.get('refresh') === '1'));
+		return;
+	}
+	if (method === 'POST' && url.pathname === '/api/scan') {
+		let body: { root?: string; maxDepth?: number } = {};
+		try {
+			const raw = await readBody(req);
+			if (raw.trim()) body = JSON.parse(raw) as typeof body;
+		} catch {
+			json(res, 400, { error: 'invalid JSON' });
+			return;
+		}
+		try {
+			const root = (body.root ?? workspaceRoot).trim() || workspaceRoot;
+			const candidates = scanFilepressSites(root, {
+				maxDepth: Number.isInteger(body.maxDepth) ? body.maxDepth : 3
+			});
+			json(res, 200, { root, candidates });
+		} catch (err) {
+			json(res, 400, { error: err instanceof Error ? err.message : String(err) });
+		}
+		return;
+	}
+	if (method === 'POST' && url.pathname === '/api/enroll') {
+		let body: { paths?: string[] } = {};
+		try {
+			const raw = await readBody(req);
+			if (raw.trim()) body = JSON.parse(raw) as typeof body;
+		} catch {
+			json(res, 400, { error: 'invalid JSON' });
+			return;
+		}
+		const paths = Array.isArray(body.paths) ? body.paths.filter((p) => typeof p === 'string') : [];
+		if (paths.length === 0) {
+			json(res, 400, { error: 'paths required' });
+			return;
+		}
+		const result = enrollExtraSites(paths);
+		cached = null;
+		json(res, 200, { ...result, inventory: await inventory(true) });
+		return;
+	}
+	if (method === 'POST' && url.pathname === '/api/unenroll') {
+		let body: { names?: string[] } = {};
+		try {
+			const raw = await readBody(req);
+			if (raw.trim()) body = JSON.parse(raw) as typeof body;
+		} catch {
+			json(res, 400, { error: 'invalid JSON' });
+			return;
+		}
+		const names = Array.isArray(body.names) ? body.names.filter((n) => typeof n === 'string') : [];
+		const removed = unenrollExtraSites(names, discoverSiblingSites());
+		cached = null;
+		json(res, 200, { removed, inventory: await inventory(true) });
 		return;
 	}
 	if (method === 'GET' && url.pathname.startsWith('/api/jobs/')) {

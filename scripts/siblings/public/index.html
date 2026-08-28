@@ -30,6 +30,7 @@
 					<span class="group-label">Read</span>
 					<button type="button" id="refresh">Refresh</button>
 					<button type="button" id="plan">Plan</button>
+					<button type="button" id="scan-open" title="Walk a folder for FilePress sites, then add the ones you keep.">Scan folder</button>
 				</div>
 				<div class="group group-write">
 					<span class="group-label">Write</span>
@@ -38,6 +39,21 @@
 					<label class="check"><input type="checkbox" id="commit" checked /> commit</label>
 				</div>
 				<div class="chips" id="chips"></div>
+			</section>
+
+			<section class="scan-panel hidden" id="scan-panel">
+				<div class="scan-row">
+					<label class="scan-label" for="scan-root">Folder</label>
+					<input type="text" id="scan-root" spellcheck="false" />
+					<button type="button" id="scan-run">Scan</button>
+					<button type="button" class="ghost" id="scan-close">Close</button>
+				</div>
+				<p class="muted scan-hint">Scan never writes. Tick new sites, then add. In-repo <code>sites/</code> already appear.</p>
+				<div class="scan-list hidden" id="scan-list"></div>
+				<div class="scan-actions hidden" id="scan-actions">
+					<button type="button" class="btn-write" id="scan-add">Add selected</button>
+					<span class="muted" id="scan-meta-inline"></span>
+				</div>
 			</section>
 
 			<p class="busy hidden" id="busy"></p>
@@ -60,7 +76,7 @@
 					</thead>
 					<tbody id="rows"></tbody>
 				</table>
-				<p class="empty hidden" id="empty">No sibling folders depend on getfilepress.</p>
+				<p class="empty hidden" id="empty">No FilePress sites yet. Scan a folder to add one.</p>
 			</section>
 
 			<section class="log-panel">

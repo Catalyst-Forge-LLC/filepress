@@ -15,9 +15,21 @@ export const workspaceRoot = resolve(filepressRoot, '..');
 const win = process.platform === 'win32';
 
 const SKIP_DIR = new Set(['filepress', 'node_modules']);
+const SCAN_SKIP = new Set([
+	'node_modules',
+	'.git',
+	'build',
+	'dist',
+	'.svelte-kit',
+	'.filepress-genie',
+	'.filepress-siblings',
+	'coverage',
+	'vendor'
+]);
 const STATE_DIR = join(filepressRoot, '.filepress-siblings');
 
-export type PinKind = 'npm' | 'link' | 'git';
+export type PinKind = 'npm' | 'link' | 'git' | 'engine';
+export type SiteOrigin = 'sibling' | 'in-repo' | 'enrolled';
 export type LogFn = (line: string) => void;
 
 export type SiblingSite = {
@@ -27,6 +39,7 @@ export type SiblingSite = {
 	contentRoot: string;
 	pin: string;
 	pinKind: PinKind;
+	origin: SiteOrigin;
 	lockfileDir: string | null;
 	lockedVersion: string | null;
 	headersPath: string | null;
@@ -54,6 +67,7 @@ export type SitePlan = {
 	path: string;
 	pin: string;
 	pinKind: PinKind;
+	origin: SiteOrigin;
 	lockedVersion: string | null;
 	update: string;
 	headers: HeadersPlan;
@@ -205,7 +219,12 @@ function shipDirFor(packageDir: string, repoRoot: string, pkg: PkgJson): string 
 	return null;
 }
 
-function siteFromPackageJson(packageJsonPath: string, repoRoot: string, name: string): SiblingSite | null {
+function siteFromPackageJson(
+	packageJsonPath: string,
+	repoRoot: string,
+	name: string,
+	origin: SiteOrigin = 'sibling'
+): SiblingSite | null {
 	const pkg = readJson(packageJsonPath);
 	if (!pkg) return null;
 	const pin = pkg.dependencies?.getfilepress ?? pkg.devDependencies?.getfilepress;
@@ -226,11 +245,77 @@ function siteFromPackageJson(packageJsonPath: string, repoRoot: string, name: st
 		contentRoot,
 		pin,
 		pinKind: pinKind(pin),
+		origin,
 		lockfileDir,
 		lockedVersion: lockedGetfilepressVersion(lockfileDir, packageDir),
 		headersPath: existsSync(headersCandidate) ? headersCandidate : null,
 		shipDir: shipDirFor(packageDir, repoRoot, pkg)
 	};
+}
+
+function inRepoShipDir(engineRoot: string, siteName: string): string | null {
+	const pkg = readJson(join(engineRoot, 'package.json'));
+	const hay = `${pkg?.scripts?.ship ?? ''} ${pkg?.scripts?.['build:www'] ?? ''} ${pkg?.scripts?.['deploy:www'] ?? ''}`;
+	if (hay.includes(`sites/${siteName}`) || hay.includes(`--site ${siteName}`)) return engineRoot;
+	return null;
+}
+
+function siteFromInRepo(contentRoot: string, engineRoot: string, name: string): SiblingSite | null {
+	if (!existsSync(join(contentRoot, 'filepress.config.ts'))) return null;
+	const headersCandidate = join(contentRoot, 'static', '_headers');
+	const lockfileDir = resolveLockfileDir(engineRoot, engineRoot);
+	return {
+		name,
+		repoRoot: engineRoot,
+		packageDir: engineRoot,
+		contentRoot,
+		pin: 'engine',
+		pinKind: 'engine',
+		origin: 'in-repo',
+		lockfileDir,
+		lockedVersion: readJson(join(engineRoot, 'package.json'))?.version ?? null,
+		headersPath: existsSync(headersCandidate) ? headersCandidate : null,
+		shipDir: inRepoShipDir(engineRoot, name)
+	};
+}
+
+function uniqueName(base: string, seenNames: Set<string>): string {
+	if (!seenNames.has(base)) return base;
+	let i = 2;
+	while (seenNames.has(`${base}-${i}`)) i++;
+	return `${base}-${i}`;
+}
+
+function pushSite(found: SiblingSite[], seen: Set<string>, seenNames: Set<string>, site: SiblingSite | null): void {
+	if (!site) return;
+	const key = resolve(site.contentRoot);
+	if (seen.has(key)) return;
+	seen.add(key);
+	const name = uniqueName(site.name, seenNames);
+	seenNames.add(name);
+	found.push(name === site.name ? site : { ...site, name });
+}
+
+export type DiscoverOpts = {
+	workspace?: string;
+	engineRoot?: string;
+	extras?: string[];
+	ignore?: Set<string>;
+};
+
+function extraSiteFromPath(raw: string, workspace: string, engineRoot: string): SiblingSite | null {
+	const abs = resolve(workspace, raw);
+	if (!existsSync(abs) || !statSync(abs).isDirectory()) return null;
+	const folder = abs.replace(/[/\\]+$/, '').split(/[/\\]/).pop() ?? 'site';
+	for (const rel of ['package.json', join('site', 'package.json')]) {
+		const site = siteFromPackageJson(join(abs, rel), abs, folder, 'enrolled');
+		if (site) return site;
+	}
+	if (existsSync(join(abs, 'filepress.config.ts'))) {
+		const underEngine = resolve(abs).startsWith(resolve(engineRoot, 'sites'));
+		if (underEngine) return siteFromInRepo(abs, engineRoot, folder);
+	}
+	return null;
 }
 
 export function ignoredFolderNames(): Set<string> {
@@ -245,10 +330,73 @@ export function ignoredFolderNames(): Set<string> {
 	}
 }
 
-export function discoverSiblingSites(workspace = workspaceRoot): SiblingSite[] {
-	const ignore = ignoredFolderNames();
+export function extraSitePaths(stateDir = STATE_DIR): string[] {
+	const path = join(stateDir, 'extras.json');
+	if (!existsSync(path)) return [];
+	try {
+		const raw = JSON.parse(readFileSync(path, 'utf8')) as { paths?: unknown };
+		const paths = Array.isArray(raw.paths) ? raw.paths : [];
+		return paths.filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+	} catch {
+		return [];
+	}
+}
+
+export function writeExtraSitePaths(paths: string[], stateDir = STATE_DIR): string[] {
+	const unique: string[] = [];
+	const seen = new Set<string>();
+	for (const raw of paths) {
+		const trimmed = raw.trim();
+		if (!trimmed) continue;
+		const key = resolve(trimmed).toLowerCase();
+		if (seen.has(key)) continue;
+		seen.add(key);
+		unique.push(trimmed.replace(/\\/g, '/'));
+	}
+	mkdirSync(stateDir, { recursive: true });
+	writeFileSync(join(stateDir, 'extras.json'), `${JSON.stringify({ paths: unique }, null, 2)}\n`);
+	return unique;
+}
+
+export function enrollExtraSites(paths: string[], stateDir = STATE_DIR): { added: string[]; already: string[] } {
+	const have = extraSitePaths(stateDir);
+	const haveKeys = new Set(have.map((p) => resolve(workspaceRoot, p).toLowerCase()));
+	const added: string[] = [];
+	const already: string[] = [];
+	for (const raw of paths) {
+		const abs = resolve(workspaceRoot, raw);
+		if (haveKeys.has(abs.toLowerCase())) {
+			already.push(abs);
+			continue;
+		}
+		haveKeys.add(abs.toLowerCase());
+		const rel = relative(workspaceRoot, abs).replace(/\\/g, '/');
+		have.push(rel.startsWith('..') ? abs.replace(/\\/g, '/') : rel);
+		added.push(abs);
+	}
+	writeExtraSitePaths(have, stateDir);
+	return { added, already };
+}
+
+export function unenrollExtraSites(names: string[], sites: SiblingSite[], stateDir = STATE_DIR): string[] {
+	const drop = new Set(names.map((n) => n.toLowerCase()));
+	const dropRoots = new Set(
+		sites.filter((s) => s.origin === 'enrolled' && drop.has(s.name.toLowerCase())).map((s) => resolve(s.contentRoot))
+	);
+	const kept = extraSitePaths(stateDir).filter((p) => !dropRoots.has(resolve(workspaceRoot, p)));
+	writeExtraSitePaths(kept, stateDir);
+	return [...dropRoots];
+}
+
+export function discoverSites(opts: DiscoverOpts = {}): SiblingSite[] {
+	const workspace = opts.workspace ?? workspaceRoot;
+	const engineRoot = opts.engineRoot ?? filepressRoot;
+	const ignore = opts.ignore ?? ignoredFolderNames();
+	const extras = opts.extras ?? extraSitePaths();
 	const found: SiblingSite[] = [];
 	const seen = new Set<string>();
+	const seenNames = new Set<string>();
+
 	for (const entry of readdirSync(workspace)) {
 		if (SKIP_DIR.has(entry) || ignore.has(entry.toLowerCase())) continue;
 		if (entry.startsWith('.') || entry.startsWith('__')) continue;
@@ -259,15 +407,115 @@ export function discoverSiblingSites(workspace = workspaceRoot): SiblingSite[] {
 			continue;
 		}
 		for (const rel of ['package.json', join('site', 'package.json')]) {
-			const site = siteFromPackageJson(join(repoRoot, rel), repoRoot, entry);
-			if (!site) continue;
-			const key = resolve(site.contentRoot);
-			if (seen.has(key)) continue;
-			seen.add(key);
-			found.push(site);
+			pushSite(found, seen, seenNames, siteFromPackageJson(join(repoRoot, rel), repoRoot, entry, 'sibling'));
 		}
 	}
+
+	const sitesDir = join(engineRoot, 'sites');
+	if (existsSync(sitesDir)) {
+		for (const entry of readdirSync(sitesDir)) {
+			if (ignore.has(entry.toLowerCase()) || entry.startsWith('.') || entry.startsWith('__')) continue;
+			const contentRoot = join(sitesDir, entry);
+			try {
+				if (!statSync(contentRoot).isDirectory()) continue;
+			} catch {
+				continue;
+			}
+			pushSite(found, seen, seenNames, siteFromInRepo(contentRoot, engineRoot, entry));
+		}
+	}
+
+	for (const extra of extras) {
+		const site = extraSiteFromPath(extra, workspace, engineRoot);
+		if (!site) continue;
+		if (ignore.has(site.name.toLowerCase())) continue;
+		pushSite(found, seen, seenNames, site);
+	}
+
 	return found.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function discoverSiblingSites(workspace = workspaceRoot): SiblingSite[] {
+	return discoverSites({ workspace });
+}
+
+export type ScanCandidate = {
+	name: string;
+	path: string;
+	absPath: string;
+	kind: PinKind;
+	origin: SiteOrigin;
+	enrolled: boolean;
+	url: string | null;
+};
+
+function walkDirs(root: string, maxDepth: number): string[] {
+	const out: string[] = [root];
+	const walk = (dir: string, depth: number) => {
+		if (depth >= maxDepth) return;
+		let entries: string[];
+		try {
+			entries = readdirSync(dir);
+		} catch {
+			return;
+		}
+		for (const entry of entries) {
+			if (SCAN_SKIP.has(entry) || entry.startsWith('.') || entry.startsWith('__')) continue;
+			const child = join(dir, entry);
+			try {
+				if (!statSync(child).isDirectory()) continue;
+			} catch {
+				continue;
+			}
+			out.push(child);
+			walk(child, depth + 1);
+		}
+	};
+	walk(root, 0);
+	return out;
+}
+
+/** Propose FilePress sites under a folder. Does not enroll. */
+export function scanFilepressSites(
+	root: string,
+	opts: { workspace?: string; engineRoot?: string; maxDepth?: number; enrolled?: SiblingSite[] } = {}
+): ScanCandidate[] {
+	const workspace = opts.workspace ?? workspaceRoot;
+	const engineRoot = opts.engineRoot ?? filepressRoot;
+	const maxDepth = opts.maxDepth ?? 3;
+	const absRoot = resolve(workspace, root);
+	if (!existsSync(absRoot) || !statSync(absRoot).isDirectory()) {
+		throw new Error(`scan root is not a directory: ${root}`);
+	}
+	const have = new Set((opts.enrolled ?? discoverSites({ workspace, engineRoot })).map((s) => resolve(s.contentRoot)));
+	const rows: ScanCandidate[] = [];
+	const seen = new Set<string>();
+	for (const dir of walkDirs(absRoot, maxDepth)) {
+		const folder = dir.replace(/[/\\]+$/, '').split(/[/\\]/).pop() ?? 'site';
+		let site: SiblingSite | null = null;
+		for (const rel of ['package.json', join('site', 'package.json')]) {
+			site = siteFromPackageJson(join(dir, rel), dir, folder, 'enrolled');
+			if (site) break;
+		}
+		if (!site && existsSync(join(dir, 'filepress.config.ts'))) {
+			const underEngine = resolve(dir).startsWith(resolve(join(engineRoot, 'sites')));
+			if (underEngine) site = siteFromInRepo(dir, engineRoot, folder);
+		}
+		if (!site) continue;
+		const key = resolve(site.contentRoot);
+		if (seen.has(key)) continue;
+		seen.add(key);
+		rows.push({
+			name: site.name,
+			path: relative(workspace, site.contentRoot).replace(/\\/g, '/') || '.',
+			absPath: site.contentRoot,
+			kind: site.pinKind,
+			origin: have.has(key) ? site.origin : 'enrolled',
+			enrolled: have.has(key),
+			url: readConfigUrl(site.contentRoot)
+		});
+	}
+	return rows.sort((a, b) => a.path.localeCompare(b.path));
 }
 
 export function engineVersion(): string {
@@ -325,6 +573,7 @@ export function headersPlan(site: SiblingSite): HeadersPlan {
 }
 
 export function updatePlan(site: SiblingSite, target: string): string {
+	if (site.pinKind === 'engine') return 'skip (in-repo — engine is the pin)';
 	const next = npmPinFor(target);
 	if (site.pinKind === 'link') {
 		return `package.json ${site.pin} → ${next}, then pnpm update getfilepress`;
@@ -513,6 +762,7 @@ export function planSite(site: SiblingSite, target: string, ctx?: PlanContext): 
 		path: relative(workspaceRoot, site.contentRoot),
 		pin: site.pin,
 		pinKind: site.pinKind,
+		origin: site.origin,
 		lockedVersion: site.lockedVersion,
 		update: updatePlan(site, target),
 		headers: headersPlan(site),
@@ -598,12 +848,18 @@ export async function buildInventory(): Promise<Inventory> {
 }
 
 export function syncCommitPaths(site: SiblingSite): string[] {
-	const abs = [
-		join(site.packageDir, 'package.json'),
-		site.lockfileDir ? join(site.lockfileDir, 'pnpm-lock.yaml') : null,
-		site.headersPath
-	].filter((p): p is string => Boolean(p) && existsSync(p));
-	return abs.map((p) => relative(site.repoRoot, p)).filter((rel) => rel && !rel.startsWith('..'));
+	const abs =
+		site.pinKind === 'engine'
+			? [site.headersPath]
+			: [
+					join(site.packageDir, 'package.json'),
+					site.lockfileDir ? join(site.lockfileDir, 'pnpm-lock.yaml') : null,
+					site.headersPath
+				];
+	return abs
+		.filter((p): p is string => Boolean(p) && existsSync(p))
+		.map((p) => relative(site.repoRoot, p))
+		.filter((rel) => rel && !rel.startsWith('..'));
 }
 
 function say(log: LogFn | null, line: string): void {
@@ -655,6 +911,10 @@ function run(
 }
 
 export function applyUpdate(site: SiblingSite, target: string, log: LogFn | null = null): boolean {
+	if (site.pinKind === 'engine') {
+		say(log, '  update   skip (in-repo — engine is the pin)');
+		return true;
+	}
 	const plan = updatePlan(site, target);
 	if (plan.startsWith('skip') || plan.startsWith('already')) {
 		say(log, `  update   ${plan}`);

@@ -33,6 +33,9 @@ function setBusy(label) {
 	$('plan').disabled = locked;
 	$('apply').disabled = locked;
 	$('ship').disabled = locked;
+	$('scan-open').disabled = locked;
+	$('scan-run').disabled = locked;
+	$('scan-add').disabled = locked;
 	$('apply').title = locked ? '' : 'Plans first, then asks you to confirm before writing.';
 	$('ship').title = locked ? '' : 'Plans first, then asks you to confirm before shipping.';
 }
@@ -69,7 +72,14 @@ function renderChips(sites) {
 	$('chips').innerHTML = chips.join('');
 }
 
+function originBadge(site) {
+	if (site.origin === 'in-repo') return '<span class="badge mute">in-repo</span>';
+	if (site.origin === 'enrolled') return '<span class="badge on">added</span>';
+	return '';
+}
+
 function updateBadge(site) {
+	if (site.pinKind === 'engine') return '<span class="badge mute">engine</span>';
 	if (site.pinKind === 'git') return '<span class="badge mute">git pin</span>';
 	if (site.pinKind === 'link') return '<span class="badge todo">link → npm</span>';
 	if (site.update.startsWith('already')) return '<span class="badge ok">current</span>';
@@ -123,7 +133,7 @@ function renderRows(sites, force = false) {
 		if (picked.has(site.name)) tr.classList.add('picked');
 		tr.innerHTML = `
 			<td class="pick"><input type="checkbox" value="${esc(site.name)}" ${picked.has(site.name) ? 'checked' : ''} /></td>
-			<td><div class="site-name">${esc(site.name)}</div><div class="path">${esc(site.path)}</div></td>
+			<td><div class="site-name">${esc(site.name)} ${originBadge(site)}</div><div class="path">${esc(site.path)}</div></td>
 			<td><span class="pin">${esc(site.pin)}</span></td>
 			<td><span class="pin">${esc(site.lockedVersion ?? '—')}</span></td>
 			<td>${updateBadge(site)}</td>
@@ -214,6 +224,94 @@ async function pollJob(id, action, only) {
 	await tick();
 	jobTimer = setInterval(tick, 700);
 }
+
+let lastScan = [];
+
+function renderScanRows(candidates) {
+	lastScan = candidates;
+	const box = $('scan-list');
+	box.replaceChildren();
+	for (const row of candidates) {
+		const label = document.createElement('label');
+		label.className = 'scan-item';
+		label.innerHTML = `
+			<input type="checkbox" value="${esc(row.absPath)}" ${row.enrolled ? 'disabled' : 'checked'} />
+			<span class="site-name">${esc(row.name)}</span>
+			${row.enrolled ? '<span class="badge mute">already listed</span>' : `<span class="badge on">${esc(row.kind)}</span>`}
+			<span class="path">${esc(row.path)}</span>
+		`;
+		box.append(label);
+	}
+	box.classList.toggle('hidden', candidates.length === 0);
+	$('scan-actions').classList.toggle('hidden', candidates.length === 0);
+	const fresh = candidates.filter((c) => !c.enrolled).length;
+	$('scan-meta-inline').textContent = fresh
+		? `${fresh} new · ${candidates.length - fresh} already listed`
+		: candidates.length
+			? 'Everything in this folder is already listed.'
+			: 'No FilePress sites in that folder.';
+}
+
+$('scan-open').addEventListener('click', () => {
+	$('scan-panel').classList.remove('hidden');
+	if (!$('scan-root').value) $('scan-root').value = inventory?.workspace ?? '';
+	$('scan-root').focus();
+});
+$('scan-close').addEventListener('click', () => {
+	$('scan-panel').classList.add('hidden');
+});
+$('scan-run').addEventListener('click', async () => {
+	setBusy('scan');
+	try {
+		const res = await fetch('/api/scan', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ root: $('scan-root').value, maxDepth: 3 })
+		});
+		const body = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(body.error ?? `scan ${res.status}`);
+		$('scan-root').value = body.root ?? $('scan-root').value;
+		renderScanRows(body.candidates ?? []);
+		show($('error'), '');
+	} catch (err) {
+		show($('error'), err.message);
+	} finally {
+		setBusy(null);
+	}
+});
+$('scan-add').addEventListener('click', async () => {
+	const paths = [...document.querySelectorAll('#scan-list input[type=checkbox]:checked:not(:disabled)')].map(
+		(el) => el.value
+	);
+	if (!paths.length) {
+		show($('error'), 'Tick at least one new site.');
+		return;
+	}
+	setBusy('add sites');
+	try {
+		const res = await fetch('/api/enroll', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ paths })
+		});
+		const body = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(body.error ?? `enroll ${res.status}`);
+		if (body.inventory) {
+			inventory = body.inventory;
+			renderEngine(inventory);
+			renderRows(inventory.sites, true);
+			renderChips(inventory.sites);
+		}
+		const added = body.added?.length ?? 0;
+		show($('error'), '');
+		$('scan-meta-inline').textContent = added ? `Added ${added}.` : 'Already listed.';
+		await refresh(true);
+	} catch (err) {
+		show($('error'), err.message);
+	} finally {
+		setBusy(null);
+	}
+});
 
 $('refresh').addEventListener('click', () => {
 	setBusy('refresh');

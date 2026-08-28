@@ -244,6 +244,72 @@ button:disabled {
 	color: var(--accent);
 }
 
+/* Scan folder */
+.scan-panel {
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: var(--bg-elevated);
+	padding: 0.7rem 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+.scan-panel.hidden {
+	display: none;
+}
+.scan-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
+}
+.scan-label {
+	font-size: 0.62rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+#scan-root {
+	flex: 1 1 16rem;
+	font: inherit;
+	font-family: var(--mono);
+	font-size: 0.78rem;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 0.28rem 0.5rem;
+	background: var(--bg);
+	color: var(--text);
+}
+.scan-hint {
+	margin: 0;
+	font-size: 0.78rem;
+}
+.scan-list {
+	max-height: 12rem;
+	overflow: auto;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+.scan-item {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	padding: 0.35rem 0.55rem;
+	border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+	font-size: 0.82rem;
+}
+.scan-item:last-child {
+	border-bottom: 0;
+}
+.scan-item .path {
+	margin-left: auto;
+}
+.scan-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+}
+
 /* Table card */
 .card {
 	flex: 1 1 auto;

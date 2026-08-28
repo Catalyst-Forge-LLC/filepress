@@ -4,15 +4,15 @@ description: What FilePress is, and what it is not.
 order: 4
 ---
 
-**FilePress** is a file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter in git. A SvelteKit static build produces HTML you can host anywhere.
+**FilePress** is a file-based Markdown blog engine. Posts are `.md` files with YAML frontmatter in git. A SvelteKit static build produces HTML any static host can serve.
 
 ## What it is
 
 - A reusable engine (`getfilepress` on npm) plus content-only sites
-- Essay theme by default; per-site `theme.css` overrides (CSS Zen Garden style)
-- Static pages, tags, RSS, sitemap, robots.txt
+- Essay theme by default; named presets `essay` | `ink` | `folio`; per-site `theme.css` last
+- Static pages, tags, RSS, sitemap, robots.txt, styled 404
 - Optional `paths` mounts (site-owned HTML at a URL prefix such as `/docs`)
-- Optional import CLI and Genie Mode for local authoring
+- Optional import CLI and Genie for local authoring
 
 ## What it is not
 
@@ -31,6 +31,6 @@ order: 4
 | CLI | `filepress` / `getfilepress` |
 | Domain | getfilepress.com |
 
-This site is built with FilePress itself (`sites/getfilepress` in the engine monorepo). The in-repo `sites/demo` site remains the engine’s fixture for drafts, scheduled posts, and frontmatter edge cases.
+This site is FilePress (`sites/getfilepress` in the engine monorepo). `sites/demo` is the engine fixture for drafts, scheduled posts, and frontmatter edge cases.
 
 Maintained by [Catalyst Forge](https://github.com/Catalyst-Forge-LLC). MIT licensed.

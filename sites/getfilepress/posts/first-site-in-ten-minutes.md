@@ -1,11 +1,12 @@
 ---
 title: First site in ten minutes
 date: 2026-08-10
-description: Scaffold a content-only FilePress site, link the engine, and run your first build.
+updated: 2026-08-28
+description: Scaffold a content-only FilePress site, link the engine, and run the first build.
 tags: [getting-started, workflow]
 ---
 
-You need Node 20+, pnpm, and a clone of the FilePress engine (or a later git pin of `getfilepress`).
+Node 20+, pnpm, and a clone of the FilePress engine (or a pin of `getfilepress`).
 
 ## Scaffold
 
@@ -35,21 +36,16 @@ pnpm install
 pnpm dev
 ```
 
-Open the URL Vite prints. Add a post under `posts/`:
+Open the URL Vite prints. Stamp a post:
 
-```markdown
----
-title: "Hello"
-date: 2026-08-10
-description: First note.
-tags: [notes]
----
-
-Ship the file. That’s the product.
+```bash
+filepress new "Hello"
 ```
+
+Or write `posts/YYYY-MM-DD-hello.md` by hand. Config and frontmatter: [Getting started](/getting-started).
 
 ```bash
 pnpm build    # → ./build/
 ```
 
-For Cloudflare later, swap the `link:` dependency for a pinned git URL — see [Deploy notes](/posts/deploy-notes). Config details live on [Getting started](/getting-started).
+For CI, swap `link:` for a pinned npm version — [Deploy](/deploy).

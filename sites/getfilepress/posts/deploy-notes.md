@@ -1,26 +1,26 @@
 ---
 title: Deploy notes
 date: 2026-08-08
-updated: 2026-08-11
-description: Pin getfilepress for CI and point Cloudflare Pages at a static build folder.
+updated: 2026-08-28
+description: Pin getfilepress for CI and point a static host at the build folder.
 tags: [deploy, workflow]
 ---
 
-The full deploy guide lives on **[Deploy](/deploy)** (Cloudflare Pages happy path + any static host). This post is the short version.
+The full guide is **[Deploy](/deploy)**. This post is the short version.
 
 ## Pin the engine
 
-Local `link:../filepress` only works on your machine. For CI:
+Local `link:../filepress` only works on one machine. For CI, pin npm (current is `0.1.19`) or a git SHA / existing tag:
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.3"
+    "getfilepress": "^0.1.19"
   }
 }
 ```
 
-Git pin also works: `github:Catalyst-Forge-LLC/filepress#v0.1.3`. Prefer a tag or SHA over floating `main`.
+Do not float on `main`. FilePress does not git-connect Cloudflare Pages. That is host settings.
 
 ## Cloudflare Pages
 
@@ -30,4 +30,4 @@ Git pin also works: `github:Catalyst-Forge-LLC/filepress#v0.1.3`. Prefer a tag o
 | Build command | `pnpm install && pnpm build` |
 | Output directory | `build` |
 
-Set `url` in `filepress.config.ts` to the live custom domain. Agents wiring CI: see [`docs/DEPLOY.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/DEPLOY.md).
+Set `url` in `filepress.config.ts` to the live origin. Agent checklist: [`docs/DEPLOY.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/DEPLOY.md).

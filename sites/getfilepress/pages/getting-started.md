@@ -1,10 +1,10 @@
 ---
 title: Getting started
-description: Install getfilepress, scaffold a content-only site, and run your first build.
+description: Install getfilepress, scaffold a content-only site, and run the first build.
 order: 1
 ---
 
-FilePress is published on npm as **`getfilepress`**. The CLI bins are `filepress` and `getfilepress` (same script). You need **Node.js 20+** and [pnpm](https://pnpm.io).
+FilePress ships on npm as **`getfilepress`**. The bins are `filepress` and `getfilepress` (same script). Node.js 20+ and [pnpm](https://pnpm.io).
 
 ## Scaffold a site
 
@@ -22,22 +22,24 @@ pnpm dev      # local preview
 pnpm build    # → build/
 ```
 
-Or depend on the published package from an empty folder (after scaffolding by hand or copying a site tree):
+Or pin the published package (current is `0.1.19`):
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.3"
+    "getfilepress": "^0.1.19"
   }
 }
 ```
 
+A git SHA or existing tag also works. Do not float on `main`. `link:../filepress` is local only.
+
 The site folder stays content-only:
 
 - `filepress.config.ts` — title, URL, nav, footer, topics, optional `homePage`, optional `theme` (`essay` | `ink` | `folio`), optional `paths`
-- `posts/` — dated Markdown posts (`/posts/<slug>`)
-- `pages/` — evergreen Markdown pages (`about.md` → `/about`)
-- `paths` mounts — optional site-owned HTML/CSS/JS trees at a URL prefix (e.g. `/docs`)
+- `posts/` — dated Markdown (`/posts/<slug>`)
+- `pages/` — evergreen Markdown (`about.md` → `/about`)
+- `paths` mounts — optional site-owned HTML/CSS/JS at a URL prefix
 - `static/` — favicon, images, logo
 - `theme.css` — optional Essay overrides
 - `package.json` — `"getfilepress": "link:../filepress"` locally, or npm / git pin in CI
@@ -70,21 +72,21 @@ export default defineFilepressConfig({
 });
 ```
 
-`title` and `url` are required. Missing values fail the build with a clear error.
+`title` and `url` are required. Missing values fail the build with a named error.
 
-Omit `logo` and the masthead uses `/logo.png` from `static/` if you drop one there. Set `logo: ""` or `null` for a text-only title.
+Omit `logo` and the masthead uses `/logo.png` from `static/` if that file is there. Set `logo: ""` or `null` for a text-only title.
 
 ### Nav, footer, and icons
 
 - `nav` — header links (defaults to Posts + Topics, or Home + Posts + Topics when `homePage` is set).
-- `footerLinks` — footer row (defaults to RSS + Topics when omitted). Setting it **replaces** the default list, so keep RSS/Topics if you still want them.
+- `footerLinks` — footer row (defaults to RSS + Topics when omitted). Setting it **replaces** the default list, so keep RSS/Topics if they still belong.
 - `icon: 'github'` — built-in mark beside the label; opens in a new tab. Theme class: `.nav-github` (see [`docs/THEME.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/THEME.md)).
 
-For a product-style home (static page at `/`, posts at `/writing`), set `homePage: 'home'` and add `pages/home.md`. This site does exactly that.
+For a product-style home (static page at `/`, posts at `/posts`), set `homePage: 'home'` and add `pages/home.md`. This site does that. The build then merges `/writing` → `/posts` into `_redirects` (Cloudflare Pages / Netlify). Extra rules go in config `redirects` or `static/_redirects`.
 
 ### Path mounts
 
-Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress serves the mount in `filepress dev` and copies it into `build/` after the Vite/Kit build. It does **not** parse Markdown or inject Essay chrome. The site owns the shell (for example a docs sidebar).
+Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress serves the mount in `filepress dev` and copies it into `build/` after the Vite/Kit build. It does **not** parse Markdown or inject Essay chrome. The site owns the shell.
 
 ```ts
 paths: [{ url: '/docs', dir: 'docs/dist' }]
@@ -95,14 +97,29 @@ paths: [{ url: '/docs', dir: 'docs/dist' }]
 - HTML files under the mount are included in `sitemap.xml`.
 - In this repo, `sites/demo` mounts `mounts/docs` at `/docs`.
 
-## Add a post
+## Posts
 
 ```bash
 filepress new "My Post"
 filepress new "My Post" --draft
 ```
 
-Writes `posts/YYYY-MM-DD-my-post.md`. You can still create the file by hand.
+Writes `posts/YYYY-MM-DD-my-post.md`. The file can still be created by hand.
+
+| Field | Role |
+| --- | --- |
+| `title` | Required |
+| `date` | Required, `YYYY-MM-DD` |
+| `slug` | Optional; otherwise from the filename |
+| `description` / `excerpt` | Listings and SEO |
+| `tags` | YAML list, e.g. `[notes, sveltekit]` |
+| `draft` | `true` hides the post from production listings and feeds |
+| `updated` | Optional `YYYY-MM-DD` |
+| `author` | Optional byline; otherwise the site author |
+
+Reading time is computed (~228 wpm). It is not a frontmatter field.
+
+Images: `static/images/posts/<slug>/photo.jpg`, referenced as `/images/posts/<slug>/photo.jpg`. A lone image plus a title attribute becomes a `<figure>`. Tokens and presets: [`docs/THEME.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/THEME.md).
 
 ## Commands
 
@@ -114,12 +131,12 @@ Writes `posts/YYYY-MM-DD-my-post.md`. You can still create the file by hand.
 | `filepress preview` | Serve the build (no Genie) |
 | `filepress check` | Type-check against the site |
 
-In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd mode. No `--site` flag.
+In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd. No `--site` flag.
 
 ## Next
 
 - Ship it: [Deploy](/deploy)
 - Import an existing site: [Import](/import)
-- Tune look and feel in dev: [Genie](/genie)
+- Tune look in `filepress dev`: [Genie](/genie)
 - If the site ships an agent skill: [Skill page](/skill-page)
 - Walkthrough posts: [Writing](/writing)

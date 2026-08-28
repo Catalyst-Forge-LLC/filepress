@@ -12,17 +12,17 @@ versions; do not float on `main`.
 | --- | --- |
 | Node.js | `>=20` (`engines` in the engine `package.json`) |
 | pnpm | Recommended; matches the engine’s `packageManager` |
-| Engine pin | `"getfilepress": "^0.1.3"` (npm) **or** `github:Catalyst-Forge-LLC/filepress#v0.1.3` |
+| Engine pin | `"getfilepress": "^0.1.19"` (npm) **or** a git SHA / existing tag — not `main` |
 
 Local `link:../filepress` is for sibling-folder development only — CI cannot use it.
 
 Set `url` in `filepress.config.ts` to the live origin (no trailing slash). Feeds,
 sitemap, and canonical URLs use that value.
 
-## Happy path: Cloudflare Pages
+## Cloudflare Pages
 
-Cheapest and simplest for most FilePress sites: git-connected Cloudflare Pages
-(or Wrangler upload of `build/`).
+Git-connect the **content** repo in the Cloudflare dashboard, or upload `build/`
+with Wrangler. FilePress does not create the project or attach git.
 
 ### Git-connected site repo
 
@@ -41,7 +41,7 @@ Dependency in the site `package.json` (pick one):
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.3"
+    "getfilepress": "^0.1.19"
   }
 }
 ```
@@ -49,7 +49,7 @@ Dependency in the site `package.json` (pick one):
 ```json
 {
   "devDependencies": {
-    "getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.3"
+    "getfilepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
   }
 }
 ```
@@ -85,7 +85,7 @@ directory” / “output” setting to `build`. No SSR, no serverless functions 
 
 ## Security headers
 
-`filepress build` writes `build/_headers` for the Cloudflare Pages happy path
+`filepress build` writes `build/_headers` for Cloudflare Pages
 (Netlify reads the same file). Defaults:
 
 - HSTS (`max-age=31536000`) — no `includeSubDomains` or `preload`

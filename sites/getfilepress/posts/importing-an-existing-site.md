@@ -1,13 +1,12 @@
 ---
 title: Importing an existing site
 date: 2026-08-09
+updated: 2026-08-28
 description: Use filepress import to crawl a public blog into Markdown posts and pages.
 tags: [workflow, getting-started]
 ---
 
-Moving off a CMS or a bespoke stack is usually the painful middle of adopting FilePress. The import CLI shortens that middle.
-
-## Crawl → extract → scaffold
+`filepress import` crawls a public site into a sibling content tree. Discovery prefers sitemap and RSS.
 
 ```bash
 pnpm filepress import --source https://example.com \
@@ -15,10 +14,8 @@ pnpm filepress import --source https://example.com \
   --yes
 ```
 
-Discovery prefers sitemap and RSS. Extraction maps articles into `posts/` and evergreen URLs into `pages/`, then scaffolds a sibling content site wired to `getfilepress`.
+Articles land in `posts/`. Evergreen URLs land in `pages/`. A long home bio becomes `pages/home.md` plus `homePage` (index at `/posts`). Old paths go to `static/_redirects`.
 
-## Theme without a redesign sprint
+Pass up to three `--inspire` URLs. Structure from the first; accent and fonts from the rest. With Ollama, import asks for a token brief. `--no-llm` still writes a deterministic `theme.css`.
 
-Pass up to three `--inspire` URLs. Signals blend: structure from the first, accent and fonts from the rest. With Ollama available, import asks for a token brief; with `--no-llm`, you still get a deterministic `theme.css`.
-
-After import, run `pnpm dev` on the new site and open **Genie** if you want a local taste loop before you commit theme and config. Overview page: [Import](/import).
+After import, `pnpm dev` on the new site. Open **Genie** if the first theme needs a local taste loop. Overview: [Import](/import).

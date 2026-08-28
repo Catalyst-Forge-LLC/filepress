@@ -1,230 +1,62 @@
 # FilePress
 
-> File-based Markdown blogs. No admin UI. No database. Just git.
+Markdown blogs from git. No CMS. No database. A static `build/` folder.
 
-A file-based Markdown blog engine. Posts are plain `.md` files with YAML frontmatter. Edit them in the GitHub mobile app, the web editor, or any text editor. There is no admin UI, no database, and no server at runtime: a static build produces HTML you can host anywhere (for example Cloudflare Pages).
+Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script as `getfilepress`).
 
-| | |
-| --- | --- |
-| **Site** | [https://getfilepress.com](https://getfilepress.com) |
-| **npm** | [`getfilepress`](https://www.npmjs.com/package/getfilepress) |
-| **CLI** | `filepress` (also `getfilepress`) |
+**Site:** [getfilepress.com](https://getfilepress.com) · **Docs:** [getting started](https://getfilepress.com/getting-started)
 
-## Requirements
-
-- Node.js 20+
-- [pnpm](https://pnpm.io)
-
-## Quick start (new site)
+## Start a site
 
 From a clone of this repo:
 
 ```bash
 pnpm install
 pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://my.blog
-
-cd ../my-blog
-pnpm install
-pnpm dev      # local preview (Genie Mode FAB in the corner)
-pnpm build    # → build/
+cd ../my-blog && pnpm install && pnpm dev
 ```
 
-The site folder only needs:
+`filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Getting started](https://getfilepress.com/getting-started).
 
-- `filepress.config.ts` — title, URL, and other site settings
-- `posts/` — Markdown posts (`/posts/<slug>`)
-- `pages/` — optional static Markdown pages (`about.md` → `/about`)
-- `paths` mounts — optional site-owned HTML/CSS/JS trees at a URL prefix (e.g. `/docs`)
-- `static/` — favicon, images, etc.
-- `package.json` — depends on this engine (`"getfilepress": "link:../filepress"` locally, `"getfilepress": "^0.1.3"` from npm, or a git URL + tag/SHA)
+Pin CI on npm (`getfilepress` current is `0.1.19`) or a git SHA / existing tag. `link:` is local only.
 
-### Import an existing site
-
-Crawl a public site (sitemap/RSS preferred), extract posts and pages, scaffold a sibling FilePress site, and optionally ask Ollama (local or a host found with `--scan`) for a token theme:
+## Import
 
 ```bash
-pnpm install
-pnpm filepress import --source https://example.com \
-  --inspire https://www.catalystforge.com \
-  --inspire https://app.execfoundry.com/start \
-  --yes
-
-# up to 3 --inspire URLs; signals are blended (first biases structure, later ones tint accent/fonts)
-
-# dry-run first (no write):
+pnpm filepress import --source https://example.com --yes
 pnpm filepress import --source https://example.com --dry-run --no-llm
 ```
 
-See [`docs/SITE_IMPORT_SPEC.md`](docs/SITE_IMPORT_SPEC.md).
+Crawls a public site (sitemap/RSS preferred) into a sibling content tree. Optional `--inspire` URLs (up to three) and Ollama. `--no-llm` stays deterministic. [Import](https://getfilepress.com/import) · [spec](docs/SITE_IMPORT_SPEC.md).
 
-More detail: [`docs/EXTERNAL_SITES.md`](docs/EXTERNAL_SITES.md).
+## Docs
 
-### In this repo
+| Topic | Where |
+| --- | --- |
+| Scaffold, config, posts | [Getting started](https://getfilepress.com/getting-started) |
+| Theme tokens and presets | [docs/THEME.md](docs/THEME.md) |
+| Genie (dev only) | [Genie](https://getfilepress.com/genie) · [spec](docs/GENIE_MODE_SPEC.md) |
+| Deploy | [Deploy](https://getfilepress.com/deploy) · [docs/DEPLOY.md](docs/DEPLOY.md) |
+| Sibling / external sites | [docs/EXTERNAL_SITES.md](docs/EXTERNAL_SITES.md) |
+| Local ports | [docs/LOCALBERTH.md](docs/LOCALBERTH.md) |
+| Agent skill page | [Skill page](https://getfilepress.com/skill-page) · [docs/SKILL_PAGE.md](docs/SKILL_PAGE.md) |
 
-- `sites/demo` — engine fixture (drafts, scheduled posts, frontmatter cheatsheet). Root `pnpm check` / `pnpm build` target this site.
-- `sites/getfilepress` — product site for getfilepress.com (`homePage` landing + Writing). Sibling publications live in their own repos.
+## In this repo
+
+- `sites/demo` — engine fixture (drafts, scheduled posts, image convention)
+- `sites/getfilepress` — getfilepress.com
 
 ```bash
 pnpm install
-pnpm dev                 # → demo fixture
-pnpm build               # → sites/demo/build/
-pnpm dev:www             # → product site
-pnpm build:www           # → sites/getfilepress/build/
-pnpm ship                # build + Wrangler Pages deploy (project: getfilepress)
+pnpm test
+pnpm dev        # demo
+pnpm dev:www    # product site
+pnpm ship       # build getfilepress + Wrangler Pages
 ```
 
-Two `filepress dev` processes share Vite **5173** unless you pin the port. With [LocalBerth](https://www.npmjs.com/package/localberth) 0.2+, `filepress dev` reads a named lease. Claim once; see [docs/LOCALBERTH.md](docs/LOCALBERTH.md).
+## Not a CMS
 
-## Site configuration
-
-```ts
-import { defineFilepressConfig } from 'getfilepress';
-
-export default defineFilepressConfig({
-  title: 'My Site',
-  description: 'A short site description.',
-  url: 'https://my.site', // required; canonical origin, no trailing slash
-  author: 'Me',
-  postsPerPage: 10,
-  topics: [{ label: 'Essays', tag: 'essays' }],
-  nav: [
-    { label: 'Posts', href: '/' },
-    { label: 'GitHub', href: 'https://github.com/acme/site', icon: 'github' }
-  ],
-  // Replaces the default RSS + Topics row when set.
-  footerLinks: [
-    { label: 'RSS', href: '/rss.xml' },
-    { label: 'GitHub', href: 'https://github.com/acme/site', icon: 'github' }
-  ],
-  theme: 'essay', // or 'ink' | 'folio'; site theme.css still wins last
-  newsletter: {
-    url: 'https://buttondown.email/me',
-    blurb: 'Occasional notes.',
-    cta: 'Subscribe'
-  }
-});
-```
-
-`title` and `url` are required; missing values fail the build with a clear error.
-
-**Nav / footer:** `nav` is the header; `footerLinks` replaces the default RSS + Topics footer row when set (include those entries yourself if you still want them). Items may set `icon: 'github'` for a built-in mark (`.nav-github` in themes).
-
-### Path mounts
-
-Attach a site-owned HTML/CSS/JS tree at a URL prefix. FilePress copies it into `build/` after the Kit build and serves it in `filepress dev`. It does **not** parse Markdown or inject Essay chrome into the mount. The site owns the shell (for example a docs sidebar).
-
-```ts
-paths: [
-  { url: '/docs', dir: 'docs/dist' }
-]
-```
-
-- `dir` is site-relative; `url` starts with `/` and must not collide with engine routes (`posts`, `writing`, `tags`, …).
-- The first URL segment is reserved against `pages/<slug>.md`.
-- HTML files under the mount are included in `sitemap.xml`.
-
-## Theming
-
-The engine ships a default Essay look, plus two token presets (`ink`, `folio`)
-via config `theme`. To restyle a site, add `theme.css` next to
-`filepress.config.ts`. It loads last, so you can override CSS
-variables and structural classes without forking the app.
-
-In local `filepress dev` / `pnpm dev`, **Genie Mode** (floating FAB) is a design cockpit:
-steers, Openverse / uploads, live inspire URLs, optional Ollama refine, and
-`lede` / `tagline` / `logo` config patches. Experiments live under `.filepress-genie/`.
-Activate writes `theme.css`, `static/`, and config. Dev-only; absent from
-`preview` and production builds. See [`docs/GENIE_MODE_SPEC.md`](docs/GENIE_MODE_SPEC.md)
-and [getfilepress.com/genie](https://getfilepress.com/genie).
-
-```css
-/* theme.css */
-:root {
-  --accent: #1e4d6b;
-  --accent-strong: #163a52;
-}
-```
-
-Token and class reference: [`docs/THEME.md`](docs/THEME.md).
-
-## Writing a post
-
-From the site root (or with `--site` / `--root` in this monorepo):
-
-```bash
-filepress new "My Post"
-filepress new "My Post" --draft
-```
-
-That writes `posts/YYYY-MM-DD-my-post.md`. Or add a file by hand:
-
-```markdown
----
-title: "My Post"
-date: 2026-07-04
-description: A short summary used in listings and SEO.
-tags: [notes]
-author: Jane Roe
-draft: false
-updated: 2026-07-05
----
-
-Body content in **Markdown**.
-```
-
-| Field | Required | Notes |
-| --- | --- | --- |
-| `title` | yes | Build fails (naming the file) if missing. |
-| `date` | yes | Strict `YYYY-MM-DD`. Future-dated posts stay hidden until that date. |
-| `slug` | no | Derived from the filename if omitted. |
-| `description` / `excerpt` | no | Listings and meta tags. |
-| `tags` | no | YAML list; lowercased and de-duplicated. |
-| `author` | no | Per-post byline; omit on single-author sites. |
-| `draft` | no | Hidden from production listings/feeds/sitemap; still builds at its URL. Listed with a Draft label under `pnpm dev` (localhost). |
-| `updated` | no | Shown when different from `date`. |
-
-**Images:** put files in `static/images/posts/<slug>/` and reference them as `/images/posts/<slug>/photo.jpg`. The demo site’s [Images in posts](sites/demo/posts/images-in-posts.md) post is a worked example.
-
-**Captions:** an image alone on a line becomes a `<figure>`; the title attribute is the caption:
-
-```markdown
-![alt text](/images/posts/my-post/photo.jpg "Caption under the image")
-```
-
-## Deploy
-
-`filepress build` emits a static `build/` folder. No Node server in production.
-
-**Happy path: [Cloudflare Pages](https://pages.cloudflare.com/)** (git-connected site repo or Wrangler upload).
-
-| Setting | Value |
-| --- | --- |
-| Build command | `pnpm install && pnpm build` |
-| Output directory | `build` |
-| Node | 20+ |
-
-Pin the engine in the site `package.json` (`"getfilepress": "^0.1.3"` or `github:Catalyst-Forge-LLC/filepress#v0.1.3`). Do not use `link:` in CI. Set config `url` to the live origin.
-
-Any other static host works the same way: publish `build/` as the web root. The build also writes a `_headers` file (HSTS, no framing, no wildcard CORS) for Cloudflare Pages; override it with `static/_headers`.
-
-Full notes (including an agent checklist): [`docs/DEPLOY.md`](docs/DEPLOY.md) · product page: [getfilepress.com/deploy](https://getfilepress.com/deploy).
-
-If the site ships an agent skill, write the install page from [`docs/SKILL_PAGE.md`](docs/SKILL_PAGE.md) · [getfilepress.com/skill-page](https://getfilepress.com/skill-page).
-
-## Repository layout
-
-```
-packages/core     shared engine (content pipeline, components, theme)
-packages/app      SvelteKit app (routes + Genie Mode in dev) used by the CLI
-packages/import   site crawl / scaffold CLI (also powers Genie theme helpers)
-sites/demo        engine fixture content
-sites/getfilepress product site (getfilepress.com)
-scripts/          filepress CLI and create-site scaffold
-```
-
-```bash
-pnpm test    # engine unit tests
-```
+No admin UI. No visitor comments — permanent. Genie is `filepress dev` only; `preview` and `build/` do not include it. Production is files.
 
 <!-- xfacts-nutrition-label -->
 
@@ -234,4 +66,4 @@ pnpm test    # engine unit tests
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. Copyright Catalyst Forge LLC.

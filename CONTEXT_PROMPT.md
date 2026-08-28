@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-28) — README slim + site accuracy / aiBreze spray
+
+Root `README.md` is short (start, import, docs table, not-a-CMS, nutrition). Config / frontmatter / theme / deploy live on getfilepress.com + `docs/*`. Public pins are npm `^0.1.19`. Do **not** invent `v0.1.19` git tags (only `v0.1.0` / `v0.1.1` exist). Git-connected Pages is Cloudflare settings, not a FilePress feature. Product pages speak as FilePress / it. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-28) — missing favicon.png must not fail prerender
 
 Layout always links `/favicon.png` then `/favicon.svg`. adapter-static prerender 404s a missing PNG (`404 /favicon.png (linked from /)`). `handleHttpError` now ignores those two paths. Sites can still drop a PNG. Do **not** publish unless asked.

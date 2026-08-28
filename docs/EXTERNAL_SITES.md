@@ -79,16 +79,16 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 ## CI / deploy
 
 `link:` only works on your machine. See **[`DEPLOY.md`](DEPLOY.md)** for the full
-contract (Cloudflare Pages happy path, Wrangler, any static host, agent checklist).
+contract (Cloudflare Pages, Wrangler, any static host, agent checklist).
 
 Short form — pin npm or a git tag:
 
 ```json
-"getfilepress": "^0.1.3"
+"getfilepress": "^0.1.19"
 ```
 
 ```json
-"getfilepress": "github:Catalyst-Forge-LLC/filepress#v0.1.3"
+"getfilepress": "github:Catalyst-Forge-LLC/filepress#<tag-or-sha>"
 ```
 
 | Setting | Value |

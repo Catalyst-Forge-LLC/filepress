@@ -393,6 +393,18 @@
         "Keep private / no LICENSE"
       ],
       "status": "active"
+    },
+    {
+      "id": "D17",
+      "timestamp": "2026-08-28",
+      "phase": "4-feature-iteration",
+      "decision": "Vite server and preview set allowedHosts: true so Tailscale MagicDNS (*.ts.net) and other LAN names can load FilePress sites.",
+      "rationale": "Operator 2026-08-28: phone Open on a FilePress site got Vite 403 Blocked request. IPs already worked.",
+      "alternatives_considered": [
+        "Allow only .ts.net",
+        "Patch each site vite.config"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

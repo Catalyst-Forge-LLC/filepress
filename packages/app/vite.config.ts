@@ -133,13 +133,15 @@ export default defineConfig(async () => {
 	writeFileSync(join(filepressCache, 'redirects.txt'), serializeRedirects(hints.redirects));
 
 	const host = process.env.HOST?.trim() || '127.0.0.1';
+	const listen = {
+		host,
+		// Tailscale MagicDNS (*.ts.net) and other LAN names. IPs are already allowed.
+		allowedHosts: true as const,
+		...(fixedPort ? { port: fixedPort, strictPort: true } : {}),
+	};
 	return {
-		server: fixedPort
-			? { host, port: fixedPort, strictPort: true }
-			: undefined,
-		preview: fixedPort
-			? { host, port: fixedPort, strictPort: true }
-			: undefined,
+		server: listen,
+		preview: listen,
 		resolve: {
 			alias: [
 				{ find: /^@filepress\/core\/server$/, replacement: coreServer },

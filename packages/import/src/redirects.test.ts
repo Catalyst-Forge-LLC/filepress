@@ -38,9 +38,6 @@ describe('importRedirectRules', () => {
 			posts: [],
 			pages: []
 		});
-		expect(rules).toEqual([
-			{ from: '/writing', to: '/posts', status: 308 },
-			{ from: '/writing/*', to: '/posts/:splat', status: 301 }
-		]);
+		expect(rules).toEqual([{ from: '/writing/*', to: '/posts/:splat', status: 301 }]);
 	});
 });

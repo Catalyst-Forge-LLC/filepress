@@ -1,8 +1,11 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { postsIndexPath } from '@filepress/core';
+import { redirect } from '@sveltejs/kit';
+import { content } from '$lib/content.server';
 import config from '$site-config';
 
 export const load: PageServerLoad = () => {
-	redirect(308, postsIndexPath(config));
+	if (!config.homePage) {
+		redirect(302, '/');
+	}
+	return content.getIndexPage(1, config.postsPerPage);
 };

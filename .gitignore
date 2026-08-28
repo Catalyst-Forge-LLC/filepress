@@ -5,6 +5,7 @@ node_modules/
 # SvelteKit / build output (per-site)
 .svelte-kit/
 build/
+sites/getfilepress/docs/dist/
 .output
 .vercel
 .netlify

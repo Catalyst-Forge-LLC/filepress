@@ -1,0 +1,26 @@
+{
+	"sections": [
+		{
+			"title": "Start",
+			"items": [
+				{ "id": "introduction", "title": "Introduction" },
+				{ "id": "getting-started", "title": "Getting started" }
+			]
+		},
+		{
+			"title": "Authoring",
+			"items": [
+				{ "id": "import", "title": "Import" },
+				{ "id": "genie", "title": "Genie" },
+				{ "id": "theme", "title": "Theme" }
+			]
+		},
+		{
+			"title": "Ship",
+			"items": [
+				{ "id": "deploy", "title": "Deploy" },
+				{ "id": "skill-page", "title": "Skill page" }
+			]
+		}
+	]
+}

@@ -42,7 +42,7 @@ Open the URL Vite prints. Stamp a post:
 filepress new "Hello"
 ```
 
-Or write `posts/YYYY-MM-DD-hello.md` by hand. Config and frontmatter: [Getting started](/getting-started).
+Or write `posts/YYYY-MM-DD-hello.md` by hand. Config and frontmatter: [Getting started](/docs/getting-started).
 
 ```bash
 pnpm build    # → ./build/

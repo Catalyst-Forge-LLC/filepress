@@ -21,7 +21,7 @@ describe('normalizeRedirectPath', () => {
 describe('serialize and parse', () => {
 	it('round-trips Cloudflare _redirects lines', () => {
 		const text = serializeRedirects(writingPostRedirects());
-		expect(text).toContain('/writing  /posts  308');
+		expect(text).not.toContain('/writing  /posts');
 		expect(text).toContain('/writing/*  /posts/:splat  301');
 		expect(parseRedirectsFile(text)).toEqual(writingPostRedirects());
 	});

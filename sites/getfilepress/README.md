@@ -1,7 +1,7 @@
 # FilePress (product site)
 
 In-repo product / marketing site for [getfilepress.com](https://getfilepress.com).
-Built with FilePress (`homePage: 'home'`, Writing at `/writing`).
+Built with FilePress (`homePage: 'home'`, Writing at `/writing`, docs mount at `/docs`).
 
 `sites/demo` remains the engine fixture (drafts, scheduled posts, cheatsheet).
 
@@ -19,7 +19,8 @@ pnpm ship                    # build + wrangler pages deploy → project "getfil
 | Path | Role |
 | --- | --- |
 | `filepress.config.ts` | Identity, `homePage`, nav, topics |
-| `pages/` | Home + docs (getting started, import, genie, about) |
+| `docs/` | Visitor docs (`pnpm docs:www` → `docs/dist`, mounted at `/docs`) |
+| `pages/` | Home + about (older Essay doc URLs still resolve) |
 | `posts/` | Writing essays |
 | `theme.css` | Product accent / surface tokens |
 | `static/` | Logo + favicon |

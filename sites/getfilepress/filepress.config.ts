@@ -14,20 +14,18 @@ export default defineFilepressConfig({
 	ogImage: '/logo.svg',
 	nav: [
 		{ label: 'Home', href: '/' },
+		{ label: 'Docs', href: '/docs' },
 		{ label: 'Writing', href: '/writing' },
-		{ label: 'Docs', href: '/getting-started' },
-		{ label: 'Deploy', href: '/deploy' },
-		{ label: 'Import', href: '/import' },
-		{ label: 'Genie', href: '/genie' },
 		{ label: 'About', href: '/about' },
 		{ label: 'GitHub', href: github, icon: 'github' }
 	],
 	footerLinks: [
 		{ label: 'RSS', href: '/rss.xml' },
+		{ label: 'Docs', href: '/docs' },
 		{ label: 'Topics', href: '/topics' },
-		{ label: 'Skill page', href: '/skill-page' },
 		{ label: 'GitHub', href: github, icon: 'github' }
 	],
+	paths: [{ url: '/docs', dir: 'docs/dist' }],
 	topics: [
 		{ label: 'Getting started', tag: 'getting-started' },
 		{ label: 'Workflow', tag: 'workflow' },

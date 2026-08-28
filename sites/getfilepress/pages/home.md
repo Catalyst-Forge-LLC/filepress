@@ -10,10 +10,7 @@ Start empty, or [import](/import) a public site. [Genie](/genie) can steer look 
 
 ## Start here
 
-- **[Getting started](/getting-started)** — install `getfilepress`, scaffold, config, posts
-- **[Import](/import)** — crawl a public site into a content tree
-- **[Genie](/genie)** — local design cockpit; bake to commit
-- **[Deploy](/deploy)** — Cloudflare Pages or any static host
+- **[Docs](/docs)** — install, import, Genie, theme, deploy
 - **[Writing](/writing)** — walkthroughs
 - **npm:** [`getfilepress`](https://www.npmjs.com/package/getfilepress) · **GitHub:** [Catalyst-Forge-LLC/filepress](https://github.com/Catalyst-Forge-LLC/filepress)
 

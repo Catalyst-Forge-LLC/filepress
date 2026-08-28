@@ -1,7 +1,5 @@
 ---
 title: Deploy
-description: Ship a FilePress site. Static build folder, Cloudflare Pages or any host.
-order: 2
 ---
 
 `filepress build` writes a **static** `build/` folder. There is no runtime server. Set `url` in `filepress.config.ts` to the live origin (no trailing slash) so RSS, sitemap, and canonical links stay correct.

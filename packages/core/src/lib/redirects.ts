@@ -59,10 +59,7 @@ export function mergeRedirects(existing: string, extra: RedirectRule[]): string 
 
 /** When `/` is a landing page, old `/writing` indexes used to hold the post list. */
 export function writingPostRedirects(): RedirectRule[] {
-	return [
-		{ from: '/writing', to: '/posts', status: 308 },
-		{ from: '/writing/*', to: '/posts/:splat', status: 301 }
-	];
+	return [{ from: '/writing/*', to: '/posts/:splat', status: 301 }];
 }
 
 export function redirectsFromSourceUrls(

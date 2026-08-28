@@ -14,4 +14,4 @@ A post is a file. Frontmatter is YAML. The source of truth is the same git repo 
 
 FilePress still does the unglamorous work: slug derivation, draft and future-date rules, tag archives, RSS, sitemap, loud build errors when a title is missing. The writing surface stays a file on purpose.
 
-Start with [Getting started](/getting-started).
+Start with [Getting started](/docs/getting-started).

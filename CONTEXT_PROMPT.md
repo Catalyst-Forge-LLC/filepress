@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-28) — /writing listing + /docs mount
+
+`/writing` is the posts listing (the “Moved to /posts” stub is gone). Exact `/writing` → `/posts` redirect dropped so the nav URL stays. `/writing/<slug>` still remaps. Product docs are `sites/getfilepress/docs` → `/docs` (`pnpm docs:www` before `dev:www` / `build:www`). Repo-root `docs/` stays operator specs. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-28) — sibling scan + in-repo sites
 
 Sibling dashboard / LocalHelm FilePress plugin now list **in-repo** `sites/*` (getfilepress, demo) plus optional **Scan folder → Add**. Extras live in `.filepress-siblings/extras.json`. In-repo pin is `engine` — Sync must not rewrite the engine `package.json`. Do **not** publish unless asked.

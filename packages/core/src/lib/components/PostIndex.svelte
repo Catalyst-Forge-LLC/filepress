@@ -12,7 +12,8 @@
 		page = 1,
 		totalPages = 1,
 		/** Page-1 URL for the post index (`/` or `/posts`). */
-		indexHref = '/'
+		indexHref = '/',
+		heading = 'Posts'
 	}: {
 		site: SiteConfig;
 		hero?: boolean;
@@ -21,6 +22,7 @@
 		page?: number;
 		totalPages?: number;
 		indexHref?: string;
+		heading?: string;
 	} = $props();
 
 	const hasContent = $derived(featured !== null || posts.length > 0);
@@ -40,9 +42,9 @@
 {:else}
 	<header class="post-header">
 		{#if page <= 1}
-			<h1>Posts</h1>
+			<h1>{heading}</h1>
 		{:else}
-			<p class="eyebrow">Posts</p>
+			<p class="eyebrow">{heading}</p>
 			<h1>Page {page}</h1>
 		{/if}
 	</header>

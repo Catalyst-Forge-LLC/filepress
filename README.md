@@ -4,7 +4,7 @@ Markdown blogs from git. No CMS. No database. A static `build/` folder.
 
 Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script as `getfilepress`).
 
-**Site:** [getfilepress.com](https://getfilepress.com) · **Docs:** [getting started](https://getfilepress.com/getting-started)
+**Site:** [getfilepress.com](https://getfilepress.com) · **Docs:** [getfilepress.com/docs](https://getfilepress.com/docs)
 
 ## Start a site
 
@@ -16,7 +16,7 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 cd ../my-blog && pnpm install && pnpm dev
 ```
 
-`filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Getting started](https://getfilepress.com/getting-started).
+`filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Docs](https://getfilepress.com/docs).
 
 Pin CI on npm (`getfilepress` current is `0.1.19`) or a git SHA / existing tag. `link:` is local only.
 
@@ -33,7 +33,7 @@ Crawls a public site (sitemap/RSS preferred) into a sibling content tree. Option
 
 | Topic | Where |
 | --- | --- |
-| Scaffold, config, posts | [Getting started](https://getfilepress.com/getting-started) |
+| Scaffold, config, posts | [Docs](https://getfilepress.com/docs) · [getting started](https://getfilepress.com/docs/getting-started) |
 | Theme tokens and presets | [docs/THEME.md](docs/THEME.md) |
 | Genie (dev only) | [Genie](https://getfilepress.com/genie) · [spec](docs/GENIE_MODE_SPEC.md) |
 | Deploy | [Deploy](https://getfilepress.com/deploy) · [docs/DEPLOY.md](docs/DEPLOY.md) |

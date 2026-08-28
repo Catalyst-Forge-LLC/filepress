@@ -192,6 +192,10 @@ export default defineConfig(async () => {
 						if (pathMounts.some((m) => path === m.url || path.startsWith(`${m.url}/`))) {
 							return;
 						}
+						// Layout always links these; sites may ship only one.
+						if (path === '/favicon.png' || path === '/favicon.svg') {
+							return;
+						}
 						throw new Error(message);
 					},
 					handleUnseenRoutes: ({ routes }) => {

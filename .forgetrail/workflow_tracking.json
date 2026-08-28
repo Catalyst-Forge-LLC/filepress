@@ -405,6 +405,18 @@
         "Patch each site vite.config"
       ],
       "status": "active"
+    },
+    {
+      "id": "D18",
+      "timestamp": "2026-08-28",
+      "phase": "4-feature-iteration",
+      "decision": "Prerender handleHttpError ignores 404 /favicon.png and /favicon.svg. Layout still links both.",
+      "rationale": "Operator 2026-08-28: localhelm site ship failed on getfilepress 0.1.18 because only favicon.svg existed.",
+      "alternatives_considered": [
+        "Require every site to add favicon.png",
+        "Only link the files that exist"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

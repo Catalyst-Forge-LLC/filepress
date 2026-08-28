@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-28) — missing favicon.png must not fail prerender
+
+Layout always links `/favicon.png` then `/favicon.svg`. adapter-static prerender 404s a missing PNG (`404 /favicon.png (linked from /)`). `handleHttpError` now ignores those two paths. Sites can still drop a PNG. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-28) — Vite allowedHosts for Tailscale names
 
 `packages/app/vite.config.ts` sets `server`/`preview` `allowedHosts: true` so a phone on `*.ts.net` is not Vite-403’d. IPs were already allowed. Sites pick this up after they use this engine and restart `filepress dev`. Do **not** publish unless asked.

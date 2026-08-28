@@ -59,7 +59,7 @@ function siteNeedsSync(site) {
 function boardFrom(inventory) {
 	return {
 		plugin: 'filepress',
-		title: 'FilePress sites',
+		title: 'FilePress Sites',
 		note: [
 			`Engine local ${inventory.engine.local}, npm ${inventory.engine.published ?? 'none'}, sync target ${inventory.engine.target}.`,
 			inventory.engine.note,
@@ -97,7 +97,7 @@ function boardFrom(inventory) {
 
 const plugin = {
 	id: 'filepress',
-	label: 'FilePress sites',
+	label: 'FilePress Sites',
 	async board() {
 		return boardFrom(await bridge(['inventory']));
 	},

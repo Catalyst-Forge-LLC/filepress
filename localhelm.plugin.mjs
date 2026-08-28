@@ -2,7 +2,7 @@
  * FilePress plugin for LocalHelm.
  * LocalHelm hosts the board; this file calls the sibling library (headers, link→npm, ship).
  */
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,21 +10,35 @@ const root = dirname(fileURLToPath(import.meta.url));
 const win = process.platform === 'win32';
 
 function bridge(args) {
-	const result = spawnSync(
-		win ? 'pnpm.cmd' : 'pnpm',
-		['exec', 'tsx', 'scripts/siblings/localhelm-bridge.ts', ...args],
-		{ cwd: root, encoding: 'utf8', windowsHide: true, shell: win },
-	);
-	const stdout = result.stdout ?? '';
-	const stderr = (result.stderr ?? '').trim();
-	if (result.error) throw new Error(result.error.message);
-	const text = stdout.trim();
-	if (!text) throw new Error(stderr || `filepress bridge failed (exit ${result.status})`);
-	try {
-		return JSON.parse(text);
-	} catch {
-		throw new Error(stderr || `filepress bridge returned non-JSON:\n${text.slice(0, 400)}`);
-	}
+	return new Promise((resolve, reject) => {
+		const child = spawn(
+			win ? 'pnpm.cmd' : 'pnpm',
+			['exec', 'tsx', 'scripts/siblings/localhelm-bridge.ts', ...args],
+			{ cwd: root, windowsHide: true, shell: win },
+		);
+		let stdout = '';
+		let stderr = '';
+		child.stdout.on('data', (chunk) => {
+			stdout += chunk;
+		});
+		child.stderr.on('data', (chunk) => {
+			stderr += chunk;
+		});
+		child.on('error', (err) => reject(err));
+		child.on('close', (status) => {
+			const text = stdout.trim();
+			const errText = stderr.trim();
+			if (!text) {
+				reject(new Error(errText || `filepress bridge failed (exit ${status})`));
+				return;
+			}
+			try {
+				resolve(JSON.parse(text));
+			} catch {
+				reject(new Error(errText || `filepress bridge returned non-JSON:\n${text.slice(0, 400)}`));
+			}
+		});
+	});
 }
 
 function actionsFor(site) {
@@ -85,20 +99,20 @@ const plugin = {
 	id: 'filepress',
 	label: 'FilePress sites',
 	async board() {
-		return boardFrom(bridge(['inventory']));
+		return boardFrom(await bridge(['inventory']));
 	},
 	async plan(action, ids) {
 		if (action === 'land') {
 			const args = ['plan', '--action', 'land'];
 			if (ids.length) args.push('--names', ids.join(','));
-			return bridge(args);
+			return await bridge(args);
 		}
 		if (action === 'push') {
 			const args = ['plan', '--action', 'push'];
 			if (ids.length) args.push('--names', ids.join(','));
-			return bridge(args);
+			return await bridge(args);
 		}
-		const inventory = bridge(['inventory']);
+		const inventory = await bridge(['inventory']);
 		const want = new Set(ids);
 		return {
 			action,
@@ -134,7 +148,7 @@ const plugin = {
 		const job = action === 'ship' || action === 'push' ? action : 'sync';
 		const args = ['apply', '--action', job];
 		if (ids.length) args.push('--names', ids.join(','));
-		return bridge(args);
+		return await bridge(args);
 	},
 };
 

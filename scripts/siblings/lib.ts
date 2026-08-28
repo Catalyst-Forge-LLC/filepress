@@ -900,6 +900,8 @@ function run(
 		encoding: 'utf8',
 		shell: win,
 		stdio: inherit ? 'inherit' : ['ignore', 'pipe', 'pipe'],
+		// wrangler + Vite build logs blow the 1MB default and kill the child mid-ship.
+		maxBuffer: 32 * 1024 * 1024,
 		env: process.env
 	};
 	const result = spawnSync(cmd, args, opts);

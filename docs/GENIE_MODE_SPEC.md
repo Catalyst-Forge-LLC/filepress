@@ -83,7 +83,7 @@ Example panel copy (normative intent, not final UI strings):
 | --- | --- | --- |
 | `OLLAMA_HOST` | Default Ollama HTTP API | `http://127.0.0.1:11434` |
 | `FILEPRESS_OLLAMA_MODEL` | Default model for Genie + import | `gemma4:12b` (or site/engine default) |
-| `FILEPRESS_GENIE` | Force Genie on in dev tooling | unset (on when `import.meta.env.DEV`) |
+| `FILEPRESS_GENIE` | **Ignored.** Do not use this to force Genie into a production build. | unset |
 | `OLLANET_HOSTS` | Extra hosts for ollanet scan | unset |
 | `OLLANET_CONFIG` | ollanet config path | `~/.ollanet/config.json` |
 
@@ -143,7 +143,7 @@ Import CLI should share the same detection/suggestion language when `--no-llm` i
 
 **Gates**
 
-- Client: mount panel only when `import.meta.env.DEV` (optional `FILEPRESS_GENIE=1` for explicit force-on in dev; never in PROD builds).
+- Client: mount only when `import.meta.env.DEV` **and** the browser (`browser` from `$app/environment`). Never prerender the FAB. `FILEPRESS_GENIE` must not enable Genie in `filepress build`. Post-build `assert-no-genie` fails the build if `GeniePanel` / `genie-fab` / `/__filepress/genie` appear in `build/`.
 - Server/middleware: register only in Vite `configureServer`—not in adapter-static output.
 - Conditional dynamic `import()` so production client bundles tree-shake the panel away.
 

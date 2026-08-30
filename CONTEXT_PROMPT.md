@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-29) — Genie must not ship in production
+
+TemperPass (`temperpass.dev`) shipped the Genie FAB because the static build hydrated (`csr: true`) and prerendered `GeniePanel`. The JSON error was `/__filepress/genie` returning HTML. Gate is now Vite `DEV` + `browser` (no `FILEPRESS_GENIE` force-on). `filepress build` fails if Genie leaks into `build/`. Sites on an older pin need a getfilepress bump + rebuild. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-28) — /writing listing + /docs mount
 
 `/writing` is the posts listing (the “Moved to /posts” stub is gone). Exact `/writing` → `/posts` redirect dropped so the nav URL stays. `/writing/<slug>` still remaps. Product docs are `sites/getfilepress/docs` → `/docs` (`pnpm docs:www` before `dev:www` / `build:www`). Repo-root `docs/` stays operator specs. Do **not** publish unless asked.

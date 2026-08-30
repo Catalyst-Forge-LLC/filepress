@@ -104,10 +104,16 @@
 			...init,
 			headers: {
 				'content-type': 'application/json',
+				accept: 'application/json',
 				...(init?.headers || {})
 			}
 		});
-		const data = await res.json();
+		const type = res.headers.get('content-type') ?? '';
+		const text = await res.text();
+		if (!type.includes('application/json')) {
+			throw new Error('Genie is only available in filepress dev.');
+		}
+		const data = JSON.parse(text) as { error?: string };
 		if (!res.ok) throw new Error(data.error || res.statusText);
 		return data;
 	}

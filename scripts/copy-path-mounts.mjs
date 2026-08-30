@@ -9,6 +9,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertNoGenieInBuild } from './assert-no-genie.mjs';
 
 const siteRoot = resolve(process.argv[2] ?? '');
 const buildDir = join(siteRoot, 'build');
@@ -21,6 +22,13 @@ const headersTemplate = join(
 if (!existsSync(buildDir)) {
 	console.warn(`filepress: post-build skipped — build dir missing (${buildDir})`);
 	process.exit(0);
+}
+
+try {
+	assertNoGenieInBuild(buildDir);
+} catch (err) {
+	console.error(err instanceof Error ? err.message : err);
+	process.exit(1);
 }
 
 const headersDest = join(buildDir, '_headers');

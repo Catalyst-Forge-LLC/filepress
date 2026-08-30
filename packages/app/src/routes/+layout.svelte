@@ -3,7 +3,6 @@
 	import criticalTheme from '$critical-theme';
 	import { SiteHeader, SiteFooter, isPathMountHref } from '@filepress/core';
 	import config from '$site-config';
-	import GenieHost from '$lib/genie/GenieHost.svelte';
 
 	let { children } = $props();
 
@@ -35,5 +34,8 @@
 
 <SiteFooter site={config} />
 
-<!-- Dev-only Genie Mode (tree-shaken when import.meta.env.DEV is false). -->
-<GenieHost />
+{#if import.meta.env.DEV}
+	{#await import('$lib/genie/GenieHost.svelte') then { default: GenieHost }}
+		<GenieHost />
+	{/await}
+{/if}

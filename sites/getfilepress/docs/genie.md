@@ -17,7 +17,7 @@ Try a look → it activates (page reload) → commit the baked files when it is 
 
 ## What Genie will not do
 
-- **Dev only.** Genie mounts when `import.meta.env.DEV` (optional `FILEPRESS_GENIE=1`). Absent from `filepress preview`, `filepress build`, and the static `build/`.
+- **Dev only.** Genie mounts in the browser during `filepress dev`. Absent from `filepress preview`, `filepress build`, and the static `build/`.
 - **Not a CMS.** Posts stay files in git.
 - **Bake to commit.** Experiments live in gitignored `.filepress-genie/`. What gets committed is the active `theme.css`, `static/`, and `filepress.config.ts`.
 

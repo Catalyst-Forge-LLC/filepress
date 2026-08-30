@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { shouldMountGenie } from './enabled';
+
 	/**
-	 * Mount Genie only in Vite DEV. Dynamic import keeps the panel out of
-	 * production client graphs when this host is tree-shaken / dead-coded.
+	 * Browser + Vite DEV only. Never prerender the FAB into static HTML.
+	 * FILEPRESS_GENIE must not force this on in a production build.
 	 */
-	const enabled =
-		import.meta.env.DEV ||
-		import.meta.env.FILEPRESS_GENIE === '1' ||
-		import.meta.env.FILEPRESS_GENIE === 'true';
+	const enabled = shouldMountGenie({ browser, viteDev: import.meta.env.DEV });
 </script>
 
 {#if enabled}

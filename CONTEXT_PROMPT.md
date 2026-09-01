@@ -28,7 +28,7 @@ Sibling dashboard / LocalHelm FilePress plugin now list **in-repo** `sites/*` (g
 
 ---
 
-## HANDOFF (2026-08-28) — README slim + site accuracy / aiBreze spray
+## HANDOFF (2026-08-28) — README slim + site accuracy / Smell Check spray
 
 Root `README.md` is short (start, import, docs table, not-a-CMS, nutrition). Config / frontmatter / theme / deploy live on getfilepress.com + `docs/*`. Public pins are npm `^0.1.19`. Do **not** invent `v0.1.19` git tags (only `v0.1.0` / `v0.1.1` exist). Git-connected Pages is Cloudflare settings, not a FilePress feature. Product pages speak as FilePress / it. Do **not** publish unless asked.
 

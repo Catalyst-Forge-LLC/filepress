@@ -1,7 +1,7 @@
 # Skill page
 
 How to write the page that installs an agent skill. Live reference:
-[aibreze.com/skill](https://aibreze.com/skill). Multi-skill variant:
+[smellcheck.dev/skill](https://smellcheck.dev/skill). Multi-skill variant:
 [temperpass.dev/install](https://temperpass.dev/install). Public copy:
 [getfilepress.com/skill-page](https://getfilepress.com/skill-page).
 
@@ -12,7 +12,7 @@ partial path.
 
 ## Two variants
 
-1. **Single skill** — one product folder (`skills/<name>/`). aiBreze,
+1. **Single skill** — one product folder (`skills/<name>/`). Smell Check,
    EmberDossier.
 2. **Multi-skill** — copy **one** folder from a set (`passes/<name>/`).
    TemperPass. Keep the per-skill table and any “when to fire” design.
@@ -62,7 +62,7 @@ Not riddle labels.
 - Write “copy it from” with a partial path.
 - Put recovery CLIs, gitignore facts, or sync-script names on the
   product page.
-- Use corporate we or builder I. The product speaks (aiBreze / it,
+- Use corporate we or builder I. The product speaks (Smell Check / it,
   EmberDossier / it, TemperPass / it).
 - Add a scene to satisfy essay law. This is a reference page.
 
@@ -76,10 +76,10 @@ raw files there.
 
 `cursor.mdc` / always-on rules stay out of the skill ZIP.
 
-Reference implementation: `aibreze/scripts/sync-skill-static.mjs`.
+Reference implementation: `smellcheck/scripts/sync-skill-static.mjs`.
 
 ## Fill-in
 
 Copy the template on [getfilepress.com/skill-page](https://getfilepress.com/skill-page)
-and replace the placeholders. Single-skill live page: aiBreze `/skill`.
+and replace the placeholders. Single-skill live page: Smell Check `/skill`.
 Multi-skill live page: TemperPass `/install`.

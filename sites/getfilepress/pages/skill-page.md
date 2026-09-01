@@ -6,13 +6,13 @@ order: 5
 
 A skill is a folder: `SKILL.md` plus whatever that file reads. The page’s job is to get that folder into a skills directory.
 
-This is the house shape. Live single-skill page: [aibreze.com/skill](https://aibreze.com/skill). Multi-skill variant: [temperpass.dev/install](https://temperpass.dev/install). Agent spec: [`docs/SKILL_PAGE.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/SKILL_PAGE.md).
+This is the house shape. Live single-skill page: [smellcheck.dev/skill](https://smellcheck.dev/skill). Multi-skill variant: [temperpass.dev/install](https://temperpass.dev/install). Agent spec: [`docs/SKILL_PAGE.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/SKILL_PAGE.md).
 
 Do not assume the reader already has the repo, knows dest dirs, or can finish a partial path.
 
 ## Two variants
 
-1. **Single skill** — one product folder (`skills/<name>/`). aiBreze, EmberDossier.
+1. **Single skill** — one product folder (`skills/<name>/`). Smell Check, EmberDossier.
 2. **Multi-skill** — copy **one** folder from a set (`passes/<name>/`). TemperPass. Keep the per-skill table and any “when to fire” design. Do not flatten it into a one-folder story.
 
 Same get-the-folder steps either way.

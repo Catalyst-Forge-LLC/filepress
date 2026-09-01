@@ -20,7 +20,7 @@ Preferred house ports (do not claim 5173 for every site):
 | --- | ---: |
 | `demo` | 5179 |
 | `getfilepress` | 5180 |
-| `aibreze-site` | 5181 |
+| `smellcheck-site` | 5181 |
 | `ollanet-site` | 5182 |
 | `ingotvault-site` | 5183 |
 | `finetuna-site` | 5184 |

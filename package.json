@@ -1,6 +1,6 @@
 {
 	"name": "getfilepress",
-	"version": "0.1.24",
+	"version": "0.1.25",
 	"private": false,
 	"type": "module",
 	"description": "FilePress — file-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",
@@ -37,6 +37,7 @@
 		"scripts/new-post.ts",
 		"scripts/preview.mjs",
 		"scripts/copy-path-mounts.mjs",
+		"scripts/assert-no-genie.mjs",
 		"scripts/create-site.mjs",
 		"scripts/ensure-lease.mjs",
 		"scripts/postinstall.mjs",
@@ -51,7 +52,7 @@
 	"scripts": {
 		"postinstall": "node scripts/postinstall.mjs",
 		"filepress": "node scripts/filepress.mjs",
-		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts scripts/siblings/discover.test.ts scripts/new-post.test.ts scripts/preview.test.ts scripts/assert-no-genie.test.ts",
+		"test": "pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts scripts/siblings/discover.test.ts scripts/new-post.test.ts scripts/preview.test.ts scripts/assert-no-genie.test.ts scripts/published-files.test.ts",
 		"check": "pnpm filepress check --site demo",
 		"build": "pnpm filepress build --site demo",
 		"build:demo": "pnpm filepress build --site demo",

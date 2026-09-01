@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-08-31) — 0.1.24 tarball missing assert-no-genie.mjs
+
+`copy-path-mounts.mjs` imports `assert-no-genie.mjs`, but `package.json` `files` omitted it. `pnpm ship` on sibling sites dies after Kit build (no `_headers`, no `/docs` mount). Fixed in **0.1.25**. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-29) — Genie must not ship in production
 
 TemperPass (`temperpass.dev`) shipped the Genie FAB because the static build hydrated (`csr: true`) and prerendered `GeniePanel`. The JSON error was `/__filepress/genie` returning HTML. Gate is now Vite `DEV` + `browser` (no `FILEPRESS_GENIE` force-on). `filepress build` fails if Genie leaks into `build/`. Sites on an older pin need a getfilepress bump + rebuild. Do **not** publish unless asked.

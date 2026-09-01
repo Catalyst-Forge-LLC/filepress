@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { missingPublishedScriptImports } from "./published-files.mjs";
 
 const here = fileURLToPath(import.meta.url);
 const packageRoot = join(dirname(here), "..");
@@ -101,6 +102,15 @@ async function bumpIfNeeded() {
 }
 
 export async function runPublishGate() {
+	const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+	const missing = missingPublishedScriptImports(pkg, packageRoot);
+	if (missing.length) {
+		console.error(
+			"package.json files is missing imports used by published scripts:\n" +
+				missing.map((m) => `  ${m}`).join("\n"),
+		);
+		process.exit(1);
+	}
 	ensureLogin();
 	await bumpIfNeeded();
 }

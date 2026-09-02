@@ -8,7 +8,7 @@ import {
 	criticalThemePlugin,
 	writeCriticalThemeModule
 } from './vite-plugin-critical-theme.ts';
-import { geniePlugin } from './vite-plugin-genie.ts';
+import { geniePlugin, resolveGenieMount } from './vite-plugin-genie.ts';
 import { pathMountsPlugin } from './vite-plugin-path-mounts.ts';
 import { filepressLeaseName, localberthGet } from './localberth-port.ts';
 import type { PathMount } from '../core/src/lib/paths-shared.ts';
@@ -122,8 +122,9 @@ function resolvePort(): number | undefined {
 
 const fixedPort = resolvePort();
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command, mode }) => {
 	const hints = await loadSiteHints();
+	const genieMount = resolveGenieMount(appRoot, { command, mode });
 	const pathMounts = hints.paths;
 	const sitePreset = resolveSitePreset(hints.theme);
 	writeFileSync(
@@ -146,7 +147,8 @@ export default defineConfig(async () => {
 			alias: [
 				{ find: /^@filepress\/core\/server$/, replacement: coreServer },
 				{ find: /^@filepress\/core\/theme$/, replacement: coreTheme },
-				{ find: /^@filepress\/core$/, replacement: coreEntry }
+				{ find: /^@filepress\/core$/, replacement: coreEntry },
+				{ find: /^\$genie-mount$/, replacement: genieMount }
 			]
 		},
 		optimizeDeps: {
@@ -167,7 +169,8 @@ export default defineConfig(async () => {
 					'$site-config': siteConfig,
 					'$site-theme': siteTheme,
 					'$site-preset': sitePreset,
-					'$critical-theme': criticalThemeOut
+					'$critical-theme': criticalThemeOut,
+					'$genie-mount': genieMount
 				},
 				paths: {
 					relative: false

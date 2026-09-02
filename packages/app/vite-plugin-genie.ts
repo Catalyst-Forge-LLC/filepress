@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { join } from 'node:path';
 import type { Plugin } from 'vite';
 import {
 	applyConfigOnly,
@@ -28,6 +29,21 @@ function sendJson(res: ServerResponse, status: number, data: unknown) {
 	res.setHeader('Content-Type', 'application/json; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store');
 	res.end(body);
+}
+
+/**
+ * `$genie-mount` in +layout. A Svelte `{#if import.meta.env.DEV}` + `import()`
+ * still emits GenieHost/GeniePanel chunks under Vite 8.2 / Rolldown. Point the
+ * alias at a stub during `vite build` so those modules never enter the graph.
+ */
+export function resolveGenieMount(
+	appRoot: string,
+	opts: { command: string; mode?: string }
+): string {
+	const live = join(appRoot, 'src/lib/genie/GenieHost.svelte');
+	const stub = join(appRoot, 'src/lib/genie/GenieMount.stub.svelte');
+	if (opts.command === 'serve' && opts.mode !== 'production') return live;
+	return stub;
 }
 
 /**

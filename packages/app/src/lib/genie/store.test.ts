@@ -13,7 +13,7 @@ import {
 	updateVersionMeta,
 	writeSnapshot
 } from './store.ts';
-import { geniePlugin } from '../../../vite-plugin-genie.ts';
+import { geniePlugin, resolveGenieMount } from '../../../vite-plugin-genie.ts';
 
 const brief = {
 	mood: 'test',
@@ -199,5 +199,14 @@ export default defineFilepressConfig({
 
 	it('keeps the Genie plugin off the production Vite build', () => {
 		expect(geniePlugin('/tmp/site').apply).toBe('serve');
+	});
+
+	it('aliases $genie-mount to the stub on vite build', () => {
+		const stub = resolveGenieMount('/app', { command: 'build', mode: 'production' });
+		const preview = resolveGenieMount('/app', { command: 'serve', mode: 'production' });
+		const live = resolveGenieMount('/app', { command: 'serve', mode: 'development' });
+		expect(stub.replace(/\\/g, '/')).toMatch(/GenieMount\.stub\.svelte$/);
+		expect(preview.replace(/\\/g, '/')).toMatch(/GenieMount\.stub\.svelte$/);
+		expect(live.replace(/\\/g, '/')).toMatch(/GenieHost\.svelte$/);
 	});
 });

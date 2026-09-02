@@ -143,9 +143,8 @@ Import CLI should share the same detection/suggestion language when `--no-llm` i
 
 **Gates**
 
-- Client: mount only when `import.meta.env.DEV` **and** the browser (`browser` from `$app/environment`). Never prerender the FAB. `FILEPRESS_GENIE` must not enable Genie in `filepress build`. Post-build `assert-no-genie` fails the build if `GeniePanel` / `genie-fab` / `/__filepress/genie` appear in `build/`.
+- Client: `$genie-mount` aliases to `GenieHost.svelte` only for `vite` serve in non-production mode. `vite build` (and `vite preview`) resolve an empty stub so GenieHost/GeniePanel never enter the graph. A Svelte `{#if import.meta.env.DEV}` + `import()` is not enough — Vite 8.2 still emits those chunks. Host still requires `browser` + Vite DEV. Post-build `assert-no-genie` fails the build if `GeniePanel` / `genie-fab` / `/__filepress/genie` appear in `build/`.
 - Server/middleware: register only in Vite `configureServer`—not in adapter-static output.
-- Conditional dynamic `import()` so production client bundles tree-shake the panel away.
 
 ---
 

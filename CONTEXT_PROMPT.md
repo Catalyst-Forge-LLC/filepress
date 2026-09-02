@@ -4,6 +4,12 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-09-02) — Genie still in Vite 8.2 production graph
+
+`{#if import.meta.env.DEV}{await import(GenieHost)}` still emits `GeniePanel` CSS/JS under Vite 8.2 (smellcheck `pnpm ship`). `$genie-mount` now aliases to an empty stub on `vite build`. **0.1.27**. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-08-31) — 0.1.24 tarball missing assert-no-genie.mjs
 
 `copy-path-mounts.mjs` imports `assert-no-genie.mjs`, but `package.json` `files` omitted it. `pnpm ship` on sibling sites dies after Kit build (no `_headers`, no `/docs` mount). Fixed in **0.1.25**. Do **not** publish unless asked.

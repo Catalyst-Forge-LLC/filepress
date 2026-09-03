@@ -14,7 +14,8 @@ export {
 	ogImageUrl,
 	postsIndexPath,
 	buildRedirectRules,
-	THEME_PRESETS
+	THEME_PRESETS,
+	NAV_ICON_NAMES
 } from './config';
 export type {
 	SiteConfig,
@@ -23,6 +24,7 @@ export type {
 	Topic,
 	NavItem,
 	NavIconName,
+	FooterCredit,
 	PathMount,
 	ThemePreset,
 	RedirectRule

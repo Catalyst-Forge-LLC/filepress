@@ -4,6 +4,24 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ---
 
+## HANDOFF (2026-09-03) — Optional footerCredit
+
+`filepress.config.ts` may set `footerCredit: { label, href, preface? }`. Renders beside the copyright as “In partnership with {label}” (preface is overridable). First consumer: sibling `acmegeek` → https://www.catalystforge.com/. Do **not** publish unless asked.
+
+---
+
+## HANDOFF (2026-09-03) — LocalSlip only (LocalBerth name is gone)
+
+Lease reader, `ensure-lease`, sibling `ls`, and docs use **`localslip`**. `docs/LOCALSLIP.md` replaces `LOCALBERTH.md`. `packages/app/localslip-port.ts` replaces `localberth-port.ts`. Do not spawn `localberth`; the npm bin is `localslip` only.
+
+---
+
+## HANDOFF (2026-09-03) — WordPress import overlay
+
+`filepress import` now probes `/wp-json/wp/v2`. Categories become FilePress tags; nav items like Recommendations point at `/tags/<slug>`. Date permalinks classify as posts; `/category/` archives are tags, not posts. Inline Astra hex (body bg / selection) fills the theme when `:root` tokens are missing. First consumer: sibling `acmegeek`. Do **not** publish unless asked.
+
+---
+
 ## HANDOFF (2026-09-02) — Genie still in Vite 8.2 production graph
 
 `{#if import.meta.env.DEV}{await import(GenieHost)}` still emits `GeniePanel` CSS/JS under Vite 8.2 (smellcheck `pnpm ship`). `$genie-mount` now aliases to an empty stub on `vite build`. **0.1.27**. Do **not** publish unless asked.

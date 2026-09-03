@@ -30,13 +30,22 @@ export interface Topic {
 }
 
 /** Built-in icons that chrome can render beside a nav/footer label. */
-export type NavIconName = 'github';
+export const NAV_ICON_NAMES = ['github', 'hn', 'thingiverse'] as const;
+export type NavIconName = (typeof NAV_ICON_NAMES)[number];
 
 export interface NavItem {
 	label: string;
 	href: string;
 	/** Optional icon rendered with the label (e.g. GitHub mark). */
 	icon?: NavIconName;
+}
+
+/** Optional footer credit, e.g. a named partnership with an outbound link. */
+export interface FooterCredit {
+	/** Words before the linked name. Default: "In partnership with". */
+	preface: string;
+	label: string;
+	href: string;
 }
 
 /** Fully-resolved site configuration (after defaults are applied). */
@@ -73,6 +82,8 @@ export interface SiteConfig {
 	 * Pass an explicit list (including RSS/Topics if you still want them) to customize.
 	 */
 	footerLinks: NavItem[];
+	/** Partnership / credit line under the copyright; null when omitted. */
+	footerCredit: FooterCredit | null;
 	topics: Topic[];
 	newsletter: NewsletterConfig | null;
 	/**
@@ -105,6 +116,12 @@ export interface SiteConfigInput {
 	nav?: NavItem[];
 	/** Custom footer links; replaces the default RSS + Topics row when set. */
 	footerLinks?: NavItem[];
+	/** Optional credit under the copyright (partnership, studio, etc.). */
+	footerCredit?: {
+		preface?: string;
+		label: string;
+		href: string;
+	};
 	topics?: Topic[];
 	newsletter?: NewsletterConfig | null;
 	/** Mount site-relative dirs at URL prefixes (docs shells, etc.). */
@@ -129,11 +146,29 @@ function normalizeNavItems(items: NavItem[] | undefined): NavItem[] | null {
 			throw new Error('filepress.config: nav/footerLinks entries need non-empty label and href.');
 		}
 		const icon = item.icon;
-		if (icon != null && icon !== 'github') {
-			throw new Error(`filepress.config: unsupported icon "${String(icon)}" (supported: github).`);
+		if (icon != null && !NAV_ICON_NAMES.includes(icon)) {
+			throw new Error(
+				`filepress.config: unsupported icon "${String(icon)}" (supported: ${NAV_ICON_NAMES.join(', ')}).`
+			);
 		}
 		return icon ? { label, href, icon } : { label, href };
 	});
+}
+
+function normalizeFooterCredit(
+	credit: SiteConfigInput['footerCredit']
+): FooterCredit | null {
+	if (!credit) return null;
+	const label = (credit.label ?? '').trim();
+	const href = (credit.href ?? '').trim();
+	if (!label || !href) {
+		throw new Error('filepress.config: footerCredit needs non-empty label and href.');
+	}
+	if (!/^https?:\/\//i.test(href)) {
+		throw new Error('filepress.config: footerCredit.href must start with http(s)://.');
+	}
+	const preface = (credit.preface ?? 'In partnership with').trim() || 'In partnership with';
+	return { preface, label, href };
 }
 
 /** Path to page 1 of the chronological post index. */
@@ -202,6 +237,7 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		homePage,
 		nav: normalizeNavItems(input.nav) ?? defaultNav,
 		footerLinks: normalizeNavItems(input.footerLinks) ?? [...defaultFooterLinks],
+		footerCredit: normalizeFooterCredit(input.footerCredit),
 		topics: input.topics ?? [],
 		newsletter: input.newsletter ?? null,
 		paths: normalizePathMounts(input.paths),

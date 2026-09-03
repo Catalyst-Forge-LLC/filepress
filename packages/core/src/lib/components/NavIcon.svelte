@@ -16,4 +16,19 @@
 			0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
 		/>
 	</svg>
+{:else if name === 'hn'}
+	<svg class="nav-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+		<rect x="1" y="1" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.2" />
+		<path
+			fill="currentColor"
+			d="M4.35 4h1.85l1.8 3.55L9.8 4h1.85L9.15 8.35V12H7.85V8.35L4.35 4z"
+		/>
+	</svg>
+{:else if name === 'thingiverse'}
+	<svg class="nav-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+		<path
+			fill="currentColor"
+			d="M8 1.4 14.2 4.7v6.6L8 14.6 1.8 11.3V4.7L8 1.4zm0 1.7L3.9 5.2 8 7.4l4.1-2.2L8 3.1zM3.1 6.3 7.3 8.6v4.3L3.1 10.6V6.3zm9.8 0v4.3L8.7 12.9V8.6l4.2-2.3z"
+		/>
+	</svg>
 {/if}

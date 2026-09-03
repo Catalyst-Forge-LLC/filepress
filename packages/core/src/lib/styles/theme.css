@@ -212,10 +212,27 @@ body {
 	color: var(--ink-faint);
 }
 
+.site-footer .footer-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.2rem;
+}
+
+.site-footer .footer-end {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.45rem;
+}
+
+.site-footer .footer-collections,
 .site-footer .footer-links {
 	display: flex;
 	align-items: center;
-	gap: 1.1rem;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.35rem 1.1rem;
 }
 
 .site-footer a {

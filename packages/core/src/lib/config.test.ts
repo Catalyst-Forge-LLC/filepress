@@ -16,6 +16,7 @@ describe('defineFilepressConfig', () => {
 			{ label: 'RSS', href: '/rss.xml' },
 			{ label: 'Topics', href: '/topics' }
 		]);
+		expect(cfg.footerCredit).toBeNull();
 		expect(cfg.topics).toEqual([]);
 		expect(cfg.newsletter).toBeNull();
 		expect(cfg.logo).toBe('/logo.png');
@@ -50,6 +51,36 @@ describe('defineFilepressConfig', () => {
 		]);
 	});
 
+	it('normalizes footerCredit and defaults the preface', () => {
+		const cfg = defineFilepressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			footerCredit: { label: 'Catalyst Forge', href: 'https://www.catalystforge.com/' }
+		});
+		expect(cfg.footerCredit).toEqual({
+			preface: 'In partnership with',
+			label: 'Catalyst Forge',
+			href: 'https://www.catalystforge.com/'
+		});
+	});
+
+	it('rejects an incomplete or non-http footerCredit', () => {
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				footerCredit: { label: '', href: 'https://www.catalystforge.com/' }
+			})
+		).toThrow(/footerCredit needs non-empty/);
+		expect(() =>
+			defineFilepressConfig({
+				title: 'X',
+				url: 'https://x.example.com',
+				footerCredit: { label: 'Catalyst Forge', href: '/partner' }
+			})
+		).toThrow(/http\(s\)/);
+	});
+
 	it('rejects empty nav entries and unknown icons', () => {
 		expect(() =>
 			defineFilepressConfig({
@@ -65,6 +96,15 @@ describe('defineFilepressConfig', () => {
 				nav: [{ label: 'X', href: '/', icon: 'gitlab' as 'github' }]
 			})
 		).toThrow(/unsupported icon/);
+		const withMarks = defineFilepressConfig({
+			title: 'X',
+			url: 'https://x.example.com',
+			footerLinks: [
+				{ label: 'HN', href: 'https://news.ycombinator.com/user?id=x', icon: 'hn' },
+				{ label: 'Thingiverse', href: 'https://www.thingiverse.com/x/designs', icon: 'thingiverse' }
+			]
+		});
+		expect(withMarks.footerLinks.map((item) => item.icon)).toEqual(['hn', 'thingiverse']);
 	});
 
 	it('defaults nav to Home + /posts when homePage is set', () => {

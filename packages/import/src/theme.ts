@@ -438,10 +438,54 @@ export function parseBriefJson(raw: string): DesignBrief {
 	};
 }
 
+function normalizeHex(raw: string | undefined): string | undefined {
+	if (!raw) return undefined;
+	const v = raw.trim();
+	if (/^#([0-9a-fA-F]{3})$/.test(v)) {
+		return `#${v[1]}${v[1]}${v[2]}${v[2]}${v[3]}${v[3]}`;
+	}
+	if (/^#([0-9a-fA-F]{6})$/.test(v)) return v;
+	return undefined;
+}
+
+function firstInlineHex(html: string, patterns: RegExp[]): string | undefined {
+	for (const re of patterns) {
+		const m = html.match(re);
+		const hex = normalizeHex(m?.[1]);
+		if (hex) return hex;
+	}
+	return undefined;
+}
+
+/** Fallback when the source theme (Astra, etc.) inlines hex instead of :root tokens. */
+function tokensFromInlineRules(html: string): Partial<DesignBrief['tokens']> {
+	const bg = firstInlineHex(html, [
+		/body(?:,[^{]{0,80})?\{[^}]*background-color:\s*(#[0-9a-fA-F]{3,8})/i
+	]);
+	const accent = firstInlineHex(html, [
+		/::selection\{[^}]*background-color:\s*(#[0-9a-fA-F]{3,8})/i,
+		/\.elementor-button[^{]*\{[^}]*background-color:\s*(#[0-9a-fA-F]{3,8})/i,
+		/(?:^|[,}])\s*a(?:,[^{]{0,40})?\{[^}]*color:\s*(#[0-9a-fA-F]{3,8})/i
+	]);
+	const ink = firstInlineHex(html, [
+		/body,h1,[^{]{0,120}\{[^}]*color:\s*(#[0-9a-fA-F]{3,8})/i,
+		/body(?:,[^{]{0,80})?\{[^}]*[^-]color:\s*(#[0-9a-fA-F]{3,8})/i
+	]);
+	const out: Partial<DesignBrief['tokens']> = {};
+	if (accent) {
+		out.accent = accent;
+		out.accentStrong = darken(accent);
+	}
+	if (bg) out.bg = bg;
+	if (ink) out.ink = ink;
+	return out;
+}
+
 /** Extract CSS custom properties from inline :root blocks (source site). */
 export function tokensFromSourceCss(html: string): Partial<DesignBrief['tokens']> {
+	const fallback = tokensFromInlineRules(html);
 	const m = html.match(/:root\s*\{([^}]+)\}/);
-	if (!m) return {};
+	if (!m) return fallback;
 	const block = m[1];
 	const vars = new Map<string, string>();
 	for (const hit of block.matchAll(/--([a-zA-Z0-9-_]+)\s*:\s*([^;}]+)/g)) {
@@ -457,15 +501,15 @@ export function tokensFromSourceCss(html: string): Partial<DesignBrief['tokens']
 	};
 	const firstHex = (...names: string[]) => {
 		for (const n of names) {
-			const v = resolve(n);
-			if (v && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)) return v;
+			const v = normalizeHex(resolve(n));
+			if (v) return v;
 		}
 		return undefined;
 	};
 	const accent = firstHex('accent-color', 'accent', 'color-gold', 'color-augment');
 	const bg = firstHex('bg-color', 'bg', 'color-bg', 'color-cream');
 	const ink = firstHex('text-color', 'ink', 'color-espresso');
-	const out: Partial<DesignBrief['tokens']> = {};
+	const out: Partial<DesignBrief['tokens']> = { ...fallback };
 	if (accent) {
 		out.accent = accent;
 		out.accentStrong = firstHex('accent-strong', 'color-understand') || accent;

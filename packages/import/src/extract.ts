@@ -3,6 +3,12 @@ import type { DiscoverResult } from './discover.ts';
 import { fetchText, resolveUrl, sameOrigin } from './fetch.ts';
 import { htmlToMarkdown } from './html-to-md.ts';
 import type { SiteIR, SiteIRPage, SiteIRPost } from './ir.ts';
+import {
+	fetchWordpressCatalog,
+	navFromWordpress,
+	topicsFromWordpress,
+	type WpCatalog
+} from './wordpress.ts';
 
 const RESERVED = new Set([
 	'posts',
@@ -137,12 +143,14 @@ function normalizeTagSlug(raw: string): string {
 
 function tagsFromDoc(document: Document): string[] {
 	const tags = new Set<string>();
-	for (const a of document.querySelectorAll('a[href*="/tag"], a[href*="/tags/"]')) {
+	for (const a of document.querySelectorAll(
+		'a[href*="/tag"], a[href*="/tags/"], a[href*="/category/"], a[rel="tag"], a[rel="category"]'
+	)) {
 		const href = a.getAttribute('href') ?? '';
-		const m = href.match(/\/tags?\/([^/]+)/i);
+		const m = href.match(/\/(?:tags?|categor(?:y|ies))\/([^/]+)/i);
 		if (m) {
 			const t = normalizeTagSlug(decodeURIComponent(m[1]));
-			if (t) tags.add(t);
+			if (t && t !== 'uncategorized') tags.add(t);
 		}
 	}
 	for (const chip of document.querySelectorAll('.tag-chip, .tag, [rel="tag"]')) {
@@ -186,11 +194,30 @@ function uniqueSlug(base: string, used: Set<string>): string {
 	return candidate;
 }
 
+function pathKeyOf(url: string): string {
+	try {
+		return new URL(url).pathname.replace(/\/+$/, '') || '/';
+	} catch {
+		return url;
+	}
+}
+
 /** Build SiteIR from discovery + HTML extraction. */
 export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 	const { origin, urls, rss, rssTitle } = discovered;
 	const notes: string[] = [];
 	const usedSlugs = new Set<string>();
+	let wp: WpCatalog | null = null;
+	try {
+		wp = await fetchWordpressCatalog(origin);
+		if (wp) {
+			notes.push(
+				`WordPress REST: ${wp.posts.length} posts, ${wp.pages.length} pages, ${wp.categories.length} categories.`
+			);
+		}
+	} catch (e) {
+		notes.push(`WordPress REST skipped: ${e instanceof Error ? e.message : e}`);
+	}
 
 	const homeUrl = urls.find((u) => u.kind === 'home')?.url ?? `${origin}/`;
 	const homeDoc = await loadDoc(homeUrl);
@@ -235,6 +262,9 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 		if (homeMd.length > 200 && paragraphs.length >= 2) {
 			homeMarkdown = homeMd;
 			notes.push('Home bio is long enough for pages/home.md; the post index moves to /posts.');
+		} else if (wp && homeMd.length > 20) {
+			homeMarkdown = homeMd;
+			notes.push('WordPress home page kept as pages/home.md even though it is short.');
 		} else {
 			notes.push('Home bio mapped to config `lede` (posts remain the index).');
 		}
@@ -243,10 +273,12 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 	const posts: SiteIRPost[] = [];
 	const rssByPath = new Map(rss.map((r) => [new URL(r.link, origin).pathname.replace(/\/+$/, ''), r]));
 
+	const wpByPath = new Map((wp?.posts ?? []).map((p) => [pathKeyOf(p.link), p]));
 	const postUrls = [
 		...new Set([
 			...urls.filter((u) => u.kind === 'post').map((u) => u.url),
-			...rss.map((r) => resolveUrl(origin, r.link)).filter((u): u is string => Boolean(u))
+			...rss.map((r) => resolveUrl(origin, r.link)).filter((u): u is string => Boolean(u)),
+			...(wp?.posts ?? []).map((p) => p.link)
 		])
 	];
 
@@ -269,17 +301,28 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 			notes.push(`Skipped thin post body: ${finalUrl}`);
 			continue;
 		}
-		const slug = uniqueSlug(slugFromUrl(finalUrl), usedSlugs);
+		const wpPost =
+			wpByPath.get(pathKey) ??
+			wp?.posts.find((p) => p.slug === slugFromUrl(finalUrl) || pathKeyOf(p.link) === pathKey);
+		const slug = uniqueSlug(wpPost?.slug || slugFromUrl(finalUrl), usedSlugs);
 		const date =
+			(wpPost?.date && /^\d{4}-\d{2}-\d{2}$/.test(wpPost.date) ? wpPost.date : null) ||
 			rfc822ToIso(rssItem?.pubDate ?? null) ||
 			dateFromDoc(document) ||
 			new Date().toISOString().slice(0, 10);
+		// WP REST categories/tags are authoritative. HTML chips pick up theme
+		// category widgets and stamp every heading onto every post.
+		const tags = wpPost ? [...wpPost.tags] : tagsFromDoc(document);
 		posts.push({
 			slug,
-			title: rssItem?.title || titleFromDoc(document),
+			title: wpPost?.title || rssItem?.title || titleFromDoc(document),
 			date,
-			tags: tagsFromDoc(document),
-			description: rssItem?.description || subtitle || metaContent(document, 'meta[name="description"]'),
+			tags,
+			description:
+				wpPost?.excerpt ||
+				rssItem?.description ||
+				subtitle ||
+				metaContent(document, 'meta[name="description"]'),
 			markdown,
 			sourceUrl: finalUrl,
 			imageUrls: extractImages(clone, finalUrl, origin)
@@ -290,7 +333,18 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 	posts.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug.localeCompare(b.slug)));
 
 	const pages: SiteIRPage[] = [];
-	const pageUrls = urls.filter((u) => u.kind === 'page');
+	const pageUrlSet = new Set<string>();
+	const pageUrls = [
+		...urls.filter((u) => u.kind === 'page'),
+		...(wp?.pages ?? [])
+			.filter((p) => !p.isHome)
+			.map((p) => ({ url: p.link, kind: 'page' as const }))
+	].filter((u) => {
+		const key = pathKeyOf(u.url);
+		if (pageUrlSet.has(key)) return false;
+		pageUrlSet.add(key);
+		return true;
+	});
 	let order = 1;
 	for (const { url } of pageUrls) {
 		const loaded = await loadDoc(url);
@@ -298,6 +352,10 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 		const { document, finalUrl } = loaded;
 		const path = new URL(finalUrl).pathname.replace(/\/+$/, '') || '/';
 		if (path === '/') continue;
+		if (slugFromUrl(finalUrl) === 'sample-page') {
+			notes.push(`Skipped default WordPress sample page: ${finalUrl}`);
+			continue;
+		}
 		const main = pickMain(document);
 		const clone = main.cloneNode(true) as Element;
 		clone.querySelector('h1')?.remove();
@@ -328,32 +386,38 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 		notes.push(`Page ${finalUrl} → /${slug}`);
 	}
 
-	// Topics from tags
+	// Topics from WordPress categories when present; else from extracted tags
 	const tagCounts = new Map<string, number>();
 	for (const p of posts) {
 		for (const t of p.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
 	}
-	const topics = [...tagCounts.entries()]
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 12)
-		.map(([tag]) => ({
-			label: tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-			tag
-		}));
+	const topics = wp
+		? topicsFromWordpress(wp)
+		: [...tagCounts.entries()]
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 12)
+				.map(([tag]) => ({
+					label: tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+					tag
+				}));
 
-	const nav: Array<{ label: string; href: string }> = homeMarkdown
-		? [
-				{ label: 'Home', href: '/' },
-				{ label: 'Posts', href: '/posts' }
-			]
-		: [{ label: 'Posts', href: '/' }];
-	for (const page of pages) {
-		nav.push({
-			label: page.title,
-			href: `/${page.slug}`
-		});
+	const nav: Array<{ label: string; href: string }> = wp
+		? navFromWordpress(wp, { homePage: Boolean(homeMarkdown) })
+		: homeMarkdown
+			? [
+					{ label: 'Home', href: '/' },
+					{ label: 'Posts', href: '/posts' }
+				]
+			: [{ label: 'Posts', href: '/' }];
+	if (!wp) {
+		for (const page of pages) {
+			nav.push({
+				label: page.title,
+				href: `/${page.slug}`
+			});
+		}
+		if (topics.length) nav.push({ label: 'Topics', href: '/topics' });
 	}
-	if (topics.length) nav.push({ label: 'Topics', href: '/topics' });
 
 	const assets: string[] = [];
 	if (homeDoc) {
@@ -365,6 +429,12 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 			const abs = resolveUrl(homeUrl, href);
 			if (abs && sameOrigin(abs, origin)) assets.push(abs);
 		}
+		const logoImg = homeDoc.document.querySelector('img.custom-logo, .custom-logo-link img');
+		const logoSrc = logoImg?.getAttribute('src');
+		if (logoSrc) {
+			const abs = resolveUrl(homeUrl, logoSrc);
+			if (abs) assets.push(abs);
+		}
 	}
 	// Common fallbacks often linked from HTML even when not in <link>
 	for (const path of ['/favicon.ico', '/favicon.svg', '/favicon-64.png', '/apple-touch-icon.png']) {
@@ -372,7 +442,7 @@ export async function extractSite(discovered: DiscoverResult): Promise<SiteIR> {
 	}
 
 	return {
-		source: { url: origin, generator },
+		source: { url: origin, generator: generator ?? (wp ? 'WordPress' : null) },
 		identity: {
 			title,
 			description: description || `${title} — imported into filepress.`,

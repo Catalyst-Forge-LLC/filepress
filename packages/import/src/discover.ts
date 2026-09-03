@@ -16,12 +16,14 @@ function asArray<T>(v: T | T[] | undefined | null): T[] {
 	return Array.isArray(v) ? v : [v];
 }
 
-function classify(url: string, origin: string): DiscoveredUrl['kind'] {
+export function classify(url: string, origin: string): DiscoveredUrl['kind'] {
 	const u = new URL(url);
 	if (u.origin !== new URL(origin).origin) return 'other';
 	const path = u.pathname.replace(/\/+$/, '') || '/';
 	if (path === '/') return 'home';
-	if (/\/tags?\//i.test(path) || /\/topics?\//i.test(path)) return 'tag';
+	if (/\/wp-(content|includes|admin|json|login)/i.test(path)) return 'other';
+	if (/\/(tags?|topics?|categor(?:y|ies))\//i.test(path)) return 'tag';
+	if (/^\/\d{4}\/\d{2}(?:\/\d{2})?\//.test(path)) return 'post';
 	if (/\/(writing|essays|posts|blog|articles)\/[^/]+/i.test(path)) return 'post';
 	if (/\/(writing|essays|posts|blog|articles)\/?$/i.test(path)) return 'listing';
 	if (/\/(about|contact|speaking|now|colophon|privacy|resume|cv)\/?$/i.test(path)) return 'page';

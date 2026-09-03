@@ -74,4 +74,12 @@ describe('tokensFromSourceCss', () => {
 		expect(t.accent).toBe('#E8931A');
 		expect(t.bg).toBe('#FBF8F2');
 	});
+
+	it('falls back to Astra-style inline hex when :root has no brand tokens', () => {
+		const html = `a,.page-title{color:#0274be;}body,.ast-separate-container{background-color:#eddea7;}body,h1,.entry-title a{color:#3a3a3a;}::selection{background-color:#7f1b1e;color:#ffffff;}`;
+		const t = tokensFromSourceCss(html);
+		expect(t.bg).toBe('#eddea7');
+		expect(t.accent).toBe('#7f1b1e');
+		expect(t.ink).toBe('#3a3a3a');
+	});
 });

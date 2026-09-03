@@ -693,7 +693,7 @@ export async function gitDirtyMap(repoRoots: string[]): Promise<Map<string, bool
 	return new Map([...tracks].map(([repo, t]) => [repo, t.dirty]));
 }
 
-/** `localberth ls` prints `name\tport\tbind\tkind\tfirewall` per lease. */
+/** `localslip ls` prints `name\tport\tbind\tkind\tfirewall` per lease. */
 export function parseLeaseTable(tsv: string): Map<string, number> {
 	const leases = new Map<string, number>();
 	for (const line of tsv.split(/\r?\n/)) {
@@ -706,24 +706,24 @@ export function parseLeaseTable(tsv: string): Map<string, number> {
 }
 
 const LEASE_TTL_MS = 30_000;
-let localberthMissing = false;
+let localslipMissing = false;
 let leaseCache: { at: number; table: Map<string, number> } | null = null;
 
 /**
- * One `localberth ls` per pass beats one `localberth get` per site by ~8s on Windows.
- * Only a spawn failure (no localberth on PATH) disables the lookup; a slow or failed
+ * One `localslip ls` per pass beats one `localslip get` per site by ~8s on Windows.
+ * Only a spawn failure (no localslip on PATH) disables the lookup; a slow or failed
  * run keeps the last good table so ports do not blink out of the board.
  */
 export async function leaseTable(): Promise<Map<string, number>> {
-	if (localberthMissing) return new Map();
+	if (localslipMissing) return new Map();
 	if (leaseCache && Date.now() - leaseCache.at < LEASE_TTL_MS) return leaseCache.table;
-	const r = await exec('localberth', ['ls'], { timeout: 6000 });
+	const r = await exec('localslip', ['ls'], { timeout: 6000 });
 	if (r.spawnFailed) {
-		localberthMissing = true;
+		localslipMissing = true;
 		return new Map();
 	}
 	if (r.status !== 0) {
-		console.warn(`siblings: localberth ls failed (${r.status}) ${r.stderr.trim()}`);
+		console.warn(`siblings: localslip ls failed (${r.status}) ${r.stderr.trim()}`);
 		return leaseCache?.table ?? new Map();
 	}
 	const table = parseLeaseTable(r.stdout);

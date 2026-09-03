@@ -33,7 +33,7 @@ Site `package.json`:
 }
 ```
 
-Local `filepress dev` follows `FILEPRESS_PORT`, then a LocalBerth lease, then Vite 5173. Details: [LOCALBERTH.md](./LOCALBERTH.md).
+Local `filepress dev` follows `FILEPRESS_PORT`, then a LocalSlip lease, then Vite 5173. Details: [LOCALSLIP.md](./LOCALSLIP.md).
 
 ```bash
 # once, in the engine

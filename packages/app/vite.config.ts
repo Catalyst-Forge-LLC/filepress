@@ -10,7 +10,7 @@ import {
 } from './vite-plugin-critical-theme.ts';
 import { geniePlugin, resolveGenieMount } from './vite-plugin-genie.ts';
 import { pathMountsPlugin } from './vite-plugin-path-mounts.ts';
-import { filepressLeaseName, localberthGet } from './localberth-port.ts';
+import { filepressLeaseName, localslipGet } from './localslip-port.ts';
 import type { PathMount } from '../core/src/lib/paths-shared.ts';
 import { unexpectedUnseenPrerenderRoutes } from './src/lib/prerender-empty-ok.ts';
 import { buildRedirectRules, THEME_PRESETS, type ThemePreset } from '../core/src/lib/config.ts';
@@ -117,7 +117,7 @@ function resolvePort(): number | undefined {
 		const n = Number(raw);
 		return Number.isInteger(n) && n > 0 && n <= 65535 ? n : undefined;
 	}
-	return localberthGet(filepressLeaseName(siteRoot));
+	return localslipGet(filepressLeaseName(siteRoot));
 }
 
 const fixedPort = resolvePort();

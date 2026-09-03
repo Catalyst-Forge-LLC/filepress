@@ -2,9 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
-/** `localberth get <name>` — undefined if the CLI or lease is missing. */
-export function localberthGet(name: string): number | undefined {
-	const r = spawnSync('localberth', ['get', name], {
+/** `localslip get <name>` — undefined if the CLI or lease is missing. */
+export function localslipGet(name: string): number | undefined {
+	const r = spawnSync('localslip', ['get', name], {
 		encoding: 'utf8',
 		timeout: 5000,
 		windowsHide: true,

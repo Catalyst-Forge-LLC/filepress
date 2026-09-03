@@ -38,7 +38,7 @@ Crawls a public site (sitemap/RSS preferred) into a sibling content tree. Option
 | Genie (dev only) | [Genie](https://getfilepress.com/genie) · [spec](docs/GENIE_MODE_SPEC.md) |
 | Deploy | [Deploy](https://getfilepress.com/deploy) · [docs/DEPLOY.md](docs/DEPLOY.md) |
 | Sibling / external sites | [docs/EXTERNAL_SITES.md](docs/EXTERNAL_SITES.md) |
-| Local ports | [docs/LOCALBERTH.md](docs/LOCALBERTH.md) |
+| Local ports | [docs/LOCALSLIP.md](docs/LOCALSLIP.md) |
 | Agent skill page | [Skill page](https://getfilepress.com/skill-page) · [docs/SKILL_PAGE.md](docs/SKILL_PAGE.md) |
 
 ## In this repo

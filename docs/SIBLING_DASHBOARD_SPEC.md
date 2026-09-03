@@ -3,7 +3,7 @@
 **Status:** locked — **M0–M2 implemented** (M2: 2026-08-25)  
 **Date:** 2026-08-20  
 **Phase:** 4-feature-iteration  
-**Related:** [`scripts/sync-sibling-sites.ts`](../scripts/sync-sibling-sites.ts) · [EXTERNAL_SITES.md](./EXTERNAL_SITES.md) · [DEPLOY.md](./DEPLOY.md) · [LOCALBERTH.md](./LOCALBERTH.md)
+**Related:** [`scripts/sync-sibling-sites.ts`](../scripts/sync-sibling-sites.ts) · [EXTERNAL_SITES.md](./EXTERNAL_SITES.md) · [DEPLOY.md](./DEPLOY.md) · [LOCALSLIP.md](./LOCALSLIP.md)
 
 **Surface:** localhost UI (`pnpm siblings`, default `http://127.0.0.1:5198`) plus CLI (`pnpm sync-siblings`). Shared library: `scripts/siblings/lib.ts`. Neither the UI nor `.filepress-siblings/` ships in the `getfilepress` npm tarball.
 
@@ -21,11 +21,11 @@
 | Q6 | Sync target | **Published npm `getfilepress` latest** when local engine version is ahead (unpublished bump). Local version wins only when it is on the registry or npm is unreachable (then say so). |
 | Q7 | Jobs | **One mutating job at a time.** Sequential sites. Live log with the real command output and the real error. Failed site does not stop the rest unless the operator chose “stop on first error.” |
 | Q8 | State | Last inventory + last job log under a **gitignored** engine-local dir (e.g. `.filepress-siblings/`). Sites stay the source of their own git history. |
-| Q9 | Dev servers | **Out of v1.** Show LocalBerth lease/port if present; do not claim ports or spawn `filepress dev` until a later milestone. |
+| Q9 | Dev servers | **Out of v1.** Show LocalSlip lease/port if present; do not claim ports or spawn `filepress dev` until a later milestone. |
 | Q10 | Name | **Sibling dashboard** in docs and UI. CLI stays `pnpm sync-siblings` for the headless path. |
-| Q11 | Look | **LocalBerth chrome, LocalHelm operator affordances.** Parchment board (`#faf8f3`), black header/footer bands, one bordered table card with a sticky head, FilePress green `#0f5c4c` as the accent. Read vs write button groups, digest chips, badge tones, and an activity pane come from LocalHelm. No toasts; inline status lines only. |
+| Q11 | Look | **LocalSlip chrome, LocalHelm operator affordances.** Parchment board (`#faf8f3`), black header/footer bands, one bordered table card with a sticky head, FilePress green `#0f5c4c` as the accent. Read vs write button groups, digest chips, badge tones, and an activity pane come from LocalHelm. No toasts; inline status lines only. |
 | Q12 | Plan gate | **Apply and Ship stay disabled until Plan has run for exactly the current selection.** Changing the selection re-locks them. Auto-refresh does not. |
-| Q13 | Inventory cost | **One subprocess per kind, per pass.** `localberth ls` once (never `localberth get` per site), `git status` in parallel across repos, cached server-side. Inventory must stay under ~1s for a 15-site workspace. |
+| Q13 | Inventory cost | **One subprocess per kind, per pass.** `localslip ls` once (never `localslip get` per site), `git status` in parallel across repos, cached server-side. Inventory must stay under ~1s for a 15-site workspace. |
 
 Locked 2026-08-20. M0 library + M1 dashboard are in-repo.
 
@@ -91,7 +91,7 @@ A site record is derived, not configured:
 | Ship | `pnpm ship` cwd if a `ship` script exists on the site package or repo root |
 | Config `url` | Live origin from `filepress.config.ts` when it can be read without executing user code unsafely — prefer a small TS parse or cached last-known; do not eval arbitrary config in the UI process if that is hard. Fallback: “url unread.” |
 | Git | Dirty? Ahead/behind origin? (read-only in v1) |
-| Lease | LocalBerth port, matched from one `localberth ls` table by package name, content folder, or sibling folder name |
+| Lease | LocalSlip port, matched from one `localslip ls` table by package name, content folder, or sibling folder name |
 
 Optional **ignore list** (engine-local JSON): folder names never shown and never mutated. The default list is empty. The spec does not name sites.
 
@@ -120,7 +120,7 @@ If local > npm: banner *“Local N is not on npm. Jobs will use M.”*
 | Ship | yes / no |
 | Git | clean / dirty / no repo; ↑N ahead / ↓N behind origin when an upstream exists |
 | Live | `url` if known (external link) |
-| Dev | LocalBerth port if known, linked to `http://127.0.0.1:<port>` (no start button in v1) |
+| Dev | LocalSlip port if known, linked to `http://127.0.0.1:<port>` (no start button in v1) |
 
 Row actions: **Plan**, **Apply**, **Ship** (hidden or disabled if no ship script). Selection checkboxes for bulk.
 
@@ -169,7 +169,7 @@ Bulk Apply / Ship uses the current selection, or all rows if none selected (conf
 | --- | --- |
 | Push selected remotes | Easy to regret; needs an extra confirm and “ahead” check |
 | Live header probe | `curl -sI` on `url` for HSTS / CSP / no `ACAO: *` — useful after ship |
-| Start/stop `filepress dev` | LocalBerth claim vs read, firewall, leftover Vite processes |
+| Start/stop `filepress dev` | LocalSlip claim vs read, firewall, leftover Vite processes |
 | Hide / ignore folder | Needs the ignore file UX |
 | Create site | Already `create-site --external`; wire later |
 | Publish engine | Stays `pnpm publish` in the engine repo, not this UI |
@@ -218,7 +218,7 @@ The CLI becomes a thin wrapper. The dashboard process imports the same module (v
 
 ### 6.2 UI process
 
-Proposed: a **local HTTP server** in the engine repo (Node, 127.0.0.1, LocalBerth lease when we add one).
+Proposed: a **local HTTP server** in the engine repo (Node, 127.0.0.1, LocalSlip lease when we add one).
 
 - `GET /api/inventory` — discovery + status (JSON matching the TypeScript types; no schema drift). Served from a short-lived cache; `?refresh=1` forces a rebuild. Concurrent callers share one in-flight build, and the cache is warmed at listen time so the first paint is free.
 - `POST /api/jobs` — `{ action, only[], commit, stopOnError }` → job id.
@@ -242,7 +242,7 @@ When committing after apply:
 
 Discovery reads files; everything else is a subprocess, so subprocesses are the budget.
 
-- **Never one subprocess per site for the same fact.** `localberth get <name>` per site cost ~8s on a 15-site workspace; one `localberth ls` plus in-process name matching costs ~0.5s and is cached for 30s.
+- **Never one subprocess per site for the same fact.** `localslip get <name>` per site cost ~8s on a 15-site workspace; one `localslip ls` plus in-process name matching costs ~0.5s and is cached for 30s.
 - `git status --porcelain` runs in parallel (bounded concurrency), not in a loop.
 - The npm registry fetch, the lease table, and the git sweep all overlap.
 - A slow or failing helper degrades one column; it never blanks the board or permanently disables itself. Only a spawn failure (binary not on PATH) turns a lookup off for the process lifetime.
@@ -290,7 +290,7 @@ Never a count-only failure (“1 failed”) without a way to open that site’s 
 
 ### M1.5 — House style and speed
 
-- LocalBerth chrome + LocalHelm operator affordances (Q11), plan gate (Q12), skeleton / empty / error states, 10s idle polling that pauses during a job.
+- LocalSlip chrome + LocalHelm operator affordances (Q11), plan gate (Q12), skeleton / empty / error states, 10s idle polling that pauses during a job.
 - Inventory budget met (Q13): ~9s → ~0.5s on a 15-site workspace.
 
 **Exit:** Board paints on load, ports and git state resolve for every row, and a poll never rebuilds the table under the cursor. **Done.**
@@ -322,7 +322,7 @@ Never a count-only failure (“1 failed”) without a way to open that site’s 
 
 Answer these when locking §0:
 
-1. **M1 bind port** — fixed LocalBerth lease vs ephemeral vs `FILEPRESS_YARD_PORT`?
+1. **M1 bind port** — fixed LocalSlip lease vs ephemeral vs `FILEPRESS_YARD_PORT`?
 2. **Push in M2 or never?** Default proposal: never in this UI unless you ask for it later.
 3. **Should Apply to “already current” still commit leftover dirty sync files?** Proposal: **yes** (that is how we backfill a commit-less apply).
 4. **Ship confirm** — extra checkbox “I know this deploys Pages” vs one Confirm?

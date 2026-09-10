@@ -10,8 +10,8 @@ export default defineFilepressConfig({
 	tagline: 'Markdown blogs from git',
 	lede: 'Posts are files. The build is static HTML. No CMS, no database, no runtime server.',
 	homePage: 'home',
-	logo: '/logo.svg',
-	ogImage: '/logo.svg',
+	logo: '/logo.png',
+	ogImage: '/logo.png',
 	nav: [
 		{ label: 'Home', href: '/' },
 		{ label: 'Docs', href: '/docs' },

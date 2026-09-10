@@ -2,9 +2,9 @@
 title: Introduction
 ---
 
-FilePress turns Markdown in git into a static site. No CMS. No database. No server at runtime.
+Publish Markdown from git as a static site, with tags, feeds, and a theme you can adapt. No CMS. No database. No server at runtime.
 
-Start empty, or [import](/docs/import) a public site. [Genie](/docs/genie) can steer look in `filepress dev`. It never ships in production. `filepress build` writes `build/`.
+Start from a folder of posts, or [import](/docs/import) a public site. [Genie](/docs/genie) can steer look in `filepress dev`. It never ships in production. `filepress build` writes `build/` and fails if Genie leaked into that folder. Preview the result with `filepress preview`.
 
 Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`**.
 

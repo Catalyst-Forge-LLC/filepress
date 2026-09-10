@@ -12,7 +12,7 @@ versions; do not float on `main`.
 | --- | --- |
 | Node.js | `>=20` (`engines` in the engine `package.json`) |
 | pnpm | Recommended; matches the engine’s `packageManager` |
-| Engine pin | `"getfilepress": "^0.1.19"` (npm) **or** a git SHA / existing tag — not `main` |
+| Engine pin | `"getfilepress": "^0.1.29"` (npm) **or** a git SHA / existing tag — not `main` |
 
 Local `link:../filepress` is for sibling-folder development only — CI cannot use it.
 
@@ -41,7 +41,7 @@ Dependency in the site `package.json` (pick one):
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.19"
+    "getfilepress": "^0.1.29"
   }
 }
 ```

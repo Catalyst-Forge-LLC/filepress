@@ -6,6 +6,20 @@ order: 1
 
 FilePress ships on npm as **`getfilepress`**. The bins are `filepress` and `getfilepress` (same script). Node.js 20+ and [pnpm](https://pnpm.io).
 
+## Shortest path
+
+A site is a content folder plus a pin of the engine. The smallest useful tree is `filepress.config.ts` (`title` and `url` required), `posts/YYYY-MM-DD-slug.md`, and `package.json` with `"getfilepress": "^0.1.29"`.
+
+```bash
+pnpm install
+pnpm build      # → ./build/
+pnpm preview    # serve build/, no Genie
+```
+
+`pnpm dev` adds the Genie FAB. It is not required for the first site. Deploy means you upload `build/` to a static host. FilePress does not create that host.
+
+The rest of this page is the scaffold if you want nav, pages, and a starter post written for you.
+
 ## Scaffold a site
 
 From a clone of the [filepress](https://github.com/Catalyst-Forge-LLC/filepress) engine:
@@ -22,12 +36,12 @@ pnpm dev      # local preview
 pnpm build    # → build/
 ```
 
-Or pin the published package (current is `0.1.19`):
+Or pin the published package (current is `0.1.29`):
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.19"
+    "getfilepress": "^0.1.29"
   }
 }
 ```
@@ -128,7 +142,7 @@ Images: `static/images/posts/<slug>/photo.jpg`, referenced as `/images/posts/<sl
 | `filepress new "Title"` | Stamp a dated post skeleton |
 | `filepress dev` | Dev server + Genie FAB |
 | `filepress build` | Static `build/` |
-| `filepress preview` | Serve the build (no Genie) |
+| `filepress preview` | Serve `build/` (no Genie) |
 | `filepress check` | Type-check against the site |
 
 In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd. No `--site` flag.

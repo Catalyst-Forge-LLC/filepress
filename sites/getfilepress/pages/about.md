@@ -33,4 +33,6 @@ order: 4
 
 This site is FilePress (`sites/getfilepress` in the engine monorepo). `sites/demo` is the engine fixture for drafts, scheduled posts, and frontmatter edge cases.
 
+Other Catalyst Forge sites on FilePress (internal examples, not customer adoption) include [haulout.dev](https://haulout.dev) and [localslip.dev](https://localslip.dev). They use Essay plus a site-root `theme.css`.
+
 Maintained by [Catalyst Forge](https://github.com/Catalyst-Forge-LLC). MIT licensed.

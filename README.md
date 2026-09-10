@@ -8,7 +8,17 @@ Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script 
 
 ## Start a site
 
-From a clone of this repo:
+Shortest path: a folder with `filepress.config.ts` (`title`, `url`), `posts/*.md`, and `"getfilepress": "^0.1.29"` in `package.json`.
+
+```bash
+pnpm install
+pnpm build      # → ./build/
+pnpm preview    # serve build/, no Genie
+```
+
+`pnpm dev` is optional (Genie). FilePress does not upload `build/`.
+
+From a clone of this repo, scaffold a fuller starter:
 
 ```bash
 pnpm install
@@ -18,7 +28,7 @@ cd ../my-blog && pnpm install && pnpm dev
 
 `filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Docs](https://getfilepress.com/docs).
 
-Pin CI on npm (`getfilepress` current is `0.1.19`) or a git SHA / existing tag. `link:` is local only.
+Pin CI on npm (`getfilepress` current is `0.1.29`) or a git SHA / existing tag. `link:` is local only.
 
 ## Import
 

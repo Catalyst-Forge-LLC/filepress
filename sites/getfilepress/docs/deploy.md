@@ -6,12 +6,12 @@ title: Deploy
 
 ## Engine dependency in CI
 
-Local sibling sites use `"getfilepress": "link:../filepress"`. Hosts cannot. Pin npm (current is `0.1.19`) or a git SHA / existing tag:
+Local sibling sites use `"getfilepress": "link:../filepress"`. Hosts cannot. Pin npm (current is `0.1.29`) or a git SHA / existing tag:
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.19"
+    "getfilepress": "^0.1.29"
   }
 }
 ```

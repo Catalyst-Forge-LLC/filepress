@@ -10,12 +10,12 @@ The full guide is **[Deploy](/deploy)**. This post is the short version.
 
 ## Pin the engine
 
-Local `link:../filepress` only works on one machine. For CI, pin npm (current is `0.1.19`) or a git SHA / existing tag:
+Local `link:../filepress` only works on one machine. For CI, pin npm (current is `0.1.29`) or a git SHA / existing tag:
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.19"
+    "getfilepress": "^0.1.29"
   }
 }
 ```

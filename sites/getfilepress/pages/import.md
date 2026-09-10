@@ -33,6 +33,13 @@ A long source bio becomes `pages/home.md` and `homePage: 'home'` (post index at 
 
 ## After import
 
-Import writes a first `theme.css`. For local taste-tuning, open **Genie** in `filepress dev`. Genie never appears in `preview` or production. See [Genie](/genie).
+Review before you commit:
+
+- `posts/` and `pages/` for missing or leftover source chrome
+- `filepress.config.ts` (`title`, `url`, `homePage`, nav)
+- `theme.css` as a first draft, not a finished look
+- `static/_redirects` if old article URLs were captured
+
+Then `pnpm install` and `pnpm dev`. Import does not deploy. For local taste-tuning, open **Genie** in `filepress dev`. Genie never appears in `preview` or production. See [Genie](/genie).
 
 CLI notes: [`docs/SITE_IMPORT_SPEC.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/SITE_IMPORT_SPEC.md). A walkthrough lives in [Writing](/writing).

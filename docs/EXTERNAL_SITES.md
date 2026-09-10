@@ -84,7 +84,7 @@ contract (Cloudflare Pages, Wrangler, any static host, agent checklist).
 Short form — pin npm or a git tag:
 
 ```json
-"getfilepress": "^0.1.19"
+"getfilepress": "^0.1.29"
 ```
 
 ```json

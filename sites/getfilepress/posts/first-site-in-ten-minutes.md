@@ -45,7 +45,8 @@ filepress new "Hello"
 Or write `posts/YYYY-MM-DD-hello.md` by hand. Config and frontmatter: [Getting started](/docs/getting-started).
 
 ```bash
-pnpm build    # → ./build/
+pnpm build      # → ./build/
+pnpm preview    # serve build/, no Genie
 ```
 
-For CI, swap `link:` for a pinned npm version — [Deploy](/deploy).
+For CI, swap `link:` for a pinned npm version (`^0.1.29`) — [Deploy](/deploy). FilePress does not create the host.

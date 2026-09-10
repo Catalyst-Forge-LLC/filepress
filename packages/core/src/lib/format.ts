@@ -34,3 +34,17 @@ export function readingMinutes(body: string, wordsPerMinute = 228): number {
 export function formatReadingTime(minutes: number): string {
 	return minutes === 1 ? '1 min read' : `${minutes} min read`;
 }
+
+/** Display name for a tag: curated topic label, else title-cased slug. */
+export function tagDisplayLabel(
+	topics: Array<{ label: string; tag: string }>,
+	tag: string
+): string {
+	const curated = topics.find((topic) => topic.tag === tag)?.label.trim();
+	if (curated) return curated;
+	return tag
+		.split('-')
+		.filter(Boolean)
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+}

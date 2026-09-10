@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatReadingTime, readingMinutes } from './format';
+import { formatReadingTime, readingMinutes, tagDisplayLabel } from './format';
 
 describe('readingMinutes', () => {
 	it('is at least one minute', () => {
@@ -11,6 +11,19 @@ describe('readingMinutes', () => {
 		const words = Array.from({ length: 228 }, () => 'word').join(' ');
 		expect(readingMinutes(words)).toBe(1);
 		expect(readingMinutes(`${words} ${words}`)).toBe(2);
+	});
+});
+
+describe('tagDisplayLabel', () => {
+	it('prefers a curated topic label', () => {
+		expect(tagDisplayLabel([{ label: 'Tips & Tricks', tag: 'tips-tricks' }], 'tips-tricks')).toBe(
+			'Tips & Tricks'
+		);
+	});
+
+	it('title-cases a slug when no topic is set', () => {
+		expect(tagDisplayLabel([], 'articles')).toBe('Articles');
+		expect(tagDisplayLabel([], 'tips-tricks')).toBe('Tips Tricks');
 	});
 });
 

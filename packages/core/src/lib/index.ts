@@ -32,6 +32,6 @@ export type {
 
 export { isPathMountHref } from './paths-shared';
 
-export { formatDate, formatReadingTime, readingMinutes } from './format';
+export { formatDate, formatReadingTime, readingMinutes, tagDisplayLabel } from './format';
 
 export type { PostMeta, PostSource, RenderedPost, RawFrontmatter } from './content/types';

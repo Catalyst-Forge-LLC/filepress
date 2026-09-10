@@ -1,19 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { PostCard } from '@filepress/core';
+	import { PostCard, tagDisplayLabel } from '@filepress/core';
 	import config from '$site-config';
 
 	let { data }: { data: PageData } = $props();
+	const heading = $derived(tagDisplayLabel(config.topics, data.tag));
 </script>
 
 <svelte:head>
-	<title>{data.tag} — {config.title}</title>
-	<meta name="description" content="Posts tagged {data.tag} on {config.title}." />
+	<title>{heading} — {config.title}</title>
+	<meta name="description" content="Posts tagged {heading} on {config.title}." />
 </svelte:head>
 
 <header class="post-header">
-	<p class="eyebrow">Tag</p>
-	<h1>{data.tag}</h1>
+	<h1>{heading}</h1>
 </header>
 
 <ul class="post-list">

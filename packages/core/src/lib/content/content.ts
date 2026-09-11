@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 import type { PostMeta, PostSource, RenderedPost } from './types';
 import { assertUniqueSlugs, ContentError, normalizeTag, parsePost } from './parse';
@@ -27,6 +27,7 @@ export interface ContentApi {
 }
 
 export interface CreateContentOptions {
+	/** Absolute or cwd-relative path to `posts/`. Missing dir → no posts (ok). */
 	contentDir: string;
 	/** Override draft listing. Default: on in Vite DEV, or when FILEPRESS_SHOW_DRAFTS is 1/true. */
 	listDrafts?: boolean;
@@ -47,6 +48,8 @@ export function resolveListDrafts(override?: boolean): boolean {
 /**
  * Build a content API bound to one content directory. This is the seam a site
  * wires up in a server-only module: `createContent({ contentDir: 'posts' })`.
+ * Absent `posts/` is fine — returns empty lists. Product sites do not need a
+ * dummy folder.
  *
  * Reads the filesystem, so it must only be imported from server code
  * (`+page.server.ts`, `+server.ts`, or a `*.server.ts` lib module). The pure
@@ -64,6 +67,11 @@ export function createContent(opts: CreateContentOptions): ContentApi {
 
 	function loadPostSources(): PostSource[] {
 		if (cache && import.meta.env.PROD) return cache;
+
+		if (!existsSync(dir)) {
+			cache = [];
+			return cache;
+		}
 
 		let filenames: string[];
 		try {

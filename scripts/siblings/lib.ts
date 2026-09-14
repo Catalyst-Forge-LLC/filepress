@@ -4,7 +4,7 @@
  */
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync, type SpawnSyncOptions } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defaultSecurityHeaders, mergeSecurityHeaders } from '../../packages/core/src/lib/headers';
@@ -893,7 +893,7 @@ function run(
 	args: string[],
 	cwd: string,
 	log: LogFn | null
-): { ok: boolean; status: number | null } {
+): { ok: boolean; status: number | null; output: string } {
 	const inherit = log === null;
 	const opts: SpawnSyncOptions = {
 		cwd,
@@ -905,11 +905,50 @@ function run(
 		env: process.env
 	};
 	const result = spawnSync(cmd, args, opts);
-	if (log) {
-		const out = `${result.stdout ?? ''}${result.stderr ?? ''}`.trimEnd();
-		if (out) log(out);
+	const output = inherit ? '' : `${result.stdout ?? ''}${result.stderr ?? ''}`.trimEnd();
+	if (log && output) log(output);
+	return { ok: result.status === 0, status: result.status, output };
+}
+
+function sameDir(left: string, right: string): boolean {
+	const a = resolve(left);
+	const b = resolve(right);
+	return win ? a.toLowerCase() === b.toLowerCase() : a === b;
+}
+
+function parseVirtualStoreDir(text: string): string | null {
+	try {
+		const obj = JSON.parse(text) as { virtualStoreDir?: unknown };
+		if (typeof obj.virtualStoreDir === 'string' && obj.virtualStoreDir.trim()) {
+			return obj.virtualStoreDir.trim();
+		}
+	} catch {
+		/* pnpm also writes YAML */
 	}
-	return { ok: result.status === 0, status: result.status };
+	const line = /^virtualStoreDir:\s*(.+)$/m.exec(text);
+	if (!line) return null;
+	return line[1].trim().replace(/^['"]|['"]$/g, '');
+}
+
+/** Recorded pnpm virtual store when it is not this package's node_modules/.pnpm (folder rename). */
+export function staleVirtualStoreDir(packageDir: string): string | null {
+	const yaml = join(packageDir, 'node_modules', '.modules.yaml');
+	if (!existsSync(yaml)) return null;
+	const recorded = parseVirtualStoreDir(readFileSync(yaml, 'utf8'));
+	if (!recorded) return null;
+	const expected = join(packageDir, 'node_modules', '.pnpm');
+	return sameDir(recorded, expected) ? null : recorded;
+}
+
+function reinstallNodeModules(packageDir: string, log: LogFn | null): boolean {
+	say(log, '  update   node_modules was installed from a different path — reinstalling');
+	rmSync(join(packageDir, 'node_modules'), { recursive: true, force: true });
+	const inst = run('pnpm', ['install'], packageDir, log);
+	if (!inst.ok) {
+		say(log, `  update   reinstall failed (exit ${inst.status})`);
+		return false;
+	}
+	return true;
 }
 
 export function applyUpdate(site: SiblingSite, target: string, log: LogFn | null = null): boolean {
@@ -930,10 +969,18 @@ export function applyUpdate(site: SiblingSite, target: string, log: LogFn | null
 		if (rewritten.changed) writeFileSync(pkgPath, rewritten.text);
 	}
 
+	if (staleVirtualStoreDir(site.packageDir) && !reinstallNodeModules(site.packageDir, log)) {
+		return false;
+	}
+
 	const installCmd = site.lockfileDir ? (['update', 'getfilepress'] as const) : (['install'] as const);
-	const { ok, status } = run('pnpm', [...installCmd], site.packageDir, log);
-	if (!ok) {
-		say(log, `  update   failed (exit ${status})`);
+	let result = run('pnpm', [...installCmd], site.packageDir, log);
+	if (!result.ok && result.output.includes('ERR_PNPM_UNEXPECTED_VIRTUAL_STORE')) {
+		if (!reinstallNodeModules(site.packageDir, log)) return false;
+		result = run('pnpm', [...installCmd], site.packageDir, log);
+	}
+	if (!result.ok) {
+		say(log, `  update   failed (exit ${result.status})`);
 		return false;
 	}
 	const locked = lockedGetfilepressVersion(

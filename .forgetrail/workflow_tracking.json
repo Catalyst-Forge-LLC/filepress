@@ -417,9 +417,27 @@
         "Only link the files that exist"
       ],
       "status": "active"
+    },
+    {
+      "id": "D19",
+      "timestamp": "2026-09-14",
+      "phase": "4-feature-iteration",
+      "decision": "FilePress site sync reinstalls node_modules when pnpm's recorded virtual store is not this package's node_modules/.pnpm (folder rename), then retries pnpm update getfilepress.",
+      "rationale": "Operator 2026-09-14: Land localslip failed ERR_PNPM_UNEXPECTED_VIRTUAL_STORE because site/node_modules still pointed at Z:\\workspace\\localberth after the rename to localslip.",
+      "alternatives_considered": [
+        "Tell the operator to delete node_modules by hand only",
+        "Bake localslip/localberth paths into LocalHelm"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "date": "2026-09-14",
+      "gotcha": "pnpm records an absolute virtualStoreDir in node_modules/.modules.yaml. After a folder rename, pnpm update fails with ERR_PNPM_UNEXPECTED_VIRTUAL_STORE.",
+      "resolution": "staleVirtualStoreDir compares that path to this packageDir; applyUpdate removes node_modules and pnpm install, then retries. Also recover if pnpm still prints ERR_PNPM_UNEXPECTED_VIRTUAL_STORE.",
+      "issue": "Land localslip sync engine failed after LocalBerth → LocalSlip rename."
+    },
     {
       "date": "2026-08-27",
       "gotcha": "Inlining site :root tokens does not stop Essay from flashing. Vite injects core :root after the critical <style> (same specificity, later source). Google Fonts @import URLs also contain semicolons (wght@400;700), so a [^;]+ strip corrupts the sheet.",
@@ -482,6 +500,10 @@
     }
   ],
   "sessions": [
+    {
+      "date": "2026-09-14",
+      "summary": "Land sync: if a sibling site's node_modules/.modules.yaml virtualStoreDir is from a previous folder name (e.g. localberth → localslip), reinstall then retry pnpm update getfilepress (D19)."
+    },
     {
       "date": "2026-07-02",
       "summary": "Ran ForgeTrail greenfield kickoff for filepress. Project already had a full GENESIS.md build spec, so it was ingested via ingestPlanArtifact and used to draft docs/PHASE_1_BRIEF.md directly (status: draft) instead of starting Phase 1 intake from scratch. Recorded D1-D4 architectural decisions from the spec's own recommendations. Brief cannot be locked yet: 11 open questions from GENESIS.md Section 9 still need explicit user answers (drafts handling, deploy target, content dir location, date format, future-dated posts, styling, comments scope, custom domain, theme sharing, core versioning, scaffold CLI distribution)."

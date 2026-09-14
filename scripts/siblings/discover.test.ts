@@ -8,6 +8,7 @@ import {
 	enrollExtraSites,
 	extraSitePaths,
 	scanFilepressSites,
+	staleVirtualStoreDir,
 	syncCommitPaths,
 	updatePlan,
 	unenrollExtraSites
@@ -130,6 +131,39 @@ describe('scanFilepressSites', () => {
 			assert.equal(www?.enrolled, true);
 		} finally {
 			cleanup();
+		}
+	});
+});
+
+describe('staleVirtualStoreDir', () => {
+	it('is null when node_modules is missing or matches this folder', () => {
+		const root = mkdtempSync(join(tmpdir(), 'fp-store-'));
+		try {
+			assert.equal(staleVirtualStoreDir(root), null);
+			const expected = join(root, 'node_modules', '.pnpm');
+			mkdirSync(join(root, 'node_modules'), { recursive: true });
+			writeFileSync(
+				join(root, 'node_modules', '.modules.yaml'),
+				JSON.stringify({ virtualStoreDir: expected })
+			);
+			assert.equal(staleVirtualStoreDir(root), null);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
+
+	it('returns the recorded path after a folder rename', () => {
+		const root = mkdtempSync(join(tmpdir(), 'fp-store-'));
+		try {
+			mkdirSync(join(root, 'node_modules'), { recursive: true });
+			const oldStore = join(root, '..', 'localberth', 'site', 'node_modules', '.pnpm');
+			writeFileSync(
+				join(root, 'node_modules', '.modules.yaml'),
+				JSON.stringify({ virtualStoreDir: oldStore })
+			);
+			assert.equal(staleVirtualStoreDir(root), oldStore);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
 		}
 	});
 });

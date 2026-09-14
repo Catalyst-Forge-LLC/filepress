@@ -33,7 +33,7 @@ function ensureGenieDirs(siteRoot: string) {
 }
 
 export function newVersionId(): string {
-	const ts = new Date().toISOString().replace(/[:.]/g, '-').replace(/Z$/, 'Z');
+	const ts = new Date().toISOString().replace(/[:.]/g, '-');
 	return `${ts}-${randomBytes(2).toString('hex')}`;
 }
 

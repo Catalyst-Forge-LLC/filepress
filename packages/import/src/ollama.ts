@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { parseHTML } from 'linkedom';
 import type { DesignBrief, SiteIR } from './ir.ts';
 import type { InspirationSignals } from './inspire.ts';
 import { DEFAULT_BRIEF, parseBriefJson } from './theme.ts';
@@ -430,10 +431,11 @@ export async function generateDesignBrief(opts: {
 
 /** Short text summary of an inspiration homepage for the brief prompt. */
 export function summarizeHtmlForBrief(html: string, max = 1200): string {
-	const text = html
-		.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-		.replace(/<style[\s\S]*?<\/style>/gi, ' ')
-		.replace(/<[^>]+>/g, ' ')
+	const { document } = parseHTML(html);
+	for (const node of document.querySelectorAll('script, style, noscript')) {
+		node.remove();
+	}
+	const text = (document.body?.textContent ?? document.documentElement?.textContent ?? '')
 		.replace(/\s+/g, ' ')
 		.trim();
 	return text.slice(0, max);

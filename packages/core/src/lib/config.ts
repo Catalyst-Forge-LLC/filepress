@@ -7,7 +7,7 @@
  * keeps `@filepress/core` app-agnostic and importable from both client and
  * server code.
  */
-import { normalizePathMounts, type PathMount } from './paths-shared';
+import { normalizePathMounts, stripTrailingSlashes, type PathMount } from './paths-shared';
 import { writingPostRedirects, type RedirectRule } from './redirects';
 export type { PathMount } from './paths-shared';
 export type { RedirectRule } from './redirects';
@@ -228,7 +228,7 @@ export function defineFilepressConfig(input: SiteConfigInput): SiteConfig {
 		lede: (input.lede ?? '').trim() || null,
 		logo,
 		ogImage: (input.ogImage ?? '').trim() || logo,
-		url: url.replace(/\/+$/, ''),
+		url: stripTrailingSlashes(url),
 		author: (input.author ?? '').trim() || title,
 		postsPerPage:
 			Number.isFinite(input.postsPerPage) && (input.postsPerPage as number) > 0
@@ -279,7 +279,7 @@ function normalizeRedirects(rules: RedirectRule[] | undefined): RedirectRule[] {
 
 /** Join the site origin with a path, guarding against double slashes. */
 export function absoluteUrl(site: Pick<SiteConfig, 'url'>, path: string): string {
-	const base = site.url.replace(/\/+$/, '');
+	const base = stripTrailingSlashes(site.url);
 	const suffix = path.startsWith('/') ? path : `/${path}`;
 	return `${base}${suffix}`;
 }

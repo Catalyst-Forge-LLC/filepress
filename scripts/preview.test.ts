@@ -18,4 +18,11 @@ describe('resolveBuildFile', () => {
 		assert.match(resolveBuildFile(root, '/posts/hello') ?? '', /hello\.html$/);
 		assert.equal(resolveBuildFile(root, '/missing'), null);
 	});
+
+	it('rejects path traversal', () => {
+		const root = mkdtempSync(join(tmpdir(), 'filepress-preview-'));
+		writeFileSync(join(root, 'index.html'), '<html></html>');
+		assert.equal(resolveBuildFile(root, '/../secret.html'), null);
+		assert.equal(resolveBuildFile(root, '/%2e%2e/secret.html'), null);
+	});
 });

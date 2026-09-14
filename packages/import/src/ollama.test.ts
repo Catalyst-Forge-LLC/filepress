@@ -3,6 +3,7 @@ import {
 	appendOllamaChatDelta,
 	applyPaletteHint,
 	buildDesignBriefPrompt,
+	summarizeHtmlForBrief,
 	DEFAULT_OLLAMA_CHAT_TIMEOUT_MS,
 	hexRelativeLuminance,
 	isAbortLike,
@@ -125,5 +126,15 @@ describe('buildDesignBriefPrompt', () => {
 		expect(user).toMatch(/Author direction/);
 		expect(user).toMatch(/Antarctica/);
 		expect(user).not.toMatch(/MUST stay "dark"/);
+	});
+});
+
+describe('summarizeHtmlForBrief', () => {
+	it('drops script and style text and keeps visible copy', () => {
+		const text = summarizeHtmlForBrief(
+			'<html><head><style>body{color:red}</style></head><body><p>Hello</p><script>alert(1)</script></body></html>'
+		);
+		expect(text).toBe('Hello');
+		expect(text).not.toMatch(/alert|color:red/);
 	});
 });

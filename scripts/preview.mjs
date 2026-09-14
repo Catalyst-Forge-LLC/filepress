@@ -6,7 +6,7 @@
  */
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, resolve, sep } from 'node:path';
+import { extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const MIME = {
@@ -32,16 +32,28 @@ const MIME = {
 const isMain =
 	Boolean(process.argv[1]) && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 
-function underRoot(root, abs) {
-	return abs === root || abs.startsWith(root + sep);
+function containedUnder(root, abs) {
+	const rel = relative(root, abs);
+	return rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 }
 
 /** Map a request path to a file under `root`, or null. */
 export function resolveBuildFile(root, urlPath) {
-	const pathname = decodeURIComponent((urlPath.split('?')[0] || '/'));
-	const rel = pathname.replace(/^\/+/, '');
-	const abs = resolve(root, rel);
-	if (!underRoot(root, abs)) return null;
+	const base = resolve(root);
+	let pathname;
+	try {
+		pathname = decodeURIComponent((urlPath.split('?')[0] || '/'));
+	} catch {
+		return null;
+	}
+	const parts = [];
+	for (const seg of pathname.split('/')) {
+		if (!seg || seg === '.') continue;
+		if (seg === '..') return null;
+		parts.push(seg);
+	}
+	const abs = parts.length ? join(base, ...parts) : base;
+	if (!containedUnder(base, abs)) return null;
 	try {
 		const st = statSync(abs);
 		if (st.isFile()) return abs;

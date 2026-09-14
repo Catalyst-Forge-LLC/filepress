@@ -2,6 +2,7 @@
  * WordPress REST overlay for filepress import.
  * Sitemap + HTML still own the crawl; this fills categories → tags and nav.
  */
+import { parseHTML } from 'linkedom';
 import { fetchText, originOf } from './fetch.ts';
 
 export type WpTerm = {
@@ -40,18 +41,11 @@ const SKIP_CATEGORY = new Set(['uncategorized']);
 const SKIP_PAGE = new Set(['sample-page']);
 
 export function decodeWpText(raw: string): string {
-	return raw
-		.replace(/<[^>]+>/g, ' ')
-		.replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-		.replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
-		.replace(/&amp;/g, '&')
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&quot;/g, '"')
-		.replace(/&#039;|&apos;/g, "'")
-		.replace(/&nbsp;/g, ' ')
-		.replace(/\s+/g, ' ')
-		.trim();
+	const { document } = parseHTML('<div id="fp-wp"></div>');
+	const el = document.getElementById('fp-wp');
+	if (!el) return raw.replace(/\s+/g, ' ').trim();
+	el.innerHTML = raw;
+	return (el.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
 export function termsToTags(categories: WpTerm[], tags: WpTerm[], categoryIds: number[], tagIds: number[]): string[] {

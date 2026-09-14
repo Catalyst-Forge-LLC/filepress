@@ -26,6 +26,7 @@ describe('decodeWpText', () => {
 	it('strips tags and entities', () => {
 		expect(decodeWpText('Tips &amp; Tricks')).toBe('Tips & Tricks');
 		expect(decodeWpText('<p>Hello &#8211; world</p>')).toBe('Hello – world');
+		expect(decodeWpText('A &lt; B &amp; C')).toBe('A < B & C');
 	});
 });
 

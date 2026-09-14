@@ -2,6 +2,7 @@
  * Cloudflare Pages / Netlify `_redirects` lines.
  * Code owns the file shape; sites and import only supply from/to pairs.
  */
+import { stripTrailingSlashes } from './paths-shared';
 export type RedirectStatus = 301 | 302 | 308;
 
 export type RedirectRule = {
@@ -18,11 +19,11 @@ export function normalizeRedirectPath(path: string): string {
 	if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
 		const url = new URL(trimmed);
 		const out = url.pathname || '/';
-		return out === '/' ? '/' : out.replace(/\/+$/, '') || '/';
+		return out === '/' ? '/' : stripTrailingSlashes(out) || '/';
 	}
 	const withSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 	if (withSlash.includes('*') || withSlash.includes(':splat')) return withSlash;
-	return withSlash === '/' ? '/' : withSlash.replace(/\/+$/, '') || '/';
+	return withSlash === '/' ? '/' : stripTrailingSlashes(withSlash) || '/';
 }
 
 export function serializeRedirects(rules: RedirectRule[]): string {
@@ -33,7 +34,8 @@ export function serializeRedirects(rules: RedirectRule[]): string {
 export function parseRedirectsFile(text: string): RedirectRule[] {
 	const rules: RedirectRule[] = [];
 	for (const raw of text.split(/\r?\n/)) {
-		const line = raw.replace(/#.*$/, '').trim();
+		const hash = raw.indexOf('#');
+		const line = (hash === -1 ? raw : raw.slice(0, hash)).trim();
 		if (!line) continue;
 		const parts = line.split(/\s+/);
 		if (parts.length < 2) continue;

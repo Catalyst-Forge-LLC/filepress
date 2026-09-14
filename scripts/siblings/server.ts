@@ -313,7 +313,7 @@ if (host !== '127.0.0.1' && host !== 'localhost') {
 createServer((req, res) => {
 	handle(req, res).catch((err) => {
 		console.error(err);
-		if (!res.headersSent) json(res, 500, { error: err instanceof Error ? err.message : String(err) });
+		if (!res.headersSent) json(res, 500, { error: 'internal error' });
 	});
 }).listen(port, host, () => {
 	const shown = host === '0.0.0.0' ? '127.0.0.1' : host;

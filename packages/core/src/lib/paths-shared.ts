@@ -12,6 +12,17 @@ export interface PathMount {
 	url: string;
 }
 
+export function toPosixPath(path: string): string {
+	return path.split('\\').join('/');
+}
+
+/** Drop trailing `/` without a regular expression. */
+export function stripTrailingSlashes(path: string): string {
+	let out = path;
+	while (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
+	return out;
+}
+
 /** Engine route prefixes a mount must not steal. */
 const ENGINE_URL_PREFIXES = new Set([
 	...RESERVED_PAGE_SLUGS,
@@ -38,8 +49,8 @@ export function normalizePathMounts(input: PathMount[] | undefined): PathMount[]
 		if (!raw || typeof raw !== 'object') {
 			throw new Error('filepress.config: each `paths` entry must be an object { url, dir }.');
 		}
-		const dir = String(raw.dir ?? '').trim().replace(/\\/g, '/').replace(/\/+$/, '');
-		let url = String(raw.url ?? '').trim().replace(/\\/g, '/');
+		const dir = stripTrailingSlashes(toPosixPath(String(raw.dir ?? '').trim()));
+		let url = toPosixPath(String(raw.url ?? '').trim());
 		if (!dir) {
 			throw new Error('filepress.config: `paths[].dir` must be a non-empty site-relative path.');
 		}
@@ -51,7 +62,7 @@ export function normalizePathMounts(input: PathMount[] | undefined): PathMount[]
 		if (!url.startsWith('/')) {
 			throw new Error(`filepress.config: \`paths[].url\` must start with / (got "${raw.url}").`);
 		}
-		url = url.replace(/\/+$/, '') || '/';
+		url = stripTrailingSlashes(url) || '/';
 		if (url === '/') {
 			throw new Error('filepress.config: `paths[].url` cannot be `/` (that is the site home).');
 		}

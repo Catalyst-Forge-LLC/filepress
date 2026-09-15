@@ -12,7 +12,7 @@ _Paste into a new chat to resume. Single most important document for session con
 
 ## HANDOFF (2026-09-03) — LocalSlip only (LocalBerth name is gone)
 
-Lease reader, `ensure-lease`, sibling `ls`, and docs use **`localslip`**. `docs/LOCALSLIP.md` replaces `LOCALBERTH.md`. `packages/app/localslip-port.ts` replaces `localberth-port.ts`. Do not spawn `localberth`; the npm bin is `localslip` only.
+Lease reader, sibling `ls`, and docs use **`localslip`**. FilePress reads; npm scripts `localslip claim`. `docs/LOCALSLIP.md`. `packages/app/localslip-port.ts` runs `localslip get`. Do not spawn `localberth`.
 
 ---
 

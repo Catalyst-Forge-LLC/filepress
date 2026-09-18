@@ -78,6 +78,7 @@ function boardFrom(inventory) {
 		],
 		rows: inventory.sites.map((site) => ({
 			id: site.name,
+			shipFingerprint: site.shipFingerprint ?? undefined,
 			cells: {
 				pin: `${site.pinKind} ${site.pin}`,
 				locked: site.lockedVersion ?? '—',

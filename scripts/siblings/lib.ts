@@ -734,9 +734,11 @@ export async function leaseTable(): Promise<Map<string, number>> {
 export function leaseNames(site: SiblingSite): string[] {
 	const pkg = readJson(join(site.contentRoot, 'package.json'));
 	const folder = site.contentRoot.replace(/[/\\]+$/, '').split(/[/\\]/).pop();
-	return [pkg?.name, folder, site.name]
+	const raw = [pkg?.name, folder, site.name]
 		.filter((n): n is string => Boolean(n))
 		.map((n) => n.toLowerCase());
+	const extra = raw.flatMap((n) => (n.endsWith('-site') ? [] : [`${n}-site`]));
+	return [...new Set([...raw, ...extra])];
 }
 
 export function leasePortFor(site: SiblingSite, leases: Map<string, number>): number | null {

@@ -6,7 +6,9 @@ import { join } from 'node:path';
 import {
 	discoverSites,
 	enrollExtraSites,
+	enrollSitesUnder,
 	extraSitePaths,
+	planEnrollSites,
 	scanFilepressSites,
 	staleVirtualStoreDir,
 	syncCommitPaths,
@@ -106,6 +108,44 @@ describe('discoverSites', () => {
 			const removed = unenrollExtraSites(['notes'], sites, stateDir);
 			assert.equal(removed.length, 1);
 			assert.equal(extraSitePaths(stateDir).length, 0);
+		} finally {
+			cleanup();
+		}
+	});
+});
+
+describe('planEnrollSites', () => {
+	it('skips a folder that is not a FilePress site', () => {
+		const { workspace, engine, cleanup } = fixture();
+		const stateDir = join(workspace, '.state');
+		try {
+			const planned = planEnrollSites([join(workspace, 'clients')], {
+				workspace,
+				engineRoot: engine,
+				stateDir
+			});
+			assert.equal(planned.rows[0]?.action, 'skip');
+			assert.match(planned.rows[0]?.reason ?? '', /not a FilePress site/);
+		} finally {
+			cleanup();
+		}
+	});
+});
+
+describe('enrollSitesUnder', () => {
+	it('adds a nested site found under a fleet folder', () => {
+		const { workspace, engine, cleanup } = fixture();
+		const stateDir = join(workspace, '.state');
+		try {
+			const result = enrollSitesUnder([join(workspace, 'clients')], {
+				workspace,
+				engineRoot: engine,
+				stateDir,
+				maxDepth: 3
+			});
+			assert.equal(result.added.length, 1);
+			assert.ok(result.added[0]?.includes('notes'));
+			assert.equal(extraSitePaths(stateDir).length, 1);
 		} finally {
 			cleanup();
 		}

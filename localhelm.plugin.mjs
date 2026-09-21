@@ -41,6 +41,10 @@ function bridge(args) {
 	});
 }
 
+function pathArgs(ids) {
+	return ids.flatMap((p) => ['--path', p]);
+}
+
 function actionsFor(site) {
 	const list = [
 		{ id: 'sync', label: 'Sync engine', write: true, icon: 'lucide:refresh-cw' },
@@ -64,6 +68,7 @@ function boardFrom(inventory) {
 			`Engine local ${inventory.engine.local}, npm ${inventory.engine.published ?? 'none'}, sync target ${inventory.engine.target}.`,
 			inventory.engine.note,
 			'Sync retargets getfilepress (including link:), merges static/_headers, and commits. Push is git push origin <branch> only — never --force. Ship then runs pnpm ship. LocalHelm does not reimplement those jobs.',
+			'Add sites lists folders with getfilepress and filepress.config.ts. Workspace siblings already appear; extras.json is for folders FilePress does not see as a sibling.',
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -103,6 +108,14 @@ const plugin = {
 		return boardFrom(await bridge(['inventory']));
 	},
 	async plan(action, ids) {
+		if (action === 'scan') {
+			const args = ['scan'];
+			if (ids[0]) args.push('--root', ids[0]);
+			return await bridge(args);
+		}
+		if (action === 'enroll' || action === 'enroll-from') {
+			return await bridge(['plan', '--action', action, ...pathArgs(ids)]);
+		}
 		if (action === 'land') {
 			const args = ['plan', '--action', 'land'];
 			if (ids.length) args.push('--names', ids.join(','));
@@ -146,6 +159,9 @@ const plugin = {
 		};
 	},
 	async apply(action, ids) {
+		if (action === 'enroll' || action === 'enroll-from') {
+			return await bridge(['apply', '--action', action, ...pathArgs(ids)]);
+		}
 		const job = action === 'ship' || action === 'push' ? action : 'sync';
 		const args = ['apply', '--action', job];
 		if (ids.length) args.push('--names', ids.join(','));

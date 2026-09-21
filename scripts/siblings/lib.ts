@@ -358,15 +358,23 @@ export function writeExtraSitePaths(paths: string[], stateDir = STATE_DIR): stri
 	return unique;
 }
 
-export function enrollExtraSites(paths: string[], stateDir = STATE_DIR): { added: string[]; already: string[] } {
+export function enrollExtraSites(
+	paths: string[],
+	stateDir = STATE_DIR
+): { added: string[]; already: string[]; skipped: string[] } {
 	const have = extraSitePaths(stateDir);
 	const haveKeys = new Set(have.map((p) => resolve(workspaceRoot, p).toLowerCase()));
 	const added: string[] = [];
 	const already: string[] = [];
+	const skipped: string[] = [];
 	for (const raw of paths) {
 		const abs = resolve(workspaceRoot, raw);
 		if (haveKeys.has(abs.toLowerCase())) {
 			already.push(abs);
+			continue;
+		}
+		if (!extraSiteFromPath(raw, workspaceRoot, filepressRoot)) {
+			skipped.push(abs);
 			continue;
 		}
 		haveKeys.add(abs.toLowerCase());
@@ -374,8 +382,157 @@ export function enrollExtraSites(paths: string[], stateDir = STATE_DIR): { added
 		have.push(rel.startsWith('..') ? abs.replace(/\\/g, '/') : rel);
 		added.push(abs);
 	}
-	writeExtraSitePaths(have, stateDir);
-	return { added, already };
+	if (added.length) writeExtraSitePaths(have, stateDir);
+	return { added, already, skipped };
+}
+
+export type SiteScope = {
+	workspace?: string;
+	engineRoot?: string;
+	stateDir?: string;
+	maxDepth?: number;
+};
+
+export type EnrollSiteRow = {
+	action: 'add' | 'already' | 'skip';
+	id: string;
+	path: string;
+	absPath: string;
+	writes: boolean;
+	reason?: string;
+};
+
+function siteScope(opts: SiteScope = {}): Required<Omit<SiteScope, 'maxDepth'>> & { maxDepth: number } {
+	return {
+		workspace: opts.workspace ?? workspaceRoot,
+		engineRoot: opts.engineRoot ?? filepressRoot,
+		stateDir: opts.stateDir ?? STATE_DIR,
+		maxDepth: opts.maxDepth ?? 3
+	};
+}
+
+function siteKey(path: string): string {
+	return resolve(path).toLowerCase();
+}
+
+/** FilePress sites under these folders, including ones already listed. Does not write. */
+export function scanSitesUnder(roots: string[], opts: SiteScope = {}): ScanCandidate[] {
+	const scope = siteScope(opts);
+	const seen = new Set<string>();
+	const rows: ScanCandidate[] = [];
+	for (const root of roots) {
+		let found: ScanCandidate[];
+		try {
+			found = scanFilepressSites(root, {
+				workspace: scope.workspace,
+				engineRoot: scope.engineRoot,
+				maxDepth: scope.maxDepth
+			});
+		} catch {
+			continue;
+		}
+		for (const row of found) {
+			const key = siteKey(row.absPath);
+			if (seen.has(key)) continue;
+			seen.add(key);
+			rows.push(row);
+		}
+	}
+	return rows.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+/** Plan extras.json writes. Skips folders that are not FilePress sites or are already listed. */
+export function planEnrollSites(paths: string[], opts: SiteScope = {}): { action: 'enroll'; rows: EnrollSiteRow[] } {
+	const scope = siteScope(opts);
+	const have = extraSitePaths(scope.stateDir);
+	const listed = new Set(
+		discoverSites({
+			workspace: scope.workspace,
+			engineRoot: scope.engineRoot,
+			extras: have
+		}).map((site) => siteKey(site.contentRoot))
+	);
+	const rows: EnrollSiteRow[] = [];
+	const seen = new Set<string>();
+	for (const raw of paths) {
+		const site = extraSiteFromPath(raw, scope.workspace, scope.engineRoot);
+		if (!site) {
+			const folder = raw.replace(/[/\\]+$/, '').split(/[/\\]/).pop() ?? raw;
+			rows.push({
+				action: 'skip',
+				id: folder,
+				path: raw,
+				absPath: resolve(scope.workspace, raw),
+				writes: false,
+				reason: 'not a FilePress site — need getfilepress and filepress.config.ts'
+			});
+			continue;
+		}
+		const key = siteKey(site.contentRoot);
+		if (seen.has(key)) continue;
+		seen.add(key);
+		const rel = relative(scope.workspace, site.contentRoot).replace(/\\/g, '/') || '.';
+		if (listed.has(key)) {
+			rows.push({
+				action: 'already',
+				id: site.name,
+				path: rel,
+				absPath: site.contentRoot,
+				writes: false,
+				reason: 'already listed'
+			});
+			continue;
+		}
+		rows.push({
+			action: 'add',
+			id: site.name,
+			path: rel,
+			absPath: site.contentRoot,
+			writes: true
+		});
+	}
+	return { action: 'enroll', rows };
+}
+
+export function applyEnrollSites(
+	paths: string[],
+	opts: SiteScope = {}
+): { action: 'enroll'; rows: EnrollSiteRow[]; added: string[]; already: string[]; skipped: string[] } {
+	const planned = planEnrollSites(paths, opts);
+	const toAdd = planned.rows.filter((row) => row.action === 'add').map((row) => row.absPath);
+	const result = toAdd.length
+		? enrollExtraSites(toAdd, siteScope(opts).stateDir)
+		: { added: [], already: [], skipped: [] };
+	return { ...planned, ...result };
+}
+
+/** After Helm fleet enroll: add FilePress sites found under those folders that are not already listed. */
+export function enrollSitesUnder(
+	roots: string[],
+	opts: SiteScope = {}
+): { action: 'enroll-from'; rows: EnrollSiteRow[]; added: string[]; already: string[]; skipped: string[] } {
+	const candidates = scanSitesUnder(roots, opts);
+	const fresh = candidates.filter((row) => !row.enrolled).map((row) => row.absPath);
+	const applied = applyEnrollSites(fresh, opts);
+	return { action: 'enroll-from', rows: applied.rows, added: applied.added, already: applied.already, skipped: applied.skipped };
+}
+
+export function planEnrollSitesUnder(
+	roots: string[],
+	opts: SiteScope = {}
+): { action: 'enroll-from'; rows: EnrollSiteRow[] } {
+	const candidates = scanSitesUnder(roots, opts);
+	return {
+		action: 'enroll-from',
+		rows: candidates.map((row) => ({
+			action: row.enrolled ? 'already' : 'add',
+			id: row.name,
+			path: row.path,
+			absPath: row.absPath,
+			writes: !row.enrolled,
+			reason: row.enrolled ? 'already listed' : undefined
+		}))
+	};
 }
 
 export function unenrollExtraSites(names: string[], sites: SiblingSite[], stateDir = STATE_DIR): string[] {

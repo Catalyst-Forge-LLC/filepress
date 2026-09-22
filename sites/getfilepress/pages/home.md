@@ -19,12 +19,34 @@ my-blog/
   posts/2026-09-10-hello.md
 ```
 
-`title` and `url` are required in config. Pin **`getfilepress`** `^0.1.29` (or `link:` a local engine clone), then:
+`package.json` pins **`getfilepress`** `^0.1.37` and maps the commands:
+
+```json
+{
+  "type": "module",
+  "scripts": {
+    "dev": "filepress dev",
+    "build": "filepress build",
+    "preview": "filepress preview"
+  },
+  "devDependencies": { "getfilepress": "^0.1.37" }
+}
+```
+
+`filepress.config.ts` needs `title` and `url`. Add `logo: null` for a text title, or put a `logo.png` in `static/`. The build fails if it links a logo that is not there.
+
+```ts
+import { defineFilepressConfig } from 'getfilepress';
+
+export default defineFilepressConfig({ title: 'My Blog', url: 'https://my.blog', logo: null });
+```
+
+The post needs `title` and `date` (`YYYY-MM-DD`) in frontmatter. Then:
 
 ```bash
 pnpm install
 pnpm build      # writes ./build/
-pnpm preview    # serves build/ locally, no Genie
+pnpm preview    # serves build/ at http://127.0.0.1:27777, no Genie
 ```
 
 `pnpm dev` is the optional design loop. It is not required to produce a site. FilePress does not pick a host or upload `build/` for you. [Getting started](/getting-started) has the scaffold command if you want a full starter tree.

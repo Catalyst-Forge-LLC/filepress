@@ -6,13 +6,54 @@ FilePress ships on npm as **`getfilepress`**. The bins are `filepress` and `getf
 
 ## Shortest path
 
-A site is a content folder plus a pin of the engine. The smallest useful tree is `filepress.config.ts` (`title` and `url` required), `posts/YYYY-MM-DD-slug.md`, and `package.json` with `"getfilepress": "^0.1.29"`.
+A site is a content folder plus a pin of the engine. The smallest tree that builds is three files.
+
+`package.json`:
+
+```json
+{
+  "type": "module",
+  "scripts": {
+    "dev": "filepress dev",
+    "build": "filepress build",
+    "preview": "filepress preview"
+  },
+  "devDependencies": { "getfilepress": "^0.1.37" }
+}
+```
+
+`filepress.config.ts` (`title` and `url` required):
+
+```ts
+import { defineFilepressConfig } from 'getfilepress';
+
+export default defineFilepressConfig({
+  title: 'My Blog',
+  url: 'https://my.blog',
+  logo: null
+});
+```
+
+`posts/2026-09-10-hello.md` (`title` and `date` required):
+
+```markdown
+---
+title: Hello
+date: 2026-09-10
+---
+
+First post.
+```
+
+Then:
 
 ```bash
 pnpm install
 pnpm build      # → ./build/
-pnpm preview    # serve build/, no Genie
+pnpm preview    # serve build/ at http://127.0.0.1:27777, no Genie
 ```
+
+`logo: null` gives a text title. Without it, the masthead links `/logo.png` and the build fails until `static/logo.png` exists.
 
 `pnpm dev` adds the Genie FAB. It is not required for the first site. Deploy means you upload `build/` to a static host. FilePress does not create that host.
 
@@ -34,12 +75,12 @@ pnpm dev      # local preview
 pnpm build    # → build/
 ```
 
-Or pin the published package (current is `0.1.29`):
+Or pin the published package (current is `0.1.37`):
 
 ```json
 {
   "devDependencies": {
-    "getfilepress": "^0.1.29"
+    "getfilepress": "^0.1.37"
   }
 }
 ```
@@ -85,7 +126,7 @@ export default defineFilepressConfig({
 
 `title` and `url` are required. Missing values fail the build with a named error.
 
-Omit `logo` and the masthead uses `/logo.png` from `static/` if that file is there. Set `logo: ""` or `null` for a text-only title.
+Omit `logo` and the masthead uses `/logo.png` from `static/`. The build fails if that file is missing. Set `logo: ""` or `null` for a text-only title.
 
 ### Nav, footer, and icons
 

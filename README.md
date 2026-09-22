@@ -8,13 +8,54 @@ Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script 
 
 ## Start a site
 
-Shortest path: a folder with `filepress.config.ts` (`title`, `url`), `posts/*.md`, and `"getfilepress": "^0.1.29"` in `package.json`.
+Shortest path: three files in an empty folder.
+
+`package.json`:
+
+```json
+{
+  "type": "module",
+  "scripts": {
+    "dev": "filepress dev",
+    "build": "filepress build",
+    "preview": "filepress preview"
+  },
+  "devDependencies": { "getfilepress": "^0.1.37" }
+}
+```
+
+`filepress.config.ts` (`title` and `url` are required):
+
+```ts
+import { defineFilepressConfig } from 'getfilepress';
+
+export default defineFilepressConfig({
+  title: 'My Blog',
+  url: 'https://my.blog',
+  logo: null
+});
+```
+
+`posts/2026-09-10-hello.md` (`title` and `date` are required):
+
+```markdown
+---
+title: Hello
+date: 2026-09-10
+---
+
+First post.
+```
+
+Then:
 
 ```bash
 pnpm install
 pnpm build      # → ./build/
-pnpm preview    # serve build/, no Genie
+pnpm preview    # serve build/ at http://127.0.0.1:27777, no Genie
 ```
+
+`logo: null` gives a text title. Without it, the masthead links `/logo.png` and the build fails until `static/logo.png` exists.
 
 `pnpm dev` is optional (Genie). FilePress does not upload `build/`.
 
@@ -28,7 +69,7 @@ cd ../my-blog && pnpm install && pnpm dev
 
 `filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Docs](https://getfilepress.com/docs).
 
-Pin CI on npm (`getfilepress` current is `0.1.29`) or a git SHA / existing tag. `link:` is local only.
+Pin CI on npm (`getfilepress` current is `0.1.37`) or a git SHA / existing tag. `link:` is local only.
 
 ## Import
 

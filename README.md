@@ -118,3 +118,5 @@ No admin UI. No visitor comments — permanent. Genie is `filepress dev` only; `
 ## License
 
 MIT. Copyright Catalyst Forge LLC.
+
+[See the rest of the Catalyst Forge shelf.](https://catalystforge.com/tools/)

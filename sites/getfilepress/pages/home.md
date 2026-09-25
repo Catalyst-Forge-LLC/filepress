@@ -1,5 +1,5 @@
 ---
-title: FilePress
+title: Markdown from git
 description: Publish Markdown from git as a static site. Import a public site or start from files.
 order: 0
 ---
@@ -7,6 +7,11 @@ order: 0
 Publish Markdown from git as a static site, with tags, feeds, and a theme you can adapt. Start with a folder of posts, or use the supported import workflow to bring an existing site into plain files.
 
 No CMS. No database. No server at runtime.
+
+<div class="cta-row">
+  <a class="cta cta-primary" href="/docs/getting-started">Read the docs</a>
+  <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/filepress">View on GitHub</a>
+</div>
 
 ## Shortest path
 

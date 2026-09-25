@@ -8,7 +8,7 @@ export default defineFilepressConfig({
 	url: 'https://getfilepress.com',
 	author: 'FilePress',
 	tagline: 'Markdown blogs from git',
-	lede: 'A folder of Markdown, a static build/, no CMS.',
+	lede: 'Folder · static build · no CMS',
 	homePage: 'home',
 	logo: '/logo.png',
 	ogImage: '/logo.png',

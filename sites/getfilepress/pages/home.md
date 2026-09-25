@@ -1,5 +1,5 @@
 ---
-title: Markdown from git
+title: Static sites from Markdown in git.
 description: Publish Markdown from git as a static site. Import a public site or start from files.
 order: 0
 ---

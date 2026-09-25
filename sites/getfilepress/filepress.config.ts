@@ -7,7 +7,7 @@ export default defineFilepressConfig({
 	description: 'Publish Markdown from git as a static site. Import a public site or start from files.',
 	url: 'https://getfilepress.com',
 	author: 'FilePress',
-	tagline: 'Write in Markdown, keep it in git.',
+	tagline: 'Easy websites, no CMS to run.',
 	lede: 'Folder · static build · no CMS',
 	homePage: 'home',
 	logo: '/logo.png',

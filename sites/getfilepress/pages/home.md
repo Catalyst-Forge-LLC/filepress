@@ -19,7 +19,9 @@ my-blog/
   posts/2026-09-10-hello.md
 ```
 
-`package.json` pins **`getfilepress`** `^0.1.37` and maps the commands:
+Write posts as Markdown files. Build the site locally, then publish the generated files to your static host.
+
+`package.json` depends on **`getfilepress`** `^0.1.37`, a compatible range, and maps the commands. Commit the lockfile if you want later installs to resolve the same set. "Pin" here means an exact version, not a caret range:
 
 ```json
 {

@@ -75,7 +75,7 @@ pnpm dev      # local preview
 pnpm build    # → build/
 ```
 
-Or pin the published package (current is `0.1.37`):
+Or depend on a compatible 0.1.x range (current range starts at `0.1.37`). Commit the lockfile if you want later installs to resolve the same set. Use an exact version only when you mean to pin:
 
 ```json
 {

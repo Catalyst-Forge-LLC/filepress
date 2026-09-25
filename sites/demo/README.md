@@ -22,4 +22,4 @@ pnpm check                         # type-check against this site
 | `theme.css` | Accent override demo (see `docs/THEME.md`) |
 | `static/` | Favicon + `images/posts/images-in-posts/` |
 
-Frontmatter, images, and config: [Getting started](https://getfilepress.com/getting-started). Theme tokens: [`docs/THEME.md`](../../docs/THEME.md).
+Frontmatter, images, and config: [Getting started](https://getfilepress.com/docs/getting-started). Theme tokens: [`docs/THEME.md`](../../docs/THEME.md).

@@ -27,6 +27,7 @@ export default defineFilepressConfig({
 		{ label: 'GitHub', href: github, icon: 'github' }
 	],
 	paths: [{ url: '/docs', dir: 'docs/dist' }],
+	redirects: [{ from: '/getting-started', to: '/docs/getting-started', status: 301 }],
 	topics: [
 		{ label: 'Getting started', tag: 'getting-started' },
 		{ label: 'Workflow', tag: 'workflow' },

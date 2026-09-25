@@ -6,7 +6,7 @@ FilePress ships on npm as **`getfilepress`**. The bins are `filepress` and `getf
 
 ## Shortest path
 
-A site is a content folder plus a pin of the engine. The smallest tree that builds is three files.
+A site is a content folder plus a dependency on the engine. The smallest tree that builds is three files.
 
 `package.json`:
 
@@ -183,3 +183,10 @@ Images: `static/images/posts/<slug>/photo.jpg`, referenced as `/images/posts/<sl
 | `filepress check` | Type-check against the site |
 
 In the engine monorepo, pass `--site <name>` (for example `--site getfilepress`). Sibling sites use cwd. No `--site` flag.
+
+## Next
+
+- Ship it: [Deploy](/docs/deploy)
+- Import an existing site: [Import](/docs/import)
+- Tune look in `filepress dev`: [Genie](/docs/genie)
+- If the site ships an agent skill: [Skill page](/docs/skill-page)

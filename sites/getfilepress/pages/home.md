@@ -51,7 +51,7 @@ pnpm build      # writes ./build/
 pnpm preview    # serves build/ at http://127.0.0.1:27777, no Genie
 ```
 
-`pnpm dev` is the optional design loop. It is not required to produce a site. FilePress does not pick a host or upload `build/` for you. [Getting started](/getting-started) has the scaffold command if you want a full starter tree.
+`pnpm dev` is the optional design loop. It is not required to produce a site. FilePress does not pick a host or upload `build/` for you. [Getting started](/docs/getting-started) has the scaffold command if you want a full starter tree.
 
 Live result of this engine: [getfilepress.com](https://getfilepress.com) (this page). In-repo fixture: `sites/demo` (`pnpm filepress dev --site demo` from a FilePress clone).
 

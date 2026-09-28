@@ -210,7 +210,7 @@ Sibling deps: `"getfilepress": "link:../filepress"`. CI pin: `github:Catalyst-Fo
 ### Agent prefs (still true)
 
 - pnpm, TypeScript ESM only  
-- Commit after substantive work; **no** Co-Authored-By / tool trailers unless asked  
+- Commit after substantive work  
 - **Never push unless asked**  
 - Lessons gate (`getAntiPatterns` + `searchLessons`) before large multi-file work  
 

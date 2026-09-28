@@ -7,7 +7,12 @@ repositories:
     root: .
 record_roots:
   - records
-bindings: []
+bindings:
+  - id: appfacts-application
+    family: appfacts
+    subject_id: app-74818d2608dd
+    repository_id: repo-home
+    path: APP_FACTS.md
 profiles:
   - id: forgetrail
     version: 0.1.0

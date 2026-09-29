@@ -46,6 +46,7 @@ describe('labelCardFromMarkdown', () => {
 
 	it('falls back to the family site when there is no viewer URL', () => {
 		const card = labelCardFromMarkdown('skills/demo/SKILL_FACTS.md', 'SKILL_FACTS.md', SKILL);
+		expect(card?.title).toBe('Demo-Skill');
 		expect(card?.href).toBe('https://skillfacts.dev');
 		expect(card?.viewer).toBe(false);
 		expect(card?.meta[0]).toEqual({ label: 'Kind', value: 'agents-skill' });

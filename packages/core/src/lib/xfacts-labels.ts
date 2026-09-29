@@ -94,6 +94,12 @@ function titleCase(key: string): string {
 	return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
+/** Headings keep mixed case (AppLedger). An all-lowercase slug is title-cased. */
+function displayName(name: string): string {
+	if (/[A-Z]/.test(name)) return name;
+	return name.replace(/[A-Za-z]+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1));
+}
+
 function oneLine(value: unknown, max = 96): string {
 	if (typeof value !== 'string') return '';
 	const text = value.replace(/\s+/g, ' ').trim();
@@ -150,7 +156,7 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 	}
 
 	const known = familyForFactsFile(filename);
-	const title = oneLine(data.name, 80);
+	const title = displayName(oneLine(data.name, 80));
 	if (!title) return null;
 
 	const credits = asRecord(data.credits);

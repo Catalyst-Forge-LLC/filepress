@@ -1,11 +1,11 @@
 # Agent guardrails — filepress
 
-This repo uses **ForgeTrail** lifecycle tracking. Source of truth: `.forgetrail/workflow_tracking.json` (`currentPhase`, `phases`, `decisions`).
+This repo uses **ForgeTrail**. The record is `appledger/`: the phase in `profiles/forgetrail.yaml`, and decisions and the session in `records/`.
 
 ## Session start
 
-1. Read `.forgetrail/workflow_tracking.json` and `CONTEXT_PROMPT.md` (once it exists) before making changes.
-2. Check `currentPhase` and work within that phase's scope; don't jump ahead without user confirmation.
+1. Read `appledger/profiles/forgetrail.yaml`, the latest session record, and `CONTEXT_PROMPT.md` (once it exists) before making changes.
+2. Work within the current phase. Don't jump ahead without user confirmation.
 
 ## Git commits
 
@@ -14,4 +14,4 @@ This repo uses **ForgeTrail** lifecycle tracking. Source of truth: `.forgetrail/
 
 ## Phase transitions
 
-Do not advance `currentPhase` or mark a phase complete without explicit user confirmation. If exit criteria look satisfied, say so and wait.
+Do not advance the phase or mark a phase complete without explicit user confirmation. If exit criteria look satisfied, say so and wait.

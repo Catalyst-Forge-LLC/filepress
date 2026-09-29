@@ -51,13 +51,26 @@ function walk(dir: string, depth: number, files: string[]): void {
 	}
 }
 
+/** A site `static/` copy of a skill pack is an install file, not a second label. */
+function copyRank(id: string): number {
+	return id.split('/').includes('static') ? 1 : 0;
+}
+
+function labelText(raw: string): string {
+	return raw.replace(/\r\n/g, '\n').trim();
+}
+
 /** Find project xFacts labels and turn each one into a home-page card. */
 export function discoverXFactsLabels(siteRoot: string): XFactsLabelCard[] {
 	const root = repoRootForSite(siteRoot);
 	const files: string[] = [];
 	walk(root, 0, files);
+	const ordered = files
+		.map((file) => ({ file, id: relative(root, file).split(sep).join('/') }))
+		.sort((a, b) => copyRank(a.id) - copyRank(b.id) || a.id.localeCompare(b.id));
+	const seen = new Set<string>();
 	const cards: XFactsLabelCard[] = [];
-	for (const file of files) {
+	for (const { file, id } of ordered) {
 		let size = 0;
 		try {
 			size = statSync(file).size;
@@ -71,7 +84,9 @@ export function discoverXFactsLabels(siteRoot: string): XFactsLabelCard[] {
 		} catch {
 			continue;
 		}
-		const id = relative(root, file).split(sep).join('/');
+		const text = labelText(raw);
+		if (seen.has(text)) continue;
+		seen.add(text);
 		const card = labelCardFromMarkdown(id, basename(file), raw);
 		if (card) cards.push(card);
 	}

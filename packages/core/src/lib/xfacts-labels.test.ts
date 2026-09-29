@@ -67,6 +67,9 @@ describe('discoverXFactsLabels', () => {
 		writeFileSync(join(root, 'examples', 'APP_FACTS.md'), APP);
 		writeFileSync(join(root, 'node_modules', 'pkg', 'APP_FACTS.md'), APP);
 
+		mkdirSync(join(root, 'site', 'static', 'skills', 'demo'), { recursive: true });
+		writeFileSync(join(root, 'site', 'static', 'skills', 'demo', 'SKILL_FACTS.md'), SKILL);
+
 		const cards = discoverXFactsLabels(join(root, 'site'));
 		expect(cards.map((card) => card.id)).toEqual(['APP_FACTS.md', 'skills/demo/SKILL_FACTS.md']);
 		expect(cards[0]?.viewer).toBe(true);

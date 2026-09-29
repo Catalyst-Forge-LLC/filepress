@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../styles/xfacts-fonts.css';
 	import type { XFactsLabelCard } from '../xfacts-labels';
 
 	let { labels }: { labels: XFactsLabelCard[] } = $props();
@@ -55,9 +56,10 @@
 		color: #101418;
 		border: 4px solid #101418;
 		border-radius: 0;
-		padding: 0.85rem 0.9rem 0.95rem;
+		padding: 1rem 1.05rem 1.15rem;
 		box-shadow: 0 12px 28px rgba(16, 20, 24, 0.12);
 		font-family: 'IBM Plex Mono', ui-monospace, monospace;
+		font-weight: 400;
 	}
 
 	.xfacts-label:hover {
@@ -67,9 +69,9 @@
 
 	h2 {
 		margin: 0;
-		font-family: Sora, 'IBM Plex Mono', ui-sans-serif, system-ui, sans-serif;
+		font-family: Sora, sans-serif;
 		font-weight: 800;
-		font-size: 1.35rem;
+		font-size: clamp(1.55rem, 5vw, 1.9rem);
 		letter-spacing: -0.03em;
 		line-height: 1.1;
 		text-transform: uppercase;
@@ -77,22 +79,22 @@
 	}
 
 	.serving {
-		font-size: 0.68rem;
+		font-size: 0.72rem;
 		line-height: 1.35;
 		color: #5c6b7a;
-		border-bottom: 8px solid #101418;
-		padding: 0.35rem 0 0.45rem;
-		margin-bottom: 0.3rem;
+		border-bottom: 10px solid #101418;
+		padding: 0.4rem 0 0.5rem;
+		margin-bottom: 0.35rem;
 	}
 
 	.meta {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem 0.7rem;
+		gap: 0.35rem 0.75rem;
 		border-bottom: 5px solid #101418;
-		padding: 0.4rem 0 0.5rem;
-		margin-bottom: 0.15rem;
-		font-size: 0.72rem;
+		padding: 0.45rem 0 0.55rem;
+		margin-bottom: 0.35rem;
+		font-size: 0.78rem;
 		color: #101418;
 	}
 
@@ -104,10 +106,10 @@
 	.row {
 		display: flex;
 		justify-content: space-between;
-		gap: 0.75rem;
+		gap: 1rem;
 		border-bottom: 1px solid #101418;
-		padding: 0.28rem 0;
-		font-size: 0.72rem;
+		padding: 0.32rem 0;
+		font-size: 0.8rem;
 		color: #101418;
 	}
 
@@ -120,28 +122,28 @@
 	}
 
 	.section {
-		margin-top: 0.65rem;
-		font-size: 0.68rem;
+		margin-top: 0.7rem;
+		font-size: 0.72rem;
 		color: #5c6b7a;
 	}
 
 	.section b {
 		display: block;
 		color: #101418;
-		font-size: 0.75rem;
-		margin-bottom: 0.2rem;
+		font-size: 0.8rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.section p {
-		margin: 0;
+		margin: 0.15rem 0 0;
 		color: #101418;
-		font-size: 0.72rem;
+		font-size: 0.8rem;
 		line-height: 1.4;
 	}
 
 	.open {
-		margin-top: 0.75rem;
-		padding-top: 0.55rem;
+		margin-top: 0.85rem;
+		padding-top: 0.65rem;
 		border-top: 1px solid #c5ced8;
 		font-size: 0.72rem;
 		font-weight: 600;

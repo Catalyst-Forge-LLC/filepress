@@ -1,6 +1,6 @@
 ---
 app_facts_version: 0.1.0
-name: filepress
+name: FilePress
 type: monorepo
 status: active
 license: MIT
@@ -46,7 +46,7 @@ credits:
   built_by: "Catalyst Forge — https://www.catalystforge.com/"
 ---
 
-# filepress
+# FilePress
 
 `monorepo` · **active** · MIT
 
@@ -91,4 +91,4 @@ Curated stack label for this repository — aimed at an under-a-minute skim.
 ---
 *Generated with [AppFacts](https://appfacts.dev) · Built by [Catalyst Forge](https://www.catalystforge.com/) · [Visual label][appfacts-label]*
 
-[appfacts-label]: https://appfacts.dev/v#af1.eNptkkFr3DAQhf-KmLMc06tOLQulaXbbgpdSKKFM5LFWWVkS0tgbs-S_F9let4FcZ76Z9-ZJVxhBfZDgsSdQ0FlHMVHOIIGnWEp98CFRDCAhM_KQQQFqtiOBBGc1-Vyww_1xIfQZ1BUcejOgKZ3jFKnRyUaWohnJMUnxFUe81XZNI8WX42EPEtLg2c5OvoWW7p6Ljy5hT5eQzqBgmX-wPGtNznoDCnZNAxKeButaUPDTcrF2CpnXtgtD2zlMJH6gobJTO_vm2lcJLcUM6vcVPCj4mGeh51yfZ61YgkDrxT8zr3JBF3JluhQ8k2_f4Ua7UbNTwSG4rctD8m24-JUocQgd_Egp2-A3rMPM1UvvqogpU1rpX4e9KIVy7o28JPTGbUhL0YWpJ89vdQdvO0vtSunZPYuYgqa87HuUkEe9JfNOmAnUlvZt73fnsMe16YJGJz7dC3ohPfB80OP2YFeIqM9o6E-PHg2ViehjX74gZd4irvSJdMkTynfMlkOaijJzzKqujeXT8HSnQ1_vkNFNmavPIRmq9vtd_d9T_wWMmPsr
+[appfacts-label]: https://appfacts.dev/v#af1.eNptkkFr3DAQhf-KmLMc06tOLQuhaXfbgJdSKKFM5LFWWVkS0tgbs-S_F9let4VcZ76Z9-ZJVxhBfZDgsSdQcG8dPSbKGSTwFEupDz4kigEkZEYeMihAzXYkkOCsJp8Ldng4LoQ-g7qCQ28GNKVznCI1OtnIUjQjOSYpvuCIt9quaaT4fDzsQUIaPNvZybfQ0t1L8dEl7OkS0hkULPNfLc9ak7PegIJd04CE58G6FhT8sFysnULmte3C0HYOE4lHNFR2amdBQWcdxfnaNwktxQzq1xU8KPiYZ6GXXJ9nrViCQOvFXzNvckEXcmW6FDyTb9_hRrtRs1PBIbity0Pybbj4lShxCB38SCnb4Desw8zVa--qiClTWumfh70ohXLujbwk9MZtSEvRhaknz__rDt52ltqV0rN7FjEFTXnZ9yQhj3pL5p0wE6gt7dve785hj2vTBY1OfHoQ9Ep64Pmgp-3BrhBRn9HQ7x49GioT0ce-fEHKvEVc6RPpkieU75gthzQVZeaYVV0by6fh-U6Hvt4ho5syV_chGar2-139z1P_AdQJ-us

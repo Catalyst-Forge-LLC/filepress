@@ -13,6 +13,11 @@ bindings:
     subject_id: app-74818d2608dd
     repository_id: repo-home
     path: APP_FACTS.md
+  - id: featurefacts-application
+    family: featurefacts
+    subject_id: app-74818d2608dd
+    repository_id: repo-home
+    path: .featurefacts/features.yaml
 profiles:
   - id: forgetrail
     version: 0.1.0

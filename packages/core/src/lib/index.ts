@@ -7,6 +7,7 @@ export { default as PostIndex } from './components/PostIndex.svelte';
 export { default as Newsletter } from './components/Newsletter.svelte';
 export { default as SiteHeader } from './components/SiteHeader.svelte';
 export { default as SiteFooter } from './components/SiteFooter.svelte';
+export { default as XFactsRail } from './components/XFactsRail.svelte';
 
 export {
 	defineFilepressConfig,

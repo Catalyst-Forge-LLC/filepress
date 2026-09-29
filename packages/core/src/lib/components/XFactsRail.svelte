@@ -8,7 +8,11 @@
 {#if labels.length}
 	<aside class="xfacts-rail" aria-label="xFacts labels">
 		{#each labels as label (label.id)}
+			{@const marked = label.family.endsWith('Facts') && label.family.length > 5}
 			<a class="xfacts-label" href={label.href} style:--xfacts-ember={label.accent}>
+				<p class="mark">
+					<span class="mark-lead">{marked ? label.family.slice(0, -5) : label.family}</span>{#if marked}<span class="mark-rest">Facts</span>{/if}
+				</p>
 				<h2>{label.title}</h2>
 				<div class="serving">{label.serving}</div>
 				{#if label.meta.length}
@@ -67,6 +71,24 @@
 		text-decoration: none;
 	}
 
+	.mark {
+		margin: 0 0 0.4rem;
+		font-family: Sora, sans-serif;
+		font-weight: 800;
+		font-size: 0.85rem;
+		letter-spacing: 0.06em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.mark-lead {
+		color: var(--xfacts-ember, #d96b2b);
+	}
+
+	.mark-rest {
+		color: #101418;
+	}
+
 	h2 {
 		margin: 0;
 		font-family: Sora, sans-serif;
@@ -74,7 +96,6 @@
 		font-size: clamp(1.55rem, 5vw, 1.9rem);
 		letter-spacing: -0.03em;
 		line-height: 1.1;
-		text-transform: uppercase;
 		color: #101418;
 	}
 

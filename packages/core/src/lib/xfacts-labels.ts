@@ -31,37 +31,37 @@ const FAMILIES: Record<string, { family: string; home: string; accent: string; s
 		family: 'AppFacts',
 		home: 'https://appfacts.dev',
 		accent: '#d96b2b',
-		serving: 'Serving size: one repository · Read time: under a minute'
+		serving: 'Serving size: one repository'
 	},
 	FEATURE: {
 		family: 'FeatureFacts',
 		home: 'https://featurefacts.dev',
 		accent: '#818cf8',
-		serving: 'Serving size: one product · Read time: under a minute'
+		serving: 'Serving size: one product'
 	},
 	TOOL: {
 		family: 'ToolFacts',
 		home: 'https://toolfacts.dev',
 		accent: '#2dd4bf',
-		serving: 'Serving size: one tool · Read time: under a minute'
+		serving: 'Serving size: one tool'
 	},
 	AGENT: {
 		family: 'AgentFacts',
 		home: 'https://agentfacts.dev',
 		accent: '#f6ad55',
-		serving: 'Serving size: one agent · Read time: under a minute'
+		serving: 'Serving size: one agent'
 	},
 	SKILL: {
 		family: 'SkillFacts',
 		home: 'https://skillfacts.dev',
 		accent: '#f472b6',
-		serving: 'Serving size: one skill · Read time: under a minute'
+		serving: 'Serving size: one skill'
 	},
 	MODEL: {
 		family: 'ModelFacts',
 		home: 'https://modelfacts.dev',
 		accent: '#38bdf8',
-		serving: 'Serving size: one model · Read time: under a minute'
+		serving: 'Serving size: one model'
 	}
 };
 
@@ -86,7 +86,7 @@ export function familyForFactsFile(filename: string): {
 		family: family || 'xFacts',
 		home: '',
 		accent: '#d96b2b',
-		serving: 'Serving size: one label · Read time: under a minute'
+		serving: 'Serving size: one label'
 	};
 }
 

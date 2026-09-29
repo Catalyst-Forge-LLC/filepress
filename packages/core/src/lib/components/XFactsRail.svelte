@@ -34,7 +34,15 @@
 						<p>{label.purpose}</p>
 					</div>
 				{/if}
-				<div class="open">{label.viewer ? 'Open label' : `What is ${label.family}?`}</div>
+				<div class="open" class:ruled={Boolean(label.purpose)}>
+					<span>{label.viewer ? 'Open Full Label' : `What is ${label.family}?`}</span>
+					<svg class="open-icon" viewBox="0 0 16 16" aria-hidden="true">
+						<path
+							fill="currentColor"
+							d="M4.2 3.4h8.4V11h-1.35V5.7L5.15 11.8 4.2 10.85 10.3 4.75H4.2V3.4z"
+						/>
+					</svg>
+				</div>
 			</a>
 		{/each}
 	</aside>
@@ -121,7 +129,7 @@
 
 	.meta strong,
 	.row strong {
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.row {
@@ -163,11 +171,24 @@
 	}
 
 	.open {
-		margin-top: 0.85rem;
-		padding-top: 0.65rem;
-		border-top: 1px solid #c5ced8;
+		margin-top: 0.75rem;
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.3rem;
 		font-size: 0.72rem;
 		font-weight: 600;
 		color: var(--xfacts-ember, #d96b2b);
+	}
+
+	.open.ruled {
+		padding-top: 0.65rem;
+		border-top: 1px solid #c5ced8;
+	}
+
+	.open-icon {
+		width: 0.85rem;
+		height: 0.85rem;
+		flex: none;
 	}
 </style>

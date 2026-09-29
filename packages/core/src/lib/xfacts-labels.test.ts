@@ -39,7 +39,7 @@ describe('labelCardFromMarkdown', () => {
 			{ label: 'Status', value: 'active' }
 		]);
 		expect(card?.rows.map((row) => row.value)).toEqual(['TypeScript', 'Node.js']);
-		expect(card?.serving).toContain('one repository');
+		expect(card?.serving).toBe('Serving size: one repository');
 		expect(card?.href).toBe('https://appfacts.dev/v#af1.abc');
 		expect(card?.viewer).toBe(true);
 	});

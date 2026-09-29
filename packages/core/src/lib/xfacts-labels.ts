@@ -4,36 +4,77 @@
  */
 import matter from 'gray-matter';
 
+export interface XFactsLabelPair {
+	label: string;
+	value: string;
+}
+
 export interface XFactsLabelCard {
 	/** Path relative to the repository root, used as a stable key. */
 	id: string;
 	family: string;
+	/** Viewer accent, used for the link line. */
+	accent: string;
 	title: string;
-	/** type, kind, or a short purpose. */
-	detail: string;
-	/** First few stack values, when the label has a stack map. */
-	stack: string;
-	/** status, when present. */
-	meta: string;
+	serving: string;
+	meta: XFactsLabelPair[];
+	/** Stack rows, in file order. The last one draws the thick rule. */
+	rows: XFactsLabelPair[];
+	purpose: string;
 	href: string;
 	/** True when href is a portable /v# viewer URL from the label file. */
 	viewer: boolean;
 }
 
-const FAMILIES: Record<string, { family: string; home: string }> = {
-	APP: { family: 'AppFacts', home: 'https://appfacts.dev' },
-	FEATURE: { family: 'FeatureFacts', home: 'https://featurefacts.dev' },
-	TOOL: { family: 'ToolFacts', home: 'https://toolfacts.dev' },
-	AGENT: { family: 'AgentFacts', home: 'https://agentfacts.dev' },
-	SKILL: { family: 'SkillFacts', home: 'https://skillfacts.dev' },
-	MODEL: { family: 'ModelFacts', home: 'https://modelfacts.dev' }
+const FAMILIES: Record<string, { family: string; home: string; accent: string; serving: string }> = {
+	APP: {
+		family: 'AppFacts',
+		home: 'https://appfacts.dev',
+		accent: '#d96b2b',
+		serving: 'Serving size: one repository · Read time: under a minute'
+	},
+	FEATURE: {
+		family: 'FeatureFacts',
+		home: 'https://featurefacts.dev',
+		accent: '#818cf8',
+		serving: 'Serving size: one product · Read time: under a minute'
+	},
+	TOOL: {
+		family: 'ToolFacts',
+		home: 'https://toolfacts.dev',
+		accent: '#2dd4bf',
+		serving: 'Serving size: one tool · Read time: under a minute'
+	},
+	AGENT: {
+		family: 'AgentFacts',
+		home: 'https://agentfacts.dev',
+		accent: '#f6ad55',
+		serving: 'Serving size: one agent · Read time: under a minute'
+	},
+	SKILL: {
+		family: 'SkillFacts',
+		home: 'https://skillfacts.dev',
+		accent: '#f472b6',
+		serving: 'Serving size: one skill · Read time: under a minute'
+	},
+	MODEL: {
+		family: 'ModelFacts',
+		home: 'https://modelfacts.dev',
+		accent: '#38bdf8',
+		serving: 'Serving size: one model · Read time: under a minute'
+	}
 };
 
 const FAMILY_ORDER = ['AppFacts', 'FeatureFacts', 'ToolFacts', 'AgentFacts', 'SkillFacts', 'ModelFacts'];
 
 const VIEWER_RE = /https:\/\/[a-z0-9.-]+\/v#[^\s)>\]]+/i;
 
-export function familyForFactsFile(filename: string): { family: string; home: string } {
+export function familyForFactsFile(filename: string): {
+	family: string;
+	home: string;
+	accent: string;
+	serving: string;
+} {
 	const stem = filename.replace(/_FACTS\.md$/i, '');
 	const known = FAMILIES[stem.toUpperCase()];
 	if (known) return known;
@@ -41,7 +82,16 @@ export function familyForFactsFile(filename: string): { family: string; home: st
 		.toLowerCase()
 		.replace(/[_-]+/g, ' ')
 		.replace(/\b\w/g, (c) => c.toUpperCase());
-	return { family: family || 'xFacts', home: '' };
+	return {
+		family: family || 'xFacts',
+		home: '',
+		accent: '#d96b2b',
+		serving: 'Serving size: one label · Read time: under a minute'
+	};
+}
+
+function titleCase(key: string): string {
+	return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
 function oneLine(value: unknown, max = 96): string {
@@ -59,12 +109,30 @@ function httpUrl(value: unknown): string {
 	return /^https?:\/\//i.test(text) ? text : '';
 }
 
-function stackLine(stack: unknown): string {
-	if (!stack || typeof stack !== 'object' || Array.isArray(stack)) return '';
-	const values = Object.values(stack as Record<string, unknown>)
-		.map((value) => (typeof value === 'string' ? value.trim() : ''))
-		.filter((value) => value && value.toLowerCase() !== 'unknown');
-	return values.slice(0, 3).join(' · ');
+function stackRows(stack: unknown): XFactsLabelPair[] {
+	if (!stack || typeof stack !== 'object' || Array.isArray(stack)) return [];
+	const rows: XFactsLabelPair[] = [];
+	for (const [key, value] of Object.entries(stack as Record<string, unknown>)) {
+		if (typeof value !== 'string') continue;
+		const text = value.trim();
+		if (!text || text.toLowerCase() === 'unknown') continue;
+		rows.push({ label: titleCase(key), value: oneLine(text, 48) });
+		if (rows.length === 8) break;
+	}
+	return rows;
+}
+
+function metaPairs(data: Record<string, unknown>): XFactsLabelPair[] {
+	const pairs: XFactsLabelPair[] = [];
+	const type = oneLine(data.type, 80);
+	const kind = oneLine(data.kind, 80);
+	if (type) pairs.push({ label: 'Type', value: type });
+	else if (kind) pairs.push({ label: 'Kind', value: kind });
+	const status = oneLine(data.status, 40);
+	const license = oneLine(data.license, 40);
+	if (status) pairs.push({ label: 'Status', value: status });
+	if (license) pairs.push({ label: 'License', value: license });
+	return pairs;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -85,7 +153,6 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 	const title = oneLine(data.name, 80);
 	if (!title) return null;
 
-	const detail = oneLine(data.type) || oneLine(data.kind) || oneLine(data.purpose);
 	const credits = asRecord(data.credits);
 	const viewer = raw.match(VIEWER_RE)?.[0] ?? '';
 	const href = viewer || httpUrl(credits.generated_with) || known.home;
@@ -94,10 +161,12 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 	return {
 		id,
 		family: known.family,
+		accent: known.accent,
 		title,
-		detail,
-		stack: stackLine(data.stack),
-		meta: oneLine(data.status, 40),
+		serving: known.serving,
+		meta: metaPairs(data),
+		rows: stackRows(data.stack),
+		purpose: oneLine(data.purpose, 180),
 		href,
 		viewer: Boolean(viewer)
 	};

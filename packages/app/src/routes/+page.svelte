@@ -93,7 +93,7 @@
 <style>
 	.home-with-rail {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 16.75rem;
+		grid-template-columns: minmax(0, 1fr) 20rem;
 		gap: clamp(1.25rem, 3vw, 2.25rem);
 		align-items: start;
 		width: 100%;
@@ -103,9 +103,10 @@
 		container-type: inline-size;
 	}
 
-	@container (max-width: 58rem) {
+	@container (max-width: 62rem) {
 		.home-with-rail {
 			grid-template-columns: minmax(0, 1fr);
+			justify-items: center;
 		}
 	}
 </style>

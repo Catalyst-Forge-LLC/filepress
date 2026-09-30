@@ -90,7 +90,7 @@ export default defineFilepressConfig({
 	description: 'A filepress site.',
 	url: ${JSON.stringify(url)},
 	author: ${JSON.stringify(title)},
-	logo: '/logo.png',
+	logo: null,
 	topics: []
 });
 `

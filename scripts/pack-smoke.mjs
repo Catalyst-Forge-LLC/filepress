@@ -26,7 +26,7 @@ function run(cmd, args, cwd, { shell } = {}) {
 	if (r.stderr) process.stderr.write(r.stderr);
 	if (r.status !== 0) {
 		console.error(`pack-smoke: failed: ${cmd} ${args.join(' ')}`);
-		process.exit(r.status ?? 1);
+		throw new Error(`pack-smoke: command exited ${r.status ?? 1}`);
 	}
 	return r;
 }

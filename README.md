@@ -20,7 +20,7 @@ Shortest path: three files in an empty folder.
     "build": "filepress build",
     "preview": "filepress preview"
   },
-  "devDependencies": { "getfilepress": "^0.1.37" }
+  "devDependencies": { "getfilepress": "^0.1.47" }
 }
 ```
 
@@ -69,7 +69,7 @@ cd ../my-blog && pnpm install && pnpm dev
 
 `filepress new "Title"` stamps `posts/YYYY-MM-DD-slug.md`. Config, frontmatter, images, and commands: [Docs](https://getfilepress.com/docs).
 
-Pin CI on npm (`getfilepress` current is `0.1.37`) or a git SHA / existing tag. `link:` is local only.
+Pin CI to a published npm version of `getfilepress` or a git SHA / existing tag. `link:` is local only.
 
 ## Import
 

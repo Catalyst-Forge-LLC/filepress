@@ -128,17 +128,65 @@ function stackRows(stack: unknown): XFactsLabelPair[] {
 	return rows;
 }
 
+function knownLine(value: unknown, max = 96): string {
+	const text = oneLine(value, max);
+	if (!text || text.toLowerCase() === 'unknown') return '';
+	return text;
+}
+
 function metaPairs(data: Record<string, unknown>): XFactsLabelPair[] {
 	const pairs: XFactsLabelPair[] = [];
-	const type = oneLine(data.type, 80);
-	const kind = oneLine(data.kind, 80);
+	const type = knownLine(data.type, 80);
+	const kind = knownLine(data.kind, 80);
 	if (type) pairs.push({ label: 'Type', value: type });
 	else if (kind) pairs.push({ label: 'Kind', value: kind });
-	const status = oneLine(data.status, 40);
-	const license = oneLine(data.license, 40);
+	const status = knownLine(data.status, 40);
+	const license = knownLine(data.license, 40);
 	if (status) pairs.push({ label: 'Status', value: status });
 	if (license) pairs.push({ label: 'License', value: license });
 	return pairs;
+}
+
+function availabilityValue(item: Record<string, unknown>): string {
+	const state = knownLine(item.availability, 40);
+	if (state !== 'conditional') return state;
+	const conditions = Array.isArray(item.conditions) ? item.conditions : [];
+	const extra = conditions
+		.map((condition) => knownLine(asRecord(condition).value, 40))
+		.filter(Boolean);
+	return extra.length ? `conditional · ${extra.join(' · ')}` : 'conditional';
+}
+
+/** Shared known values across a FeatureFacts selection. Unknown stays off the card. */
+function featureRows(features: unknown): XFactsLabelPair[] {
+	if (!Array.isArray(features) || !features.length) return [];
+	const items = features.map((item) => asRecord(item));
+	const names = items.map((item) => knownLine(item.name, 40)).filter(Boolean);
+	const rows: XFactsLabelPair[] = [];
+	if (names.length) rows.push({ label: 'Selected', value: oneLine(names.join(' · '), 96) });
+
+	const shared = (pick: (item: Record<string, unknown>) => string): string => {
+		const values = items.map((item) => pick(item));
+		const present = values.filter(Boolean);
+		if (!present.length || present.length !== items.length) return '';
+		const unique = [...new Set(present)];
+		return unique.length === 1 ? unique[0] : 'mixed';
+	};
+
+	const fields: Array<[string, (item: Record<string, unknown>) => string]> = [
+		['Lifecycle', (item) => knownLine(item.lifecycle, 40)],
+		['Availability', availabilityValue],
+		['Maturity', (item) => knownLine(item.maturity, 40)],
+		['Documentation', (item) => knownLine(item.documentation, 40)],
+		['Tests', (item) => knownLine(item.tests, 40)],
+		['Evidence', (item) => knownLine(item.evidence_state, 40)]
+	];
+	for (const [label, pick] of fields) {
+		const value = shared(pick);
+		if (value) rows.push({ label, value });
+		if (rows.length === 8) break;
+	}
+	return rows;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -163,6 +211,7 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 	const viewer = raw.match(VIEWER_RE)?.[0] ?? '';
 	const href = viewer || httpUrl(credits.generated_with) || known.home;
 	if (!href) return null;
+	const stack = stackRows(data.stack);
 
 	return {
 		id,
@@ -171,7 +220,7 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 		title,
 		serving: known.serving,
 		meta: metaPairs(data),
-		rows: stackRows(data.stack),
+		rows: stack.length ? stack : featureRows(data.features),
 		purpose: oneLine(data.purpose, 180),
 		href,
 		viewer: Boolean(viewer)

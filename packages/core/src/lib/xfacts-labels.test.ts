@@ -44,6 +44,67 @@ describe('labelCardFromMarkdown', () => {
 		expect(card?.viewer).toBe(true);
 	});
 
+	it('reads a FeatureFacts selection and leaves unknown fields off the card', () => {
+		const card = labelCardFromMarkdown(
+			'FEATURE_FACTS.md',
+			'FEATURE_FACTS.md',
+			`---
+name: LocalHelm
+type: typescript-node
+status: active
+mode: map-backed
+features:
+  - name: Push
+    lifecycle: implemented
+    availability: unknown
+    maturity: unknown
+    documentation: partial
+    tests: partial
+    evidence_state: current
+  - name: Scan
+    lifecycle: implemented
+    availability: conditional
+    conditions:
+      - kind: plan
+        value: Pro
+    maturity: unknown
+    documentation: partial
+    tests: unknown
+    evidence_state: current
+---
+`
+		);
+		expect(card?.family).toBe('FeatureFacts');
+		expect(card?.serving).toBe('Serving size: one product');
+		expect(card?.meta).toEqual([
+			{ label: 'Type', value: 'typescript-node' },
+			{ label: 'Status', value: 'active' }
+		]);
+		expect(card?.rows).toEqual([
+			{ label: 'Selected', value: 'Push · Scan' },
+			{ label: 'Lifecycle', value: 'implemented' },
+			{ label: 'Documentation', value: 'partial' },
+			{ label: 'Evidence', value: 'current' }
+		]);
+	});
+
+	it('omits a type or status that is still unknown', () => {
+		const card = labelCardFromMarkdown(
+			'FEATURE_FACTS.md',
+			'FEATURE_FACTS.md',
+			`---
+name: Draft
+type: unknown
+status: unknown
+credits:
+  generated_with: https://featurefacts.dev
+---
+`
+		);
+		expect(card?.meta).toEqual([]);
+		expect(card?.rows).toEqual([]);
+	});
+
 	it('falls back to the family site when there is no viewer URL', () => {
 		const card = labelCardFromMarkdown('skills/demo/SKILL_FACTS.md', 'SKILL_FACTS.md', SKILL);
 		expect(card?.title).toBe('Demo-Skill');

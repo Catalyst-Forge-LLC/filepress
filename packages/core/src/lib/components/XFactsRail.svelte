@@ -23,7 +23,7 @@
 					</div>
 				{/if}
 				{#each label.rows as row, i (row.label)}
-					<div class="row" class:thick={i === label.rows.length - 1}>
+					<div class="row" class:stack={row.value.length > 32} class:thick={i === label.rows.length - 1}>
 						<strong>{row.label}</strong>
 						<span>{row.value}</span>
 					</div>
@@ -148,6 +148,16 @@
 
 	.row span {
 		text-align: right;
+	}
+
+	.row.stack {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.15rem;
+	}
+
+	.row.stack span {
+		text-align: left;
 	}
 
 	.section {

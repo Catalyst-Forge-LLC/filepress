@@ -92,3 +92,9 @@ export function discoverXFactsLabels(siteRoot: string): XFactsLabelCard[] {
 	}
 	return sortLabelCards(cards);
 }
+
+/** Only return a label that discovery has approved; never resolve arbitrary URL paths. */
+export function readXFactsLabel(siteRoot: string, id: string): string | null {
+	if (!discoverXFactsLabels(siteRoot).some((card) => card.id === id)) return null;
+	return readFileSync(join(repoRootForSite(siteRoot), id), 'utf8');
+}

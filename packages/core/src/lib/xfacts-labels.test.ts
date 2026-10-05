@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { discoverXFactsLabels } from './xfacts-discover';
+import { discoverXFactsLabels, readXFactsLabel } from './xfacts-discover';
 import { labelCardFromMarkdown } from './xfacts-labels';
 
 const APP = `---
@@ -42,6 +42,8 @@ describe('labelCardFromMarkdown', () => {
 		expect(card?.serving).toBe('Serving size: one repository');
 		expect(card?.href).toBe('https://appfacts.dev/v#af1.abc');
 		expect(card?.viewer).toBe(true);
+		expect(card?.home).toBe('https://appfacts.dev');
+		expect(card?.summary).toContain('stack');
 	});
 
 	it('reads a FeatureFacts selection and leaves unknown fields off the card', () => {
@@ -75,6 +77,8 @@ features:
 `
 		);
 		expect(card?.family).toBe('FeatureFacts');
+		expect(card?.href).toBe('/xfacts/FEATURE_FACTS.md');
+		expect(card?.home).toBe('https://featurefacts.dev');
 		expect(card?.serving).toBe('Serving size: one product');
 		expect(card?.meta).toEqual([
 			{ label: 'Type', value: 'typescript-node' },
@@ -105,10 +109,10 @@ credits:
 		expect(card?.rows).toEqual([]);
 	});
 
-	it('falls back to the family site when there is no viewer URL', () => {
+	it('links to the local full label when there is no viewer URL', () => {
 		const card = labelCardFromMarkdown('skills/demo/SKILL_FACTS.md', 'SKILL_FACTS.md', SKILL);
 		expect(card?.title).toBe('Demo-Skill');
-		expect(card?.href).toBe('https://skillfacts.dev');
+		expect(card?.href).toBe('/xfacts/skills/demo/SKILL_FACTS.md');
 		expect(card?.viewer).toBe(false);
 		expect(card?.meta[0]).toEqual({ label: 'Kind', value: 'agents-skill' });
 		expect(card?.purpose).toContain('Curate a ledger');
@@ -134,5 +138,8 @@ describe('discoverXFactsLabels', () => {
 		const cards = discoverXFactsLabels(join(root, 'site'));
 		expect(cards.map((card) => card.id)).toEqual(['APP_FACTS.md', 'skills/demo/SKILL_FACTS.md']);
 		expect(cards[0]?.viewer).toBe(true);
+		expect(readXFactsLabel(join(root, 'site'), 'APP_FACTS.md')).toBe(APP);
+		expect(readXFactsLabel(join(root, 'site'), '../APP_FACTS.md')).toBeNull();
+		expect(readXFactsLabel(join(root, 'site'), 'examples/APP_FACTS.md')).toBeNull();
 	});
 });

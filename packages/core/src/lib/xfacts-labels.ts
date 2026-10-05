@@ -13,6 +13,8 @@ export interface XFactsLabelCard {
 	/** Path relative to the repository root, used as a stable key. */
 	id: string;
 	family: string;
+	home: string;
+	summary: string;
 	/** Viewer accent, used for the link line. */
 	accent: string;
 	title: string;
@@ -66,6 +68,15 @@ const FAMILIES: Record<string, { family: string; home: string; accent: string; s
 };
 
 const FAMILY_ORDER = ['AppFacts', 'FeatureFacts', 'ToolFacts', 'AgentFacts', 'SkillFacts', 'ModelFacts'];
+
+const SUMMARIES: Record<string, string> = {
+	AppFacts: 'A compact overview of an application: its purpose, stack, license, and status.',
+	FeatureFacts: 'A capability label showing what a product can do, its lifecycle, and documentation and test evidence.',
+	ToolFacts: 'A compact label describing a tool, its interface, requirements, and usage.',
+	AgentFacts: 'A compact label describing an AI agent, its capabilities, tools, and operating constraints.',
+	SkillFacts: 'A compact label describing an agent skill, its purpose, requirements, and permissions.',
+	ModelFacts: 'A compact label describing an AI model, its capabilities, provenance, and limitations.'
+};
 
 const VIEWER_RE = /https:\/\/[a-z0-9.-]+\/v#[^\s)>\]]+/i;
 
@@ -209,13 +220,15 @@ export function labelCardFromMarkdown(id: string, filename: string, raw: string)
 
 	const credits = asRecord(data.credits);
 	const viewer = raw.match(VIEWER_RE)?.[0] ?? '';
-	const href = viewer || httpUrl(credits.generated_with) || known.home;
+	const href = viewer || `/xfacts/${id.split('/').map(encodeURIComponent).join('/')}`;
 	if (!href) return null;
 	const stack = stackRows(data.stack);
 
 	return {
 		id,
 		family: known.family,
+		home: known.home || httpUrl(credits.generated_with),
+		summary: SUMMARIES[known.family] || 'A compact facts label describing this project.',
 		accent: known.accent,
 		title,
 		serving: known.serving,

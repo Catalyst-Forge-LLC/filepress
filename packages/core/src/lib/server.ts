@@ -47,5 +47,5 @@ export type {
 	RenderedPage
 } from './content/types';
 export { RESERVED_PAGE_SLUGS } from './content/types';
-export { discoverXFactsLabels, repoRootForSite } from './xfacts-discover';
+export { discoverXFactsLabels, repoRootForSite, readXFactsLabel } from './xfacts-discover';
 export type { XFactsLabelCard } from './xfacts-labels';

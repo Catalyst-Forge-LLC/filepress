@@ -6,7 +6,8 @@ export const prerenderEmptyOk = [
 	'/page/[n]',
 	'/tags/[tag]',
 	'/[slug]',
-	'/posts/[slug]'
+	'/posts/[slug]',
+	'/xfacts/[...id]'
 ] as const;
 
 export function unexpectedUnseenPrerenderRoutes(routes: string[]): string[] {

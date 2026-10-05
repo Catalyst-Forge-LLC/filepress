@@ -1,5 +1,13 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-05) — xFacts help and full labels
+
+The shared xFacts rail now has question-mark links to each family site with locally bundled Tippy.js tooltips. Labels without a portable viewer link open a prerendered `/xfacts/<repo-relative-label-path>` page with the complete Markdown body and expandable YAML data. Existing viewer links are preserved. The route only reads discovery-approved labels; repository-only Markdown links are shown as text.
+
+LocalHelm's current FeatureFacts file contains nine selected capabilities; its card shows their names, shared implemented lifecycle, and current evidence. Availability/maturity remain unknown and documentation/tests are partly unknown, so those are omitted from the compact card and visible on the full page.
+
+Validation: 77 core and 24 app tests pass; LocalHelm production build passes and its tooltip/full-label page were checked in the browser. The type check reports eight existing errors in SiteHeader, GeniePanel, and the home page. Demo build is blocked by its existing missing `/logo.png`. No publication, deployment, version bump, or phase transition was made. Sibling sites still need a published FilePress update and rebuild.
+
 _Paste into a new chat to resume. Single most important document for session continuity — update at the end of every session. Decisions live in `.forgetrail/workflow_tracking.json`._
 
 ---

@@ -1,17 +1,36 @@
 <script lang="ts">
 	import '../styles/xfacts-fonts.css';
 	import type { XFactsLabelCard } from '../xfacts-labels';
+	import popperUrl from '@popperjs/core/dist/umd/popper.min.js?url';
+	import tippyUrl from 'tippy.js/dist/tippy-bundle.umd.min.js?url';
 
 	let { labels }: { labels: XFactsLabelCard[] } = $props();
 </script>
+
+<svelte:head>
+	<script defer src={popperUrl}></script>
+	<script defer src={tippyUrl}></script>
+	{@html `<script>document.addEventListener('DOMContentLoaded', function () {
+		if (!window.tippy) return;
+		document.querySelectorAll('[data-xfacts-help]').forEach(function (element) {
+			window.tippy(element, { content: element.getAttribute('data-xfacts-help'), maxWidth: 280 });
+			element.removeAttribute('title');
+		});
+	});</script>`}
+</svelte:head>
 
 {#if labels.length}
 	<aside class="xfacts-rail" aria-label="xFacts labels">
 		{#each labels as label (label.id)}
 			{@const marked = label.family.endsWith('Facts') && label.family.length > 5}
-			<a class="xfacts-label" href={label.href} style:--xfacts-ember={label.accent}>
+			<section class="xfacts-label" aria-label={`${label.family}: ${label.title}`} style:--xfacts-ember={label.accent}>
 				<p class="mark">
-					<span class="mark-lead">{marked ? label.family.slice(0, -5) : label.family}</span>{#if marked}<span class="mark-rest">Facts</span>{/if}
+					<span><span class="mark-lead">{marked ? label.family.slice(0, -5) : label.family}</span>{#if marked}<span class="mark-rest">Facts</span>{/if}</span>
+					{#if label.home}
+						<a class="help" href={label.home} target="_blank" rel="noopener noreferrer" aria-label={`About ${label.family} (opens in a new tab)`} title={label.summary} data-xfacts-help={label.summary}>
+							<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 14v.1"/></svg>
+						</a>
+					{/if}
 				</p>
 				<h2>{label.title}</h2>
 				<div class="serving">{label.serving}</div>
@@ -34,16 +53,16 @@
 						<p>{label.purpose}</p>
 					</div>
 				{/if}
-				<div class="open" class:ruled={Boolean(label.purpose)}>
-					<span>{label.viewer ? 'Open Full Label' : `What is ${label.family}?`}</span>
+				<a class="open" href={label.href} class:ruled={Boolean(label.purpose)}>
+					<span>Open Full Label</span>
 					<svg class="open-icon" viewBox="0 0 16 16" aria-hidden="true">
 						<path
 							fill="currentColor"
 							d="M4.2 3.4h8.4V11h-1.35V5.7L5.15 11.8 4.2 10.85 10.3 4.75H4.2V3.4z"
 						/>
 					</svg>
-				</div>
-			</a>
+				</a>
+			</section>
 		{/each}
 	</aside>
 {/if}
@@ -80,6 +99,9 @@
 	}
 
 	.mark {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
 		margin: 0 0 0.4rem;
 		font-family: Sora, sans-serif;
 		font-weight: 800;
@@ -92,6 +114,11 @@
 	.mark-lead {
 		color: var(--xfacts-ember, #d96b2b);
 	}
+
+	.help { display: inline-flex; color: #5c6b7a; padding: 0.2rem; }
+	.help svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+	.help:hover { color: #101418; }
+	.help:focus-visible, .open:focus-visible { outline: 2px solid #101418; outline-offset: 3px; }
 
 	.mark-rest {
 		color: #101418;

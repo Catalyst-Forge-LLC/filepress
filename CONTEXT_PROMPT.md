@@ -1,5 +1,9 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-06) — Land updates exact engine pins
+
+Sibling sync now runs `pnpm update getfilepress@<target>` so exact npm pins can move to the engine's selected version. An unqualified `pnpm update getfilepress` respected AdSmith's exact 0.1.48 pin and left it unchanged, causing the post-update check to incorrectly suggest that 0.1.50 needed publication. The failure guidance now points to the site's pin and pnpm output. AdSmith's exact pin, lockfile, and installed dependency were successfully updated to 0.1.50 using the corrected applyUpdate path. No push or deployment was performed.
+
 ## HANDOFF (2026-10-05) — xFacts help and full labels
 
 The shared xFacts rail now has question-mark links to each family site with locally bundled Tippy.js tooltips. Labels without a portable viewer link open a prerendered `/xfacts/<repo-relative-label-path>` page with the complete Markdown body and expandable YAML data. Existing viewer links are preserved. The route only reads discovery-approved labels; repository-only Markdown links are shown as text.

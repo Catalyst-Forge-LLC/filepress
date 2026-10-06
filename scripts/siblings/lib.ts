@@ -738,7 +738,7 @@ export function updatePlan(site: SiblingSite, target: string): string {
 	if (site.pinKind === 'git') return `skip (git pin ${site.pin} — edit package.json)`;
 	if (site.pin === next && site.lockedVersion === target) return `already ${next}`;
 	if (site.lockedVersion === target) return `already ${target}`;
-	return `pnpm update getfilepress  (${site.lockedVersion ?? site.pin} → ${target})`;
+	return `pnpm update getfilepress@${target}  (${site.lockedVersion ?? site.pin} → ${target})`;
 }
 
 export function readConfigUrl(contentRoot: string): string | null {
@@ -1132,7 +1132,8 @@ export function applyUpdate(site: SiblingSite, target: string, log: LogFn | null
 		return false;
 	}
 
-	const installCmd = site.lockfileDir ? (['update', 'getfilepress'] as const) : (['install'] as const);
+	// Naming the target also updates exact pins; an unqualified update keeps their old version.
+	const installCmd = ['update', `getfilepress@${target}`] as const;
 	let result = run('pnpm', [...installCmd], site.packageDir, log);
 	if (!result.ok && result.output.includes('ERR_PNPM_UNEXPECTED_VIRTUAL_STORE')) {
 		if (!reinstallNodeModules(site.packageDir, log)) return false;
@@ -1148,7 +1149,7 @@ export function applyUpdate(site: SiblingSite, target: string, log: LogFn | null
 	);
 	if (locked !== target) {
 		say(log, `  update   still ${locked ?? 'unresolved'} after pnpm; getfilepress@${target} is not installed.`);
-		say(log, `  update   publish ${target} to npm, then re-run.`);
+		say(log, '  update   check the site dependency pin and pnpm output, then re-run sync.');
 		return false;
 	}
 	return true;

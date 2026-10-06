@@ -76,6 +76,13 @@ From this repo:
 pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://my.blog
 ```
 
+For a confirmed Cloudflare Pages target, add `--pages-project <project>` and
+`--production-branch <branch>` to generate a build-and-upload `ship` command and
+local Wrangler dependency. For a nested `site/` or `sites/<name>`, also pass
+`--root-package <app-root/package.json>` to add root delegation. Existing different
+root Ship commands are preserved by refusing the scaffold. See [DEPLOY.md](DEPLOY.md)
+for the complete setup and verification contract.
+
 ## CI / deploy
 
 `link:` only works on your machine. See **[`DEPLOY.md`](DEPLOY.md)** for the full

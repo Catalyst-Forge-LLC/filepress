@@ -57,7 +57,52 @@ Dependency in the site `package.json` (pick one):
 Attach a custom domain in the Cloudflare dashboard. Keep `url` in config in sync
 with that domain.
 
-### Wrangler (CLI upload)
+## Wrangler (CLI upload)
+
+### Ship commands (site and repository root)
+
+Every deployment-configured site needs `scripts.ship` in its own `package.json`:
+
+```json
+"ship": "pnpm build && wrangler pages deploy build --project-name <confirmed-project> --branch <production-branch>"
+```
+
+Install Wrangler locally with `pnpm add -D wrangler`; do not depend on a global CLI.
+Confirm the authenticated account, existing Pages project and its production branch.
+The public domain and folder name are not sufficient to identify that target.
+Creating a missing Pages project and running a deployment are separate operations;
+preparing scripts does not perform either one.
+
+For a site inside an app repository, also add a root command:
+
+```json
+"ship": "pnpm --dir site run ship"
+```
+
+Use the actual path (`site` or `sites/<name>`). Preserve any existing app deployment
+command; explicitly choose or compose the root target when there are multiple sites.
+LocalHelm's repository Ship and site Ship rely on these respective scripts. Land
+synchronizes FilePress and then uses the site's Ship; it does not invent a deployment
+command, add a missing deployment CLI dependency, or provision a host.
+
+The external scaffold can prepare both commands for a confirmed target:
+
+```bash
+pnpm create-site my-site --external ../my-app/site --url https://my.example \
+  --pages-project my-pages-project --production-branch main \
+  --root-package ../my-app/package.json
+```
+
+`--root-package` is optional for standalone sites. It requires an existing ancestor
+package.json and refuses to overwrite a different Ship command. Both Pages options
+are required together. Run `pnpm install` in the generated site to install its CLI.
+Without a target, the scaffold marks deployment as unconfigured and omits Ship.
+
+Verify the build locally before first deployment, and confirm that LocalHelm
+discovers both the repository and site Ship actions. Treat a missing project,
+authentication, or installation as pending setup, even when the scripts exist.
+
+### Manual upload
 
 From a site that already has `build/`:
 

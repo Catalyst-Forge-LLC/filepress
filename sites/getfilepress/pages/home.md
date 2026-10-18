@@ -4,11 +4,21 @@ description: "Turn a folder of pages and posts into a static website with naviga
 order: 0
 ---
 
-<section class="value-hero" aria-label="FilePress overview"><div class="value-intro"><p class="value-kind">Static site builder for Markdown</p><h1>Give your Markdown a place to be read.</h1><p class="value-lede">Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate.</p><div class="cta-row"><a class="cta cta-primary" href="/docs/getting-started">Build your first site</a><a class="cta cta-secondary" href="#from-file-to-page">See the file-to-page example</a></div><p class="value-limit">Requires a local build environment. Publish the generated files to your chosen static host.</p></div><figure class="value-proof"><figcaption>Illustrative example</figcaption><p><strong>Starting point</strong><br><code>posts/hello.md</code><br><code># A useful note</code><br>A short explanation worth keeping.</p><div class="value-result"><p><strong>What you get</strong><br>A readable page, linked from the post list and included in the feed.</p></div><p>Edit the file, preview it, and build the next version.</p><p class="value-note">Illustrative file-to-page flow. This site is built with FilePress.</p></figure></section>
-
-<h2 id="from-file-to-page">From file to page</h2>
-
-The example above follows the same path as this site: Markdown becomes a readable page, and the build supplies navigation and feeds.
+<section class="value-hero" aria-label="FilePress overview"><div class="value-intro"><div class="value-headline"><p class="value-kind">Static site builder for Markdown</p><h1>Give your Markdown a place to be read.</h1></div><div class="value-pitch"><p class="value-lede">Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate.</p><div class="cta-row"><a class="cta cta-primary" href="/docs/getting-started">Build your first site</a><a class="cta cta-secondary" href="#from-file-to-page">See the source and its actual page</a></div><p class="value-limit">Requires a local build environment. Publish the generated files to your chosen static host.</p></div></div>
+<figure class="value-proof worked-example example-pair" id="from-file-to-page" tabindex="-1">
+<figcaption>This Markdown file is a page you can read right now</figcaption>
+<p class="example-context">A real post from this site, not invented sample output. The source excerpt is shortened; open the rendered page to see the complete result.</p>
+<section class="example-step" aria-labelledby="example-step-1">
+<h2 id="example-step-1"><span>1 · Source file</span> Write the post as ordinary Markdown</h2>
+<p><code>posts/why-files.md</code></p><pre><code>---&#10;title: Why files&#10;date: 2026-08-11&#10;tags: [workflow, getting-started]&#10;---&#10;&#10;A post is a file. Frontmatter is YAML.&#10;The source of truth is the same git&#10;repo used for code.&#10;&#10;- **Edit anywhere.** Laptop editor,&#10;  GitHub web, mobile app…</code></pre>
+</section>
+<section class="example-step example-report" aria-labelledby="example-step-2">
+<h2 id="example-step-2"><span>2 · Built page</span> Readers get a titled, dated post</h2>
+<div class="example-page"><p class="example-meta">11 August 2026 · workflow · getting-started</p><h3>Why files</h3><p>A post is a file. Frontmatter is YAML. The source of truth is the same git repo used for code.</p><p><strong>Edit anywhere.</strong> Laptop editor, GitHub web, mobile app…</p><a href="/posts/why-files">Read the actual page →</a></div><p class="example-payoff">The build supplies the page, its place in Writing, tag pages, and feed entry. Your source stays a text file.</p>
+</section>
+<p class="value-note">The preview above is an excerpt of the post, not an embedded screenshot. Edit the source, preview locally, and rebuild when the writing changes.</p>
+<p class="example-links"><a href="/posts/why-files">Open Why files</a> · <a href="https://github.com/Catalyst-Forge-LLC/filepress/blob/main/sites/getfilepress/posts/why-files.md">Inspect its Markdown source</a></p>
+</figure></section>
 
 For a product or service, [start with a landing page](/docs/landing-pages). It gives you a draft opening and responsive example layout.
 

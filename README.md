@@ -1,6 +1,6 @@
 # FilePress
 
-Markdown blogs from git. No CMS. No database. A static `build/` folder.
+Give your Markdown a place to be read. FilePress turns pages and posts into a static website with navigation, tags, and feeds, while keeping content in files you can edit and version.
 
 Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script as `getfilepress`).
 
@@ -120,3 +120,7 @@ No admin UI. No visitor comments — permanent. Genie is `filepress dev` only; `
 MIT. Copyright Catalyst Forge LLC.
 
 [See the rest of the Catalyst Forge shelf.](https://catalystforge.com/tools/)
+
+## Product landing starter
+
+For a product or service, add `--layout landing` to `pnpm create-site`. It creates a draft opening with room for the audience, useful result, example, prerequisites, and first action, plus a responsive theme. Replace the prompts before removing `draft: true`. The default blog starter is unchanged. See [landing-page guidance](sites/getfilepress/docs/landing-pages.md).

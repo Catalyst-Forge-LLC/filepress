@@ -120,7 +120,7 @@ credits:
 });
 
 describe('discoverXFactsLabels', () => {
-	it('reads labels from the repo and skips examples and dependencies', () => {
+	it('reads project labels and excludes examples, dependencies, and borrowed temporary skills', () => {
 		const root = mkdtempSync(join(tmpdir(), 'filepress-xfacts-'));
 		mkdirSync(join(root, '.git'));
 		mkdirSync(join(root, 'site'));
@@ -135,11 +135,18 @@ describe('discoverXFactsLabels', () => {
 		mkdirSync(join(root, 'site', 'static', 'skills', 'demo'), { recursive: true });
 		writeFileSync(join(root, 'site', 'static', 'skills', 'demo', 'SKILL_FACTS.md'), SKILL);
 
+		for (const scratch of ['temp', 'tmp']) {
+			mkdirSync(join(root, scratch, 'borrowed-reviewer'), { recursive: true });
+			writeFileSync(join(root, scratch, 'borrowed-reviewer', 'SKILL_FACTS.md'), SKILL.replace('demo-skill', 'borrowed-reviewer'));
+		}
+
 		const cards = discoverXFactsLabels(join(root, 'site'));
 		expect(cards.map((card) => card.id)).toEqual(['APP_FACTS.md', 'skills/demo/SKILL_FACTS.md']);
 		expect(cards[0]?.viewer).toBe(true);
 		expect(readXFactsLabel(join(root, 'site'), 'APP_FACTS.md')).toBe(APP);
 		expect(readXFactsLabel(join(root, 'site'), '../APP_FACTS.md')).toBeNull();
 		expect(readXFactsLabel(join(root, 'site'), 'examples/APP_FACTS.md')).toBeNull();
+		expect(readXFactsLabel(join(root, 'site'), 'temp/borrowed-reviewer/SKILL_FACTS.md')).toBeNull();
+		expect(readXFactsLabel(join(root, 'site'), 'tmp/borrowed-reviewer/SKILL_FACTS.md')).toBeNull();
 	});
 });

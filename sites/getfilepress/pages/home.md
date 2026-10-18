@@ -1,17 +1,16 @@
 ---
-title: Turns a folder of Markdown into a static site.
-description: Publish Markdown from git as a static site. Import a public site or start from files.
+title: "Give your Markdown a place to be read."
+description: "Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate."
 order: 0
 ---
 
-Publish Markdown from git as a static site, with tags, feeds, and a theme you can adapt. Start with a folder of posts, or use the supported import workflow to bring an existing site into plain files.
+<section class="value-hero" aria-label="FilePress overview"><div class="value-intro"><p class="value-kind">Static site builder for Markdown</p><h1>Give your Markdown a place to be read.</h1><p class="value-lede">Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate.</p><div class="cta-row"><a class="cta cta-primary" href="/docs/getting-started">Build your first site</a><a class="cta cta-secondary" href="#from-file-to-page">See the file-to-page example</a></div><p class="value-limit">Requires a local build environment. Publish the generated files to your chosen static host.</p></div><figure class="value-proof"><figcaption>Illustrative example</figcaption><p><strong>Starting point</strong><br><code>posts/hello.md</code><br><code># A useful note</code><br>A short explanation worth keeping.</p><div class="value-result"><p><strong>What you get</strong><br>A readable page, linked from the post list and included in the feed.</p></div><p>Edit the file, preview it, and build the next version.</p><p class="value-note">Illustrative file-to-page flow. This site is built with FilePress.</p></figure></section>
 
-No CMS. No database. No server at runtime.
+<h2 id="from-file-to-page">From file to page</h2>
 
-<div class="cta-row">
-  <a class="cta cta-primary" href="/docs/getting-started">Read the docs</a>
-  <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/filepress">View on GitHub</a>
-</div>
+The example above follows the same path as this site: Markdown becomes a readable page, and the build supplies navigation and feeds.
+
+For a product or service, [start with a landing page](/docs/landing-pages). It gives you a draft opening and responsive example layout.
 
 ## Shortest path
 

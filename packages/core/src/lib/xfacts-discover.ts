@@ -7,6 +7,8 @@ const SKIP_DIRS = new Set([
 	'build',
 	'dist',
 	'coverage',
+	'temp',
+	'tmp',
 	'examples',
 	'fixtures',
 	'test',

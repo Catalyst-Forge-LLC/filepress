@@ -4,7 +4,8 @@
 			"title": "Start",
 			"items": [
 				{ "id": "introduction", "title": "Introduction" },
-				{ "id": "getting-started", "title": "Getting started" }
+				{ "id": "getting-started", "title": "Getting started" },
+                { "id": "landing-pages", "title": "Product landing pages" }
 			]
 		},
 		{

@@ -46,7 +46,8 @@
 		"packages/import",
 		"pnpm-workspace.yaml",
 		"README.md",
-		"LICENSE"
+		"LICENSE",
+		"scripts/starters"
 	],
 	"scripts": {
 		"postinstall": "node scripts/postinstall.mjs",

@@ -90,3 +90,22 @@ test('root delegation cannot edit a package outside the site ancestors', (t) => 
 	assert.equal(readFileSync(rootPkg, 'utf8'), '{}');
 	assert.equal(existsSync(target), false);
 });
+
+
+test('landing starter is draft, self-contained, and preserves the blog default', (t) => {
+	const root = fixture(t);
+	const landing = join(root, 'landing');
+	assert.equal(run(landing, '--layout', 'landing').status, 0);
+	assert.match(readFileSync(join(landing, 'filepress.config.ts'), 'utf8'), /homePage: 'home'/);
+	assert.ok(existsSync(join(landing, 'theme.css')));
+	const page = readFileSync(join(landing, 'pages', 'home.md'), 'utf8');
+	assert.match(page, /draft: true/);
+	assert.match(page, /href="#first-use"/);
+	assert.match(page, /## First use/);
+	const blog = join(root, 'blog');
+	assert.equal(run(blog).status, 0);
+	assert.equal(existsSync(join(blog, 'pages', 'home.md')), false);
+	const bad = join(root, 'invalid-layout');
+	assert.notEqual(run(bad, '--layout', 'unknown').status, 0);
+	assert.equal(existsSync(bad), false);
+});

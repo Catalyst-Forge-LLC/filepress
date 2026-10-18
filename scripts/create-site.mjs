@@ -29,7 +29,7 @@ function parseArgs(argv) {
 	const args = { _: [], force: false };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
-		if (['--title', '--url', '--external', '--pages-project', '--production-branch', '--root-package'].includes(a)) {
+		if (['--title', '--url', '--external', '--pages-project', '--production-branch', '--root-package', '--layout'].includes(a)) {
 			if (!argv[i + 1] || argv[i + 1].startsWith('--')) fail(`missing value for ${a}`);
 			args[a.slice(2)] = argv[++i];
 		}
@@ -46,7 +46,7 @@ const name = args._[0];
 if (!name) {
 	fail(
 		'missing site name.\n' +
-			'  Usage: node scripts/create-site.mjs <name> [--title ..] [--url ..] [--external <path>]\n' +
+			'  Usage: node scripts/create-site.mjs <name> [--title ..] [--url ..] [--external <path>] [--layout blog|landing]\n' +
 			'  Deploy: --pages-project <project> --production-branch <branch> [--root-package <path/package.json>]'
 	);
 }
@@ -54,6 +54,8 @@ if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
 	fail(`invalid site name "${name}". Use lowercase letters, numbers, and hyphens.`);
 }
 
+const layout = args.layout || 'blog';
+if (!['blog', 'landing'].includes(layout)) fail('--layout must be blog or landing');
 const external = Boolean(args.external);
 const target = external ? resolve(repoRoot, args.external) : join(repoRoot, 'sites', name);
 
@@ -119,6 +121,7 @@ writeFileSync(
 export default defineFilepressConfig({
 	title: ${JSON.stringify(title)},
 	description: 'A filepress site.',
+${layout === 'landing' ? "\thomePage: 'home',\n\tnav: [{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }]," : ''}
 	url: ${JSON.stringify(url)},
 	author: ${JSON.stringify(title)},
 	logo: null,
@@ -138,6 +141,11 @@ Thumbs.db
 .filepress-import/crawl-cache/
 `
 );
+
+if (layout === 'landing') {
+	copyFileSync(join(scriptDir, 'starters', 'home.md'), join(target, 'pages', 'home.md'));
+	copyFileSync(join(scriptDir, 'starters', 'landing.css'), join(target, 'theme.css'));
+}
 
 const today = new Date().toISOString().slice(0, 10);
 writeFileSync(
@@ -231,6 +239,10 @@ pnpm build    # → build/
 
 Optional: add \`theme.css\` next to \`filepress.config.ts\` to
 override the default Essay theme.
+
+## Shape the opening
+
+${layout === 'landing' ? 'Edit \`pages/home.md\`: describe the reader, product form, bounded result, example, and first action. The page is a draft until you replace the prompts and remove \`draft: true\`. \`theme.css\` supplies a responsive opening and keeps technical labels below the explanation. Choose your own type and palette. The draft flag does not block builds or hosting, so replace the prompts before publishing.' : 'This starter opens on the post list. For a product or service landing page, create a new site with \`--layout landing\`. Existing sites keep their layout.'}
 
 ## Deploy
 

@@ -7,7 +7,7 @@ main.wrap > .home-with-rail:has(.value-hero) { display: block !important; }
 .home-page:has(.value-hero) > .page-header:has(.draft-banner) { display: block; }
 .home-page:has(.value-hero) > .page-header > :not(.draft-banner) { display: none; }
 .home-page .prose:has(.value-hero) { max-width: none; }
-.home-page .value-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; padding: clamp(1rem, 3vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4.5rem); border-bottom: 1px solid var(--rule, #ccd3d7); margin-bottom: 2.5rem; }
+.home-page .value-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; padding: clamp(1rem, 3vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4.5rem); border-bottom: 1px solid var(--rule, #ccd3d7); margin-bottom: 2.5rem; }
 .home-page .value-hero > * { min-width: 0; }
 .home-page .value-hero h1 { margin: .8rem 0 1.25rem; max-width: 17ch; font-family: var(--font-serif, Georgia, serif); font-size: clamp(2.25rem, 4.4vw, 3.6rem); line-height: 1.12; letter-spacing: -.035em; color: var(--ink, #202933); text-wrap: balance; }
 .home-page .value-hero .value-kind { margin: 0; font: 600 .875rem/1.5 var(--font-sans, system-ui); color: var(--accent-strong, var(--ink, #202933)); letter-spacing: .025em; }
@@ -34,3 +34,8 @@ main.wrap > .home-with-rail:has(.value-hero) { display: block !important; }
 
 /* Controls supplied by the starter; colors come from the site's theme. */
 .value-hero .cta {border:1px solid var(--rule-strong);border-radius:6px;text-decoration:none}.value-hero .cta-primary{background:var(--ink);color:var(--bg)}.value-hero .cta-secondary{color:var(--ink)}.value-hero .cta:hover{text-decoration:underline}
+
+/* Worked-example headings distinguish the problem, output, and next action. */
+.home-page .value-proof { scroll-margin-top: 1.5rem; }
+.home-page .value-proof h2 { margin: 1rem 0 .5rem; font: 700 1.1rem/1.4 var(--font-sans, system-ui); letter-spacing: -.015em; text-transform: none; color: var(--ink); }
+.home-page .value-proof .value-result h2 { margin-top: 0; }

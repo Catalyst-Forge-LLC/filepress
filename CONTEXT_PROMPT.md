@@ -1,5 +1,15 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-18) — Worked examples in the landing starter
+
+The optional landing starter now requires one concrete input → output → next-action
+example, specific headings, and visible benefit. It distinguishes recommended
+edits from applied edits and links to the example instead of repeating it below.
+Author guidance includes the same acceptance check. Eight existing scaffold tests,
+the guidance build, and a generated starter build pass; desktop and 390px layouts
+were inspected. See the session-worked-examples-20261018 AppLedger record and the
+Catalyst Forge worked-example follow-up. No publication or phase change.
+
 ## HANDOFF (2026-10-06) — Scaffold explicit Ship setup
 
 External create-site supports paired `--pages-project` and `--production-branch`

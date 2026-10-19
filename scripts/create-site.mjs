@@ -242,7 +242,7 @@ override the default Essay theme.
 
 ## Shape the opening
 
-${layout === 'landing' ? 'Edit \`pages/home.md\`: describe the reader, product form, bounded result, example, and first action. The page is a draft until you replace the prompts and remove \`draft: true\`. \`theme.css\` supplies a responsive opening and keeps technical labels below the explanation. Choose your own type and palette. The draft flag does not block builds or hosting, so replace the prompts before publishing.' : 'This starter opens on the post list. For a product or service landing page, create a new site with \`--layout landing\`. Existing sites keep their layout.'}
+${layout === 'landing' ? 'Edit \`pages/home.md\`: describe the reader, product form, bounded result, example, and first action. The page is a draft until you replace the prompts and remove \`draft: true\`. \`theme.css\` supplies a responsive opening and keeps technical labels below the explanation. Choose your own type and palette. The draft flag does not block builds or hosting, so replace the prompts before publishing. Carry the same short worked example into your public product README, then check its GitHub and package-registry rendering. Reuse a maintained fixture or full-output link; a site deployment does not update the package README.' : 'This starter opens on the post list. For a product or service landing page, create a new site with \`--layout landing\`. Existing sites keep their layout.'}
 
 ## Deploy
 

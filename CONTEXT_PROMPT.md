@@ -1,5 +1,14 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-18) — README clarity after publication
+
+The first-use choice now surfaces the landing starter beside the blog route.
+Landing author guidance and generated starter instructions also require a compact
+worked example in the public GitHub and package READMEs, with actual screenshot
+captions where useful. Eight existing scaffold tests, the product site build, and
+the packed README check pass. See session-readme-clarity-20261018. These are local
+changes for owner release; no push, publication, deployment, or phase transition.
+
 ## HANDOFF (2026-10-18) — Worked examples in the landing starter
 
 The optional landing starter now requires one concrete input → output → next-action

@@ -6,7 +6,24 @@ Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script 
 
 **Site:** [getfilepress.com](https://getfilepress.com) · **Docs:** [getfilepress.com/docs](https://getfilepress.com/docs)
 
-## Start a site
+## Choose a starting page
+
+For a product or service, use the **landing starter**. From a clone of this repository:
+
+```bash
+pnpm install
+pnpm create-site my-product --external ../my-product-site --layout landing --title "My product" --url https://my-product.example
+cd ../my-product-site
+pnpm install
+pnpm build
+pnpm preview
+```
+
+It creates a draft opening for the audience, useful result, one worked example, prerequisites, and first action, with a responsive theme. Replace the prompts before removing `draft: true`. The flag does not block hosting. [Landing-page guidance](https://getfilepress.com/docs/landing-pages).
+
+For a blog, omit `--layout landing` from the scaffold command, or use the minimal example below.
+
+## Start a blog with three files
 
 Shortest path: three files in an empty folder.
 
@@ -20,7 +37,7 @@ Shortest path: three files in an empty folder.
     "build": "filepress build",
     "preview": "filepress preview"
   },
-  "devDependencies": { "getfilepress": "^0.1.47" }
+  "devDependencies": { "getfilepress": "^0.1.52" }
 }
 ```
 
@@ -120,7 +137,3 @@ No admin UI. No visitor comments — permanent. Genie is `filepress dev` only; `
 MIT. Copyright Catalyst Forge LLC.
 
 [See the rest of the Catalyst Forge shelf.](https://catalystforge.com/tools/)
-
-## Product landing starter
-
-For a product or service, add `--layout landing` to `pnpm create-site`. It creates a draft opening with room for the audience, useful result, example, prerequisites, and first action, plus a responsive theme. Replace the prompts before removing `draft: true`. The default blog starter is unchanged. See [landing-page guidance](sites/getfilepress/docs/landing-pages.md).

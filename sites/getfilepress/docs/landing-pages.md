@@ -29,3 +29,9 @@ The starter gives the worked example one location, linked by the secondary actio
 Before removing draft: true, hide the product name and generic labels such as “Useful result.” Can a reader still identify the problem, see the output, and explain what changes for them? Ask them to point to the actual before and after. Attractive formatting and a correct output filename do not answer that question.
 
 Preview both a wide and narrow viewport, follow the first-use link, and navigate it with a keyboard before publishing.
+
+## Carry the example into the README
+
+People also discover a product through GitHub and its package registry. Give the public README the same plain product description, prerequisite-aware first action, and compact worked example. Reuse the site fixture or link to its complete output so the two versions stay consistent. For a visual product, include an actual screenshot with a caption that distinguishes sample data from observed behavior.
+
+Check the rendered website, GitHub README, and packed package README together before release. A site deployment does not update npm. Confirm that the package build copies the intended README and that its image and example links work outside the repository. Keep maintainer build/deploy instructions after the reader-facing explanation.

@@ -27,7 +27,7 @@ test('standalone Pages site carries its own build/upload command and local CLI d
 	assert.match(readFileSync(join(target, 'README.md'), 'utf8'), /does not provision a cloud project/);
 });
 
-for (const sitePath of ['site', 'sites/uxcalibur-dev']) {
+for (const sitePath of ['site', 'sites/handbook']) {
 	test(`nested ${sitePath} gets root delegation without losing other scripts`, (t) => {
 		const root = fixture(t);
 		const rootPkg = join(root, 'package.json');

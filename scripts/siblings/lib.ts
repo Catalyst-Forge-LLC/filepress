@@ -1290,6 +1290,68 @@ export function applyShip(site: SiblingSite, log: LogFn | null = null): boolean 
 	return true;
 }
 
+function runAsync(
+	cmd: string,
+	args: string[],
+	cwd: string,
+	log: LogFn | null
+): Promise<{ ok: boolean; status: number | null; output: string }> {
+	return new Promise((resolve) => {
+		const child = spawn(cmd, args, {
+			cwd,
+			shell: win,
+			windowsHide: true,
+			stdio: ['ignore', 'pipe', 'pipe'],
+			env: process.env
+		});
+		let output = '';
+		const take = (chunk: Buffer | string) => {
+			output += String(chunk);
+			if (output.length > 8 * 1024 * 1024) output = output.slice(-256 * 1024);
+		};
+		child.stdout?.on('data', take);
+		child.stderr?.on('data', take);
+		const finish = (status: number | null) => {
+			const text = output.trimEnd();
+			if (log && text) log(text);
+			resolve({ ok: status === 0, status, output: text });
+		};
+		child.on('error', () => finish(null));
+		child.on('close', (status) => finish(status));
+	});
+}
+
+export async function applyShipAsync(site: SiblingSite, log: LogFn | null = null): Promise<boolean> {
+	if (!site.shipDir) {
+		say(log, '  ship     none');
+		return true;
+	}
+	say(log, `  ship     pnpm ship in ${relative(workspaceRoot, site.shipDir)}`);
+	const { ok, status } = await runAsync('pnpm', ['ship'], site.shipDir, log);
+	if (!ok) {
+		say(log, `  ship     failed (exit ${status})`);
+		return false;
+	}
+	return true;
+}
+
+/** Same steps as applySite. Ship waits without blocking the other sites in the pool. */
+export async function applySiteAsync(
+	site: SiblingSite,
+	opts: { target: string; ship: boolean; commit: boolean },
+	log: LogFn | null = null
+): Promise<boolean> {
+	if (!applyUpdate(site, opts.target, log) || !applyHeaders(site, log)) return false;
+	if (opts.commit) {
+		if (!applyCommit(site, opts.target, log)) return false;
+	} else {
+		say(log, '  commit   skipped (--no-commit)');
+	}
+	if (opts.ship) return applyShipAsync(site, log);
+	say(log, '  ship     skipped (pass --ship)');
+	return true;
+}
+
 export function applySite(
 	site: SiblingSite,
 	opts: { target: string; ship: boolean; commit: boolean },

@@ -2,10 +2,12 @@
  * JSON bridge so LocalHelm can host FilePress sibling jobs without reimplementing them.
  * Invoked by localhelm.plugin.mjs in this repo.
  */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import {
 	applyEnrollSites,
 	applyPushSite,
-	applySite,
+	applySiteAsync,
 	buildInventory,
 	discoverSiblingSites,
 	enrollSitesUnder,
@@ -18,6 +20,33 @@ import {
 	workspaceRoot,
 	type SiblingSite,
 } from './lib.ts';
+
+/** How many sibling ships run together inside this one bridge process. */
+const SHIP_AT_A_TIME = 3;
+/** LocalHelm writes this when Stop is pressed. Ships already running finish. */
+const landStopFile = join(workspaceRoot, '.localhelm', 'land.stop');
+
+function landStopRequested(): boolean {
+	return existsSync(landStopFile);
+}
+
+async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+	const results: R[] = new Array(items.length);
+	const ran = new Array<boolean>(items.length).fill(false);
+	let next = 0;
+	async function worker(): Promise<void> {
+		for (;;) {
+			if (landStopRequested()) return;
+			const i = next++;
+			if (i >= items.length) return;
+			results[i] = await fn(items[i]!);
+			ran[i] = true;
+		}
+	}
+	const workers = Math.min(Math.max(1, limit), items.length);
+	if (workers > 0) await Promise.all(Array.from({ length: workers }, () => worker()));
+	return results.filter((_, i) => ran[i]);
+}
 
 type Cmd = {
 	cmd: 'inventory' | 'apply' | 'plan' | 'scan';
@@ -125,20 +154,22 @@ async function main(): Promise<void> {
 
 	if (opts.action === 'push') {
 		const log: string[] = [];
-		const results = sites.map((site) => {
+		const ran = await mapLimit(sites, SHIP_AT_A_TIME, async (site) => {
 			const ok = applyPushSite(site, (line) => log.push(`${site.name} ${line}`));
 			return { id: site.name, ok };
 		});
-		process.stdout.write(`${JSON.stringify({ action: 'push', results, log })}\n`);
-		if (results.some((row) => !row.ok)) process.exitCode = 1;
+		process.stdout.write(
+			`${JSON.stringify({ action: 'push', results: ran, stopped: landStopRequested() || ran.length < sites.length, log })}\n`,
+		);
+		if (ran.some((row) => !row.ok)) process.exitCode = 1;
 		return;
 	}
 
 	const action = opts.action === 'ship' ? 'ship' : 'sync';
 	const engine = await loadEngineStrip();
 	const log: string[] = [];
-	const results = sites.map((site) => {
-		const ok = applySite(
+	const ran = await mapLimit(sites, SHIP_AT_A_TIME, async (site) => {
+		const ok = await applySiteAsync(
 			site,
 			{ target: engine.target, ship: action === 'ship', commit: opts.commit !== false },
 			(line) => log.push(`${site.name} ${line}`),
@@ -151,11 +182,12 @@ async function main(): Promise<void> {
 			target: engine.target,
 			note: engine.note,
 			commit: opts.commit !== false,
-			results,
+			results: ran,
+			stopped: landStopRequested() || ran.length < sites.length,
 			log,
 		})}\n`,
 	);
-	if (results.some((row) => !row.ok)) process.exitCode = 1;
+	if (ran.some((row) => !row.ok)) process.exitCode = 1;
 }
 
 main().catch((err: unknown) => {

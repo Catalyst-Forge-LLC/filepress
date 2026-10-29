@@ -78,10 +78,13 @@ pnpm create-site my-blog --external ../my-blog --title "My Blog" --url https://m
 
 For a confirmed Cloudflare Pages target, add `--pages-project <project>` and
 `--production-branch <branch>` to generate a build-and-upload `ship` command and
-local Wrangler dependency. For a nested `site/` or `sites/<name>`, also pass
-`--root-package <app-root/package.json>` to add root delegation. Existing different
-root Ship commands are preserved by refusing the scaffold. See [DEPLOY.md](DEPLOY.md)
-for the complete setup and verification contract.
+local Wrangler dependency. A nested site in a git repository also gets root
+delegation, `"ship": "pnpm --dir <site-path> run ship"`, written to the nearest
+ancestor `package.json`. The site is not configured until that root command
+exists. `--root-package` selects the file explicitly. An existing different root
+Ship command is preserved by refusing the scaffold. `filepress check` fails
+while the site has `ship` and the ancestor package does not run it. See
+[DEPLOY.md](DEPLOY.md) for the complete setup and verification contract.
 
 ## CI / deploy
 

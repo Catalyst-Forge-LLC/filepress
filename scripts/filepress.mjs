@@ -15,6 +15,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
+import { rootShipGap, rootShipGapMessage } from './root-ship.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 /** Install root of the filepress package (monorepo root, or linked/npm copy). */
@@ -271,6 +272,8 @@ function runSiteCommand(argv) {
 	}
 
 	if (command === 'check') {
+		const shipGap = rootShipGap(siteRoot);
+		if (shipGap) fail(rootShipGapMessage(shipGap));
 		const syncBin = findPackageBin('@sveltejs/kit', 'svelte-kit');
 		if (syncBin) {
 			const sync = spawn(process.execPath, [syncBin, 'sync'], {

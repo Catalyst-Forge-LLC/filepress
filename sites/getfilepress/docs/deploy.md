@@ -40,6 +40,18 @@ npx wrangler pages deploy build --project-name <project>
 
 This product site’s engine script is `pnpm ship` (Wrangler project `getfilepress`).
 
+### Site and repository ship
+
+A deployment-configured site needs `scripts.ship` in its own `package.json`: build, then upload with a local Wrangler to the confirmed Pages project and production branch.
+
+When that site lives inside an app repository, the app `package.json` also needs a root command. The site is not configured until both exist:
+
+```json
+"ship": "pnpm --dir site run ship"
+```
+
+Use the real directory (`site` or `sites/<name>`). `pnpm ship` from the app repository runs it. Keep any existing app deployment command, and compose the root command when one repository has several sites. The scaffold adds this delegation for a nested git repository when you pass `--pages-project` and `--production-branch`. `filepress check` fails while the site has `ship` and that ancestor package does not run the site. The full contract is [`docs/DEPLOY.md`](https://github.com/Catalyst-Forge-LLC/filepress/blob/main/docs/DEPLOY.md).
+
 ## Other hosts
 
 Same contract: install → build → publish **`build/`** as the web root. Netlify, GitHub Pages, object storage + CDN, nginx. No SSR adapters or serverless functions. If the host supports a custom 404 document, point it at `404.html`.

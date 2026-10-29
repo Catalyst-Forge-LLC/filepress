@@ -1,5 +1,9 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-29) — Nested sites require root ship
+
+A deployment-configured site nested in a git app repository is configured only when the ancestor `package.json` delegates `pnpm ship` to the site. The external scaffold writes that delegation when `--pages-project` and `--production-branch` are set, and refuses to replace a different root command. `filepress check` fails while the site has `ship` and the ancestor does not run it. Standalone site repositories are unchanged. No publication, push, or phase transition.
+
 ## HANDOFF (2026-10-18) — README clarity after publication
 
 The first-use choice now surfaces the landing starter beside the blog route.

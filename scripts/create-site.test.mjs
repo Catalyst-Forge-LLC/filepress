@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const scaffold = fileURLToPath(new URL('./create-site.mjs', import.meta.url));
@@ -14,6 +14,9 @@ function fixture(t) {
 }
 function run(target, ...args) {
 	return spawnSync(process.execPath, [scaffold, 'test-site', '--external', target, ...args], { encoding: 'utf8' });
+}
+function gitInit(dir) {
+	execFileSync('git', ['init'], { cwd: dir, stdio: 'ignore' });
 }
 const deploy = ['--pages-project', 'test-pages', '--production-branch', 'production'];
 
@@ -39,6 +42,33 @@ for (const sitePath of ['site', 'sites/handbook']) {
 		assert.equal(pkg.scripts.test, 'node test.mjs');
 	});
 }
+
+for (const sitePath of ['site', 'sites/handbook']) {
+	test(`nested ${sitePath} gets root delegation from the git ancestor without --root-package`, (t) => {
+		const root = fixture(t);
+		gitInit(root);
+		const rootPkg = join(root, 'package.json');
+		writeFileSync(rootPkg, JSON.stringify({ name: 'app', scripts: { test: 'node test.mjs' } }, null, 2));
+		const result = run(join(root, sitePath), ...deploy);
+		assert.equal(result.status, 0, result.stderr);
+		const pkg = JSON.parse(readFileSync(rootPkg, 'utf8'));
+		assert.equal(pkg.scripts.ship, `pnpm --dir "${sitePath}" run ship`);
+		assert.equal(pkg.scripts.test, 'node test.mjs');
+		assert.match(readFileSync(join(root, sitePath, 'README.md'), 'utf8'), /not configured without that root command/);
+	});
+}
+
+test('an existing composed root ship that already runs the site is left unchanged', (t) => {
+	const root = fixture(t);
+	gitInit(root);
+	const rootPkg = join(root, 'package.json');
+	const ship = 'pnpm --dir "site" run ship && pnpm --dir "sites/other" run ship';
+	const original = JSON.stringify({ scripts: { ship } }, null, 2);
+	writeFileSync(rootPkg, original);
+	const result = run(join(root, 'site'), ...deploy);
+	assert.equal(result.status, 0, result.stderr);
+	assert.equal(readFileSync(rootPkg, 'utf8'), original);
+});
 
 test('conflicting app ship is preserved and scaffold makes no partial site', (t) => {
 	const root = fixture(t);
@@ -76,6 +106,20 @@ test('missing and unsafe deployment arguments fail before writing files', (t) =>
 		assert.notEqual(run(target, ...args).status, 0);
 		assert.equal(existsSync(target), false);
 	}
+});
+
+test('conflicting ancestor ship is preserved even without --root-package', (t) => {
+	const root = fixture(t);
+	gitInit(root);
+	const rootPkg = join(root, 'package.json');
+	const original = '{"scripts":{"ship":"deploy-existing-app"}}';
+	writeFileSync(rootPkg, original);
+	const target = join(root, 'site');
+	const result = run(target, ...deploy);
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /already has a different ship/);
+	assert.equal(readFileSync(rootPkg, 'utf8'), original);
+	assert.equal(existsSync(target), false);
 });
 
 test('root delegation cannot edit a package outside the site ancestors', (t) => {

@@ -16,6 +16,13 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+	ancestorPackagePath,
+	delegatesToSite,
+	isShellSafeSiteRel,
+	normalizeRel,
+	rootShipCommand
+} from './root-ship.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
@@ -23,6 +30,13 @@ const repoRoot = resolve(scriptDir, '..');
 function fail(msg) {
 	console.error(`create-site: ${msg}`);
 	process.exit(1);
+}
+
+function rootShipNote(packagePath, command) {
+	if (packagePath && command) {
+		return `The app repository package.json delegates \`pnpm ship\` to this site (\`${command}\`). A nested site is not configured without that root command. \`filepress check\` fails while it is missing.`;
+	}
+	return 'If this site is nested in an app repository, that repository is not configured until its package.json delegates with `"ship": "pnpm --dir <site-path> run ship"`. Preserve any existing app deployment command. `filepress check` fails while this site has `ship` and the ancestor package does not run it.';
 }
 
 function parseArgs(argv) {
@@ -47,7 +61,8 @@ if (!name) {
 	fail(
 		'missing site name.\n' +
 			'  Usage: node scripts/create-site.mjs <name> [--title ..] [--url ..] [--external <path>] [--layout blog|landing]\n' +
-			'  Deploy: --pages-project <project> --production-branch <branch> [--root-package <path/package.json>]'
+			'  Deploy: --pages-project <project> --production-branch <branch> [--root-package <path/package.json>]\n' +
+			'  A nested site with a Pages target gets root ship delegation from the nearest ancestor package.json.'
 	);
 }
 if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
@@ -70,19 +85,26 @@ if (args['root-package'] && !pagesProject) fail('--root-package requires a confi
 let rootPackagePath;
 let rootPackage;
 let rootShip;
-if (args['root-package']) {
-	rootPackagePath = resolve(repoRoot, args['root-package']);
-	const sitePath = relative(dirname(rootPackagePath), target).replaceAll('\\', '/');
-	if (!sitePath || sitePath.startsWith('../') || !/^[a-zA-Z0-9_./ -]+$/.test(sitePath)) {
+let rootShipReady = false;
+if (external && pagesProject) {
+	rootPackagePath = args['root-package']
+		? resolve(repoRoot, args['root-package'])
+		: ancestorPackagePath(target);
+}
+if (rootPackagePath) {
+	const sitePath = normalizeRel(relative(dirname(rootPackagePath), target));
+	if (!isShellSafeSiteRel(sitePath)) {
 		fail('--root-package must belong to an ancestor of the site with a shell-safe relative path');
 	}
 	try { rootPackage = JSON.parse(readFileSync(rootPackagePath, 'utf8')); }
 	catch { fail(`cannot read root package.json: ${rootPackagePath}`); }
 	if (!rootPackage || typeof rootPackage !== 'object' || Array.isArray(rootPackage)) fail('root package.json must be an object');
-	rootShip = `pnpm --dir "${sitePath}" run ship`;
-	if (rootPackage.scripts?.ship && rootPackage.scripts.ship !== rootShip) {
-		fail('root already has a different ship command; preserve it and wire site delegation explicitly');
+	rootShip = rootShipCommand(sitePath);
+	const current = rootPackage.scripts?.ship;
+	if (typeof current === 'string' && current !== rootShip && !delegatesToSite(current, sitePath)) {
+		fail(`root already has a different ship command in ${rootPackagePath}; preserve it and wire site delegation explicitly (${rootShip})`);
 	}
+	rootShipReady = typeof current === 'string' && (current === rootShip || delegatesToSite(current, sitePath));
 }
 
 if (existsSync(target)) {
@@ -249,11 +271,14 @@ ${layout === 'landing' ? 'Edit \`pages/home.md\`: describe the reader, product f
 ${pagesProject ? `Pages target: \`${pagesProject}\`, production branch: \`${productionBranch}\`.
 Run \`pnpm install\` to install the site's local Wrangler dependency, then \`pnpm ship\` to build and upload.
 Confirm the authenticated Cloudflare account and that the Pages project exists before shipping.
-${rootPackagePath ? 'The parent package.json also delegates its ship command to this site.' : 'If this site is nested in an app repo, add a root ship command delegating to this site (pnpm --dir <site-path> run ship). Preserve any existing app deployment command.'}
+${rootShipNote(rootPackagePath, rootShip)}
 Scaffolding does not provision a cloud project or deploy the site.
 ` : `Deployment is not configured. Before release, choose the hosting account, project and production branch,
 install a local deployment CLI, and add a site \`ship\` command that builds then uploads.
-For a nested site, also add root \`ship\` delegation. See https://getfilepress.com/deploy.
+A nested site is not configured until the app repository's package.json also delegates to it:
+\`"ship": "pnpm --dir <site-path> run ship"\`. Preserve any existing app deployment command.
+\`filepress check\` fails while this site has \`ship\` and that ancestor package does not run it.
+See https://getfilepress.com/deploy.
 `}
 
 \`link:\` only works on your machine. For CI/hosting, pin npm or a git tag:
@@ -269,12 +294,14 @@ Any static host: publish the \`build/\` folder. Details: https://getfilepress.co
 	);
 
 	console.log(`Created external site at ${target}`);
-	if (rootPackagePath) {
+	if (rootPackagePath && !rootShipReady) {
 		const original = readFileSync(rootPackagePath, 'utf8');
 		rootPackage.scripts = { ...rootPackage.scripts, ship: rootShip };
 		const indent = original.match(/\n([\t ]+)"/)?.[1] || '\t';
 		writeFileSync(rootPackagePath, JSON.stringify(rootPackage, null, indent) + '\n');
 		console.log(`Added root ship delegation in ${rootPackagePath}`);
+	} else if (rootPackagePath) {
+		console.log(`Root ship already delegates to this site in ${rootPackagePath}`);
 	}
 	console.log(`Next:`);
 	console.log(`  cd ${relToEngine} && pnpm install   # if not already`);

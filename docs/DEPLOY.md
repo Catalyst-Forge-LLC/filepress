@@ -73,30 +73,35 @@ The public domain and folder name are not sufficient to identify that target.
 Creating a missing Pages project and running a deployment are separate operations;
 preparing scripts does not perform either one.
 
-For a site inside an app repository, also add a root command:
+A site inside an app repository is configured only when that repository's
+`package.json` also delegates to the site:
 
 ```json
 "ship": "pnpm --dir site run ship"
 ```
 
-Use the actual path (`site` or `sites/<name>`). Preserve any existing app deployment
-command; explicitly choose or compose the root target when there are multiple sites.
-LocalHelm's repository Ship and site Ship rely on these respective scripts. Land
-synchronizes FilePress and then uses the site's Ship; it does not invent a deployment
+Use the actual path (`site` or `sites/<name>`). `pnpm ship` from the app
+repository runs that command. Preserve any existing app deployment command, and
+compose the root target when there are multiple sites. LocalHelm prefers the
+repository script and falls back to `site/package.json`. Land synchronizes
+FilePress and then uses the site's Ship; it does not invent a deployment
 command, add a missing deployment CLI dependency, or provision a host.
 
-The external scaffold can prepare both commands for a confirmed target:
+`filepress check` fails while the site package has `scripts.ship` and the
+ancestor package in the same git repository does not run that site.
+
+The external scaffold writes both commands for a confirmed target. When the
+site is nested in a git repository, it adds the root delegation from the nearest
+ancestor `package.json` without an extra flag. `--root-package` selects that
+file explicitly. The scaffold refuses to overwrite a different Ship command.
+Both Pages options are required together. Run `pnpm install` in the generated
+site to install its CLI. Without a target, the scaffold marks deployment as
+unconfigured and omits Ship.
 
 ```bash
 pnpm create-site my-site --external ../my-app/site --url https://my.example \
-  --pages-project my-pages-project --production-branch main \
-  --root-package ../my-app/package.json
+  --pages-project my-pages-project --production-branch main
 ```
-
-`--root-package` is optional for standalone sites. It requires an existing ancestor
-package.json and refuses to overwrite a different Ship command. Both Pages options
-are required together. Run `pnpm install` in the generated site to install its CLI.
-Without a target, the scaffold marks deployment as unconfigured and omits Ship.
 
 Verify the build locally before first deployment, and confirm that LocalHelm
 discovers both the repository and site Ship actions. Treat a missing project,

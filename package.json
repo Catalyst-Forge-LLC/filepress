@@ -39,6 +39,7 @@
 		"scripts/copy-path-mounts.mjs",
 		"scripts/assert-no-genie.mjs",
 		"scripts/create-site.mjs",
+		"scripts/root-ship.mjs",
 		"scripts/postinstall.mjs",
 		"scripts/link-embedded-packages.mjs",
 		"packages/core",
@@ -52,7 +53,7 @@
 	"scripts": {
 		"postinstall": "node scripts/postinstall.mjs",
 		"filepress": "node scripts/filepress.mjs",
-		"test": "node --test scripts/create-site.test.mjs && pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts scripts/siblings/discover.test.ts scripts/new-post.test.ts scripts/preview.test.ts scripts/assert-no-genie.test.ts scripts/published-files.test.ts",
+		"test": "node --test scripts/create-site.test.mjs scripts/root-ship.test.mjs && pnpm --filter @filepress/core test && pnpm --filter @filepress/import test && pnpm --filter @filepress/app test && tsx --test scripts/sync-sibling-sites.test.ts scripts/siblings/discover.test.ts scripts/new-post.test.ts scripts/preview.test.ts scripts/assert-no-genie.test.ts scripts/published-files.test.ts",
 		"check": "pnpm filepress check --site demo",
 		"build": "pnpm filepress build --site demo",
 		"build:demo": "pnpm filepress build --site demo",

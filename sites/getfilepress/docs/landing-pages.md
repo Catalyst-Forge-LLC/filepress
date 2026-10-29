@@ -12,6 +12,12 @@ Replace the prompts in pages/home.md with a recognizable situation, the product 
 
 The layout makes room for an example before stack labels. Existing xFacts labels stay available below the explanation. Discovery skips temporary folders named temp or tmp, along with examples, fixtures, tests, dependencies, build output, and hidden folders, so borrowed review material does not appear as a product label. The CSS uses theme variables so you can choose a product-specific palette and type. An obvious utility can lead with its working interface instead.
 
+## State the main job before the example
+
+Name the product category and what someone can do with it before describing its implementation or companion tools. A worked example demonstrates the promise; it should not accidentally narrow a broader product to one small use case. If the product uses another tool, explain the relationship explicitly: which provides the method, which keeps the record, and which is optional.
+
+Keep the landing page, README, package description, and machine-readable catalog consistent about that main job. Preserve useful setup instructions, defaults, examples, and recovery guidance. Organize that detail rather than removing it to make the introduction shorter.
+
 ## Make the example do the explaining
 
 Use one connected example with specific headings:

@@ -1,10 +1,10 @@
 ---
-title: "Give your Markdown a place to be read."
-description: "Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate."
+title: "Build a website from Markdown, without running a CMS."
+description: "Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps your content in files you can edit and version. Start with a blog or a product landing page, then deploy the generated files to your chosen host."
 order: 0
 ---
 
-<section class="value-hero" aria-label="FilePress overview"><div class="value-intro"><div class="value-headline"><p class="value-kind">Static site builder for Markdown</p><h1>Give your Markdown a place to be read.</h1></div><div class="value-pitch"><p class="value-lede">Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate.</p><div class="cta-row"><a class="cta cta-primary" href="/docs/getting-started">Build your first site</a><a class="cta cta-secondary" href="#from-file-to-page">See the source and its actual page</a></div><p class="value-limit">Requires a local build environment. Publish the generated files to your chosen static host.</p></div></div>
+<section class="value-hero" aria-label="FilePress overview"><div class="value-intro"><div class="value-headline"><p class="value-kind">Static site builder for Markdown</p><h1>Build a website from Markdown, without running a CMS.</h1></div><div class="value-pitch"><p class="value-lede">Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps your content in files you can edit and version. Start with a blog or a product landing page, then deploy the generated files to your chosen host.</p><div class="cta-row"><a class="cta cta-primary" href="/docs/getting-started">Build your first site</a><a class="cta cta-secondary" href="#from-file-to-page">See the source and its actual page</a></div><p class="value-limit">Requires a local build environment. Publish the generated files to your chosen static host.</p></div></div>
 <figure class="value-proof worked-example example-pair" id="from-file-to-page" tabindex="-1">
 <figcaption>This Markdown file is a page you can read right now</figcaption>
 <p class="example-context">A real post from this site, not invented sample output. The source excerpt is shortened; open the rendered page to see the complete result.</p>

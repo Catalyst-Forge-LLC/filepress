@@ -1,6 +1,8 @@
 # FilePress
 
-Give your Markdown a place to be read. FilePress turns pages and posts into a static website with navigation, tags, and feeds, while keeping content in files you can edit and version.
+**Build a website from Markdown, without running a CMS.**
+
+FilePress turns pages and posts into a static website with navigation, tags, and feeds, while keeping content in files you can edit and version. Start with a blog or a product landing page. Import existing content or use the optional local Genie theme assistant when useful; building and hosting remain separate steps.
 
 Written **FilePress**. npm **`getfilepress`**. CLI **`filepress`** (same script as `getfilepress`).
 

@@ -3,7 +3,7 @@
 	"version": "0.1.54",
 	"private": false,
 	"type": "module",
-	"description": "FilePress — file-based Markdown blog engine. Link this package from a content-only site (config + posts), then run `filepress build`.",
+	"description": "Build static websites from Markdown pages and posts, with navigation, tags, feeds, and blog or landing-page starting paths. No CMS required.",
 	"license": "MIT",
 	"homepage": "https://getfilepress.com",
 	"repository": {

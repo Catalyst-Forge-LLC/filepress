@@ -4,7 +4,7 @@ const github = 'https://github.com/Catalyst-Forge-LLC/filepress';
 
 export default defineFilepressConfig({
 	title: 'FilePress',
-	description: "Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps the content in files you can edit and version, with no CMS or database to operate.",
+	description: "Turn a folder of pages and posts into a static website with navigation, tags, and feeds. FilePress keeps your content in files you can edit and version. Start with a blog or a product landing page, then deploy the generated files to your chosen host.",
 	url: 'https://getfilepress.com',
 	author: 'FilePress',
 	tagline: 'Easy websites, no CMS to run.',

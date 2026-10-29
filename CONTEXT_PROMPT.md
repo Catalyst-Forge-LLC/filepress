@@ -1,5 +1,9 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-10-29) — Product headline wrapping
+
+The getfilepress.com hero now uses explicit phrase groups that can reflow on narrow screens. Copy and metadata are unchanged. This is product-site CSS and markup only; the generator and starter templates are unchanged. Site build and desktop/mobile checks passed. See session-hero-wrapping-20261029. Local only; no publication, push, or phase transition.
+
 ## HANDOFF (2026-10-29) — Nested sites require root ship
 
 A deployment-configured site nested in a git app repository is configured only when the ancestor `package.json` delegates `pnpm ship` to the site. The external scaffold writes that delegation when `--pages-project` and `--production-branch` are set, and refuses to replace a different root command. `filepress check` fails while the site has `ship` and the ancestor does not run it. Standalone site repositories are unchanged. No publication, push, or phase transition.

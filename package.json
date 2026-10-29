@@ -1,6 +1,6 @@
 {
 	"name": "getfilepress",
-	"version": "0.1.54",
+	"version": "0.1.55",
 	"private": false,
 	"type": "module",
 	"description": "Build static websites from Markdown pages and posts, with navigation, tags, feeds, and blog or landing-page starting paths. No CMS required.",

@@ -1,7 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig, createServer } from 'vite';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
@@ -54,6 +54,42 @@ const coreEntry = join(appRoot, '../core/src/lib/index.ts');
 const coreConfig = join(appRoot, '../core/src/lib/config.ts');
 const coreServer = join(appRoot, '../core/src/lib/server.ts');
 const coreTheme = join(appRoot, '../core/src/lib/theme.ts');
+
+/**
+ * Packages whose files the browser fetches from disk in dev: font files from
+ * core's CSS and the `?url` scripts in XFactsRail.svelte.
+ */
+const browserServedPackages = [
+	'@fontsource-variable/inter',
+	'@fontsource-variable/newsreader',
+	'@fontsource/ibm-plex-mono',
+	'@fontsource/sora',
+	'@popperjs/core',
+	'tippy.js'
+];
+
+/**
+ * Real directories of those packages, as core resolves them. When getfilepress
+ * is an installed dependency they sit beside it (pnpm) or above it (npm),
+ * outside the allow list SvelteKit builds, and Vite answers 403.
+ */
+function browserServedPackageDirs(): string[] {
+	const dirs: string[] = [];
+	for (const name of browserServedPackages) {
+		let dir = join(appRoot, '../core');
+		for (;;) {
+			const candidate = join(dir, 'node_modules', ...name.split('/'));
+			if (existsSync(candidate)) {
+				dirs.push(realpathSync(candidate));
+				break;
+			}
+			const parent = dirname(dir);
+			if (parent === dir) break;
+			dir = parent;
+		}
+	}
+	return dirs;
+}
 
 type SiteHints = {
 	paths: PathMount[];
@@ -141,7 +177,7 @@ export default defineConfig(async ({ command, mode }) => {
 		...(fixedPort ? { port: fixedPort, strictPort: true } : {}),
 	};
 	return {
-		server: listen,
+		server: { ...listen, fs: { allow: browserServedPackageDirs() } },
 		preview: listen,
 		resolve: {
 			alias: [
@@ -152,7 +188,10 @@ export default defineConfig(async ({ command, mode }) => {
 			]
 		},
 		optimizeDeps: {
-			exclude: ['ollanet']
+			// getfilepress and @filepress/core are source, not prebuilt packages. As an
+			// installed dependency their path contains node_modules, so Vite would try
+			// to pre-bundle them and fail on the `?url` imports in XFactsRail.svelte.
+			exclude: ['ollanet', 'getfilepress', '@filepress/core']
 		},
 		ssr: {
 			external: ['ollanet']

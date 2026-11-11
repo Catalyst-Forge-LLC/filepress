@@ -1,5 +1,9 @@
 # FilePress — Project Context Prompt
 
+## HANDOFF (2026-11-11) — Dev server for installed sites with an xFacts label
+
+`filepress dev` served a page that never hydrated when getfilepress was an installed dependency and the home page showed an xFacts label (found on ClaimCheck, 0.1.58, Windows). The label's Sora and IBM Plex Mono files and the Popper/Tippy scripts live in sibling packages outside `server.fs.allow`, so Vite answered 403. Vite also tried to pre-bundle `getfilepress` and `@filepress/core` because their installed path contains `node_modules`, and the bundler cannot load the `?url` imports in `XFactsRail.svelte`. `packages/app/vite.config.ts` now adds those package directories to the allow list and excludes the two source packages from pre-bundling. Dev only; `filepress build` is unchanged. In the engine repo those packages resolve inside its own `node_modules` and core is plain source, so the defect is not expected there (not checked before the change). ClaimCheck carries the same diff as a pnpm patch until a release ships. See session-installed-dev-xfacts-20261111. No version bump, publication, push, or phase transition.
+
 ## HANDOFF (2026-10-29) — Product headline wrapping
 
 The getfilepress.com hero now uses explicit phrase groups that can reflow on narrow screens. Copy and metadata are unchanged. This is product-site CSS and markup only; the generator and starter templates are unchanged. Site build and desktop/mobile checks passed. See session-hero-wrapping-20261029. Local only; no publication, push, or phase transition.
